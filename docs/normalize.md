@@ -126,7 +126,7 @@ conflict    = if contents disagree materially, record a conflict (P8) —
 
 ## 7. P5–P7 — Relationships, wiki pages, anchor currency
 
-- **P5:** candidate `related component paths` resolve to Component slugs via P2's entities (+ rename map for stale paths); unresolvable paths are recorded as warnings, never guessed (DP 8). Relationship rows materialize per ir.md §3.3/§4.1.
+- **P5:** candidate `related component paths` resolve to Component slugs via P2's entities (+ rename map for stale paths); unresolvable *internal* paths are recorded as warnings, never guessed (DP 8) — unresolved *external* imports (stdlib, third-party) are silently classified as external dependency coordinates, not warned (dogfood finding: warning on known-externals is noise). Relationship rows materialize per ir.md §3.3/§4.1. **Containment edges are generated over ALL known components (observed ∪ current state)** *(additive clarification, verify-chain finding)*: containment derives from paths alone, so restricting it to observed components would make the always-observed Project (or a touched package) silently drop `contains` edges to out-of-scope children on every PR compile. Resolution of internal-vs-external imports likewise consults the combined map.
 - **P6:** Wiki Page entities derive deterministically from the candidate entity set (identity = owning slug + page type) — in Normalize, per the ADR-009 boundary (ir.md §4.1).
 - **P7:** every matched entity's stored anchors are rewritten to the candidate's current-commit anchors (anchor currency, ir.md §2.2). Unmatched entities keep their anchors (they were out of scope or unobserved — Diff decides what that means).
 

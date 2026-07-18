@@ -97,7 +97,7 @@ Emitted by language analyzers and deterministic extractors:
 | `symbol_observed` | symbol_path, kind (class/function/method), signature, anchor | analyzers |
 | `dependency_observed` | from-component path → to-component path or external package | analyzers |
 | `api_endpoint_observed` | HTTP method, route, handler anchor, source (`code_pattern` \| `openapi` — kept distinct for conflict surfacing, §4.3) | analyzers, OpenAPI extractor |
-| `test_case_observed` | test node id, framework, anchor | analyzers |
+| `test_case_observed` | test node id, framework, **module** (the analyzer's own module-path convention — Normalize never derives it with language assumptions; boundary leak found by the TypeScript stress test), anchor | analyzers |
 | `test_target_observed` | test node id → targeted symbol/component, mechanism (import/call/marker) | analyzers |
 | `source_change_observed` | file, change kind, spans (the PR's *source diff* — drives incremental scoping; deliberately named to avoid confusion with the knowledge delta) | git collector |
 | `pr_observed` | number, title, body, merged_at, commit shas, linked issue keys | PR collector |

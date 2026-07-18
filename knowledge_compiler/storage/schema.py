@@ -152,6 +152,22 @@ class DeltaChangeRow(Base):
     )
 
 
+class LLMCacheRow(Base):
+    """Content-addressed LLM cache (ADR-008): load-bearing, not an optimization.
+    Entries are immutable and never expire by time; committed EAGERLY (outside
+    the compile transaction) so budget-halted runs keep their prepaid answers
+    (pipeline.md §6.2)."""
+
+    __tablename__ = "llm_cache"
+
+    cache_key: Mapped[str] = mapped_column(Text, primary_key=True)
+    template_id: Mapped[str] = mapped_column(Text)
+    template_version: Mapped[str] = mapped_column(Text)
+    model_id: Mapped[str] = mapped_column(Text)
+    output: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class DeltaRelationshipChangeRow(Base):
     __tablename__ = "delta_relationship_changes"  # append-only
 

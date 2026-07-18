@@ -207,6 +207,15 @@ class _Normalizer:
         self._components()
         self._apis()
         self._test_coverage()
+        self._pull_requests()
+
+    def _pull_requests(self) -> None:
+        for f in self._facts_of("pr_observed"):
+            number = f.payload["number"]
+            payload = {k: v for k, v in sorted(f.payload.items())}
+            self._put(self._entity("pull_request", f"pull-request/{number}",
+                                   f"PR #{number}: {f.payload.get('title', '')}", payload),
+                      rule="natural_key", signals={}, facts=[f])
 
     def _project(self) -> None:
         payload = {"repo_slug": self.repo_slug}
@@ -232,7 +241,10 @@ class _Normalizer:
         for f in self._facts_of("dependency_observed"):
             deps_by_module.setdefault(f.payload["from_path"], []).append(f.payload["to_path"])
 
-        internal = set(by_path)
+        # internal-ness resolves against observed ∪ current-state components — a PR
+        # slice importing an out-of-scope module must not classify it as external
+        internal = set(by_path) | {e.payload["path"] for e in self.current.entities
+                                   if e.entity_type == "component"}
         for path in sorted(by_path):
             group = by_path[path]
             deps = sorted(set(deps_by_module.get(path, [])))
@@ -286,7 +298,9 @@ class _Normalizer:
 
         for f in self._facts_of("test_case_observed"):
             node_id = f.payload["node_id"]
-            test_module = node_id.split("::")[0].replace("/", ".").removesuffix(".py")
+            # the analyzer owns its module convention (ADR-006 boundary): the fact
+            # carries it; Normalize never derives it with language assumptions
+            test_module = f.payload["module"]
             payload = {
                 "node_id": node_id,
                 "framework": f.payload["framework"],
@@ -413,22 +427,35 @@ class _Normalizer:
     # -- P5: relationships -------------------------------------------------------------
 
     def _p5_relationships(self) -> None:
-        components = {e.payload["path"]: e.slug for e in self.entities.values()
+        observed = {e.payload["path"]: e.slug for e in self.entities.values()
+                    if e.entity_type == "component"}
+        # resolution map includes current-state components (candidate wins) so a PR
+        # slice can link into out-of-scope components; edges originate from observed only
+        components = {e.payload["path"]: e.slug for e in self.current.entities
                       if e.entity_type == "component"}
+        components.update(observed)
         project_slug = next(s for s, e in sorted(self.entities.items())
                             if e.entity_type == "project")
 
+        # Containment derives from paths alone, so it is generated over ALL known
+        # components (observed ∪ current) — otherwise a PR slice would make the
+        # always-observed Project (or a touched package) silently drop `contains`
+        # edges to out-of-scope children (verify-chain finding).
         for path in sorted(components):
             parent = path.rsplit(".", 1)[0] if "." in path else None
             if parent and parent in components:
                 self.relationships.add((components[parent], "contains", components[path]))
             else:
                 self.relationships.add((project_slug, "contains", components[path]))
-            entity = self.entities[components[path]]
+
+        # Dependencies come from observed imports only; out-of-scope components'
+        # existing edges are protected by the survivor rule in Diff.
+        for path in sorted(observed):
+            entity = self.entities[observed[path]]
             for dep in entity.payload["internal_dependencies"]:
                 resolved = self._resolve_internal(dep, set(components))
                 if resolved and resolved != path:
-                    self.relationships.add((components[path], "depends_on", components[resolved]))
+                    self.relationships.add((observed[path], "depends_on", components[resolved]))
 
         for e in sorted(self.entities.values(), key=lambda e: e.slug):
             if e.entity_type == "api":
@@ -442,9 +469,9 @@ class _Normalizer:
                     resolved = self._resolve_internal(target, set(components))
                     if resolved:
                         self.relationships.add((e.slug, "covers", components[resolved]))
-                    else:
-                        self.warnings.append(
-                            f"unresolvable coverage target '{target}' from {e.slug}")
+                    # unresolved targets are external imports (pytest, stdlib, deps) —
+                    # already recorded as external_dependencies on the test's component;
+                    # warning here would be noise, not DP-8 visibility (dogfood finding)
             elif e.entity_type in ("feature", "business_rule", "risk"):
                 rel = {"feature": "implemented_by", "business_rule": "governs", "risk": "affects"}[e.entity_type]
                 for comp_path in sorted(e.payload.get("related_components", [])):

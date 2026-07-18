@@ -19,27 +19,40 @@ from knowledge_compiler.ir import (
 class CompileScope:
     """What this compile observed (pipeline.md §5)."""
 
-    full: bool                       # full repo vs PR slice (PR slices arrive phase 3)
-    ran_families: frozenset[str]     # e.g. {"deterministic"} for a --no-llm compile
+    full: bool                            # full repo vs PR slice
+    ran_families: frozenset[str]          # e.g. {"deterministic"} for a --no-llm compile
+    in_scope_files: frozenset[str] = frozenset()  # PR slice: the forge-reported file set
+
+
+def _entity_files(entity: Entity) -> frozenset[str]:
+    files = entity.payload.get("files")
+    if files:
+        return frozenset(files)
+    if entity.payload.get("file"):
+        return frozenset({entity.payload["file"]})
+    return frozenset(a.file_path for a in entity.anchors)
 
 
 def _removable(entity: Entity, scope: CompileScope) -> bool:
-    """Removal evidence: in scope AND the producing extractor family ran.
+    """Removal evidence (pipeline.md §5, ir.md §4.2.1): the entity's evidence
+    location was in scope, AND the producing extractor family ran.
 
-    LLM-derived entities (and their derived wiki pages) are only removable when
-    the llm family ran — a deterministic-only compile can never mass-remove them
-    (pipeline.md §6.1)."""
-    if not scope.full:
-        return False  # PR-scope removal logic lands with incremental compilation
-    if entity.entity_type in LLM_DERIVED_TYPES:
-        return "llm" in scope.ran_families
-    if entity.entity_type == "wiki_page":
-        # derived identity: follows its owner's family; owner slug is in the payload
-        owner = entity.payload.get("owner_slug", "")
-        owner_type = owner.split("/", 1)[0].replace("-", "_")
-        if owner_type in LLM_DERIVED_TYPES:
-            return "llm" in scope.ran_families
-    return "deterministic" in scope.ran_families
+    Wiki pages are handled separately (they follow their owner — see compute_diff).
+    PR/Jira entities are records of *events*, not statements about current source:
+    absence from any compile is never evidence against a merge that happened, so
+    they are never removable (dogfood finding: a later PR touching the same files
+    must not delete an earlier PR's record).
+    """
+    if entity.entity_type in ("pull_request", "jira_story"):
+        return False
+    family = "llm" if entity.entity_type in LLM_DERIVED_TYPES else "deterministic"
+    if family not in scope.ran_families:
+        return False  # pipeline.md §6.1: absence is not evidence if the family didn't run
+    if scope.full:
+        return True
+    files = _entity_files(entity)
+    # no file evidence (e.g. project) => never removable from a PR slice
+    return bool(files) and files <= scope.in_scope_files
 
 
 def _payload_diff(old: dict, new: dict) -> dict:
@@ -87,24 +100,54 @@ def compute_diff(candidate: CandidateState, current: CurrentState,
 
     # survivors: current entities absent from the candidate that removal evidence spares
     survivors: set[str] = set()
-    for slug in sorted(set(cur) - set(cand)):
+    removed_slugs: set[str] = set()
+    unobserved = sorted(set(cur) - set(cand))
+    for slug in unobserved:
+        if cur[slug].entity_type == "wiki_page":
+            continue  # decided after owners (below)
         if _removable(cur[slug], scope):
-            entity_changes.append(EntityChange(
-                op="removed", slug=slug, entity_type=cur[slug].entity_type,
-                change_summary={}, evidence={}))
+            removed_slugs.add(slug)
         else:
             survivors.add(slug)
+    # wiki pages have derived identity: they follow their owner's fate, never their own files
+    for slug in unobserved:
+        e = cur[slug]
+        if e.entity_type != "wiki_page":
+            continue
+        owner = e.payload.get("owner_slug", "")
+        if owner in removed_slugs or (scope.full and owner not in cand and owner not in survivors):
+            removed_slugs.add(slug)
+        else:
+            survivors.add(slug)
+    for slug in sorted(removed_slugs):
+        entity_changes.append(EntityChange(
+            op="removed", slug=slug, entity_type=cur[slug].entity_type,
+            change_summary={}, evidence={}))
 
-    # relationships: set diff, protecting edges that touch surviving unobserved entities
+    # relationships: set diff. An edge is removable only when its FROM side was
+    # observed this compile (its outgoing edges are then authoritative) or removed;
+    # a surviving-unobserved from-entity keeps all its edges.
     cur_edges = {(r.relation_type, r.from_slug, r.to_slug) for r in current.relationships}
     cand_edges = {(r.relation_type, r.from_slug, r.to_slug) for r in candidate.relationships}
+
+    removed_edges: set[tuple[str, str, str]] = set()
+    for edge in cur_edges - cand_edges:
+        if edge[1] in survivors:
+            continue
+        removed_edges.add(edge)
+    # edges touching removed entities: recorded explicitly so the append-only
+    # delta log matches what the DB cascade deletes (silent-history gap otherwise)
+    for edge in cur_edges:
+        if edge[1] in removed_slugs or edge[2] in removed_slugs:
+            removed_edges.add(edge)
+
     relationship_changes: list[RelationshipChange] = []
     for rel, f, t in sorted(cand_edges - cur_edges):
+        if f in removed_slugs or t in removed_slugs:
+            continue  # never add an edge to an entity being removed this compile
         relationship_changes.append(RelationshipChange(op="added", relation_type=rel,
                                                        from_slug=f, to_slug=t))
-    for rel, f, t in sorted(cur_edges - cand_edges):
-        if f in survivors or t in survivors:
-            continue  # the entity wasn't observed; its edges aren't evidence either
+    for rel, f, t in sorted(removed_edges):
         relationship_changes.append(RelationshipChange(op="removed", relation_type=rel,
                                                        from_slug=f, to_slug=t))
 

@@ -1,0 +1,109 @@
+"""LLM semantic extractor (pipeline.md §3.2): candidates with mandatory anchors.
+
+Owns the validation gate (reject, log, retry once — never persist malformed),
+the cache consultation, and budget accounting (ADR-008). Anchors are built only
+from symbol paths the deterministic pass actually observed — the LLM cannot
+invent an anchor (ADR-004 evidence discipline).
+"""
+
+from __future__ import annotations
+
+from pydantic import ValidationError
+
+from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
+from knowledge_compiler.llm.cache import LLMCache, cache_key
+from knowledge_compiler.llm.templates import (
+    SCHEMA, TEMPLATE_ID, TEMPLATE_VERSION, ExtractionOut, build_prompt,
+)
+
+
+class LLMBudgetExceeded(Exception):
+    """Per-run call cap hit: the run fails resumably — cache keeps prepaid work
+    (pipeline.md §6.2)."""
+
+
+_FACT_TYPE = {"business_rules": "business_rule_candidate",
+              "features": "feature_candidate",
+              "risks": "risk_candidate"}
+
+
+class LLMSemanticExtractor:
+    def __init__(self, provider, cache: LLMCache, max_calls: int,
+                 known_symbols: dict[str, list[str]], modules: dict[str, str]) -> None:
+        """known_symbols: file -> symbol paths observed by the deterministic pass.
+        modules: file -> module path. Both come from analyzer facts — the LLM
+        layer is grounded in the deterministic skeleton, never the reverse."""
+        self.provider = provider
+        self.cache = cache
+        self.max_calls = max_calls
+        self.known_symbols = known_symbols
+        self.modules = modules
+        self.calls_made = 0
+        self.warnings: list[str] = []
+
+    def extract(self, artifacts: list[Artifact]) -> list[Fact]:
+        facts: list[Fact] = []
+        for artifact in sorted(artifacts, key=lambda a: a.source_ref):
+            if artifact.source_ref not in self.modules or artifact.content is None:
+                continue  # not an analyzable source file
+            output = self._complete_cached(artifact)
+            if output is None:
+                continue
+            facts.extend(self._to_facts(artifact, output))
+        return facts
+
+    # -- provider + cache ---------------------------------------------------------
+
+    def _complete_cached(self, artifact: Artifact) -> ExtractionOut | None:
+        key = cache_key(TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
+                        artifact.content_hash)
+        cached = self.cache.get(key)
+        if cached is not None:
+            return ExtractionOut.model_validate(cached)  # cache holds validated output only
+
+        prompt = build_prompt(artifact.source_ref, self.modules[artifact.source_ref],
+                              self.known_symbols.get(artifact.source_ref, []),
+                              artifact.content)
+        for attempt in (1, 2):  # validation gate: retry once, then skip loudly
+            if self.calls_made >= self.max_calls:
+                raise LLMBudgetExceeded(
+                    f"LLM budget ({self.max_calls} calls) exhausted at {artifact.source_ref}; "
+                    "re-run to resume — completed work is cached")
+            self.calls_made += 1
+            raw = self.provider.complete(prompt, SCHEMA)
+            try:
+                validated = ExtractionOut.model_validate(raw)
+            except ValidationError as exc:
+                if attempt == 2:
+                    self.warnings.append(
+                        f"LLM output failed validation twice for {artifact.source_ref}: {exc}")
+                    return None
+                continue
+            self.cache.put(key, TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
+                           validated.model_dump())
+            return validated
+        return None
+
+    # -- facts ---------------------------------------------------------------------
+
+    def _to_facts(self, artifact: Artifact, output: ExtractionOut) -> list[Fact]:
+        extraction = Extraction(method="llm", extractor="llm-semantic",
+                                extractor_version="0.1", model_id=self.provider.model_id,
+                                template_version=TEMPLATE_VERSION)
+        valid_symbols = set(self.known_symbols.get(artifact.source_ref, []))
+        facts: list[Fact] = []
+        for field, fact_type in _FACT_TYPE.items():
+            for item in getattr(output, field):
+                anchors = [Anchor(file_path=artifact.source_ref, symbol_path=s)
+                           for s in item.symbol_paths if s in valid_symbols]
+                if not anchors:
+                    # file-level anchor floor: the file itself is real evidence
+                    anchors = [Anchor(file_path=artifact.source_ref)]
+                payload = {k: v for k, v in sorted(item.model_dump().items())
+                           if k != "symbol_paths"}
+                facts.append(Fact(fact_type=fact_type, payload=payload,
+                                  artifact_refs=(artifact.source_ref,),
+                                  extraction=extraction,
+                                  content_hash=content_hash(payload),
+                                  anchors=tuple(anchors)))
+        return facts

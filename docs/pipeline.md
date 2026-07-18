@@ -94,6 +94,8 @@ Consequence: any single successful trigger heals an arbitrary backlog, in order,
 
 - **Collection scope:** `--full` = whole repo; `--pr` = the PR's forge-reported file diff + its PR/Jira metadata artifacts.
 - **Removal evidence** (ir.md §4.2.1, extended with the extractor condition): Diff may emit `op: removed` only if the entity's evidence location was **in collection scope** *and* **the extractor family that produced it actually ran** over that scope this compile. The second condition matters for degraded runs: in a `--no-llm` compile, LLM-derived entities are never removed — the extractor that could re-observe them didn't run, so absence is not evidence (§6.1).
+- **PR and Jira entities are never removable** *(additive clarification, dogfood finding)*: they are records of events, not statements about current source — absence from any compile is never evidence against a merge that happened. Without this rule, a later PR touching the same files would delete an earlier PR's record via the file-scope check.
+- **Edges of removed entities are recorded in the delta** *(additive clarification)*: Diff synthesizes `relationship removed` rows for every edge touching a removed entity, matching what the database cascade deletes — otherwise the append-only delta log silently under-records history.
 
 ## 6. Degraded modes
 

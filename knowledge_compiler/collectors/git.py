@@ -41,6 +41,26 @@ class GitCollector:
     def head_commit(self) -> str:
         return _git(self.repo_path, "rev-parse", "HEAD").strip()
 
+    def collect_at_commit(self, commit_sha: str, paths: list[str]) -> list[Artifact]:
+        """Stage specific files as they exist at a commit (PR-scoped collection).
+        Paths absent at the commit (removed by the PR) are skipped — their absence
+        is scope evidence, not an artifact."""
+        artifacts: list[Artifact] = []
+        for rel_path in sorted(set(paths)):
+            result = subprocess.run(
+                ["git", "-C", str(self.repo_path), "cat-file", "-p", f"{commit_sha}:{rel_path}"],
+                capture_output=True)
+            if result.returncode != 0:
+                continue  # absent at this commit
+            raw = result.stdout
+            if b"\0" in raw[:_SNIFF_BYTES]:
+                continue
+            artifacts.append(Artifact(
+                artifact_type="source_file", source_ref=rel_path.replace("\\", "/"),
+                content_hash=hashlib.sha256(raw).hexdigest(),
+                content=raw.decode("utf-8", errors="replace")))
+        return artifacts
+
     def collect_full(self) -> list[Artifact]:
         tracked = _git(self.repo_path, "ls-files", "-z").split("\0")
         artifacts: list[Artifact] = []

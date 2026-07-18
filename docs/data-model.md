@@ -112,6 +112,8 @@ Append-only is enforced by policy and privileges (no UPDATE/DELETE grants on the
 
 ### `llm_cache`
 
+> **The one documented exemption to ADR-001's `repo_id` invariant** *(additive clarification)*: the cache is content-addressed and repo-agnostic by design — identical (template, model, input content) is the same answer in any repository, so sharing entries across repos is correct and saves cost. The schema test encodes this exemption explicitly.
+
 | Column | Notes |
 |---|---|
 | `cache_key` PK | `hash(template_id + template_version + model_id + input content)` (ADR-008) |

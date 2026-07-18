@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Knowledge Compiler** — an open-source system that continuously compiles software engineering artifacts (Git repos, PRs, Jira tickets, docs, OpenAPI specs) into a structured, persistent knowledge base queryable by AI agents. The compiler metaphor is intentional: raw artifacts go in, structured engineering knowledge comes out.
 
-**Architecture v1.0 is FROZEN (2026-07-18).** The spec set: [docs/vision.md](docs/vision.md), [docs/architecture.md](docs/architecture.md), ADR-001…ADR-010 ([docs/decisions/index.md](docs/decisions/index.md)), [docs/ir.md](docs/ir.md), [docs/data-model.md](docs/data-model.md), [docs/pipeline.md](docs/pipeline.md), [docs/normalize.md](docs/normalize.md). ADRs are immutable — changing a decision requires a superseding ADR; living specs accept additive clarifications only. Do not create new architecture documents unless implementation reveals a genuine gap. [INITIAL-Brainstorm.md](INITIAL-Brainstorm.md) is the superseded exploratory draft. Current phase: implementation.
+**Architecture v1.0 is FROZEN (2026-07-18).** The spec set: [docs/vision.md](docs/vision.md), [docs/architecture.md](docs/architecture.md), ADR-001…ADR-010 ([docs/decisions/index.md](docs/decisions/index.md)), [docs/ir.md](docs/ir.md), [docs/data-model.md](docs/data-model.md), [docs/pipeline.md](docs/pipeline.md), [docs/normalize.md](docs/normalize.md). ADRs are immutable — changing a decision requires a superseding ADR; living specs accept additive clarifications only (implementation findings are folded in as marked clarifications). Do not create new architecture documents unless implementation reveals a genuine gap. [INITIAL-Brainstorm.md](INITIAL-Brainstorm.md) is the superseded exploratory draft.
+
+**Current phase: V1 pipeline implemented; dogfood next, then MCP (milestone 2).** Working: `kc init/compile(--full|--pr|--no-llm)/reconcile/verify/inspect`, Python + TypeScript analyzers, the ADR-004 identity cascade, atomic persist + append-only delta log, OKF wiki emission, loop-safe branch publisher, opt-in LLM semantic layer (Anthropic or OpenAI provider, content-addressed cache). Deferred by design: MCP serve, embeddings/retrieval, Jira collector, entry-point plugin activation (built-ins are wired directly until plugin-sdk.md's trigger fires).
 
 Key V1 commitments (see vision.md for rationale): the **Living Wiki is the V1 wedge** (MCP/Q&A is milestone 2, test generation milestone 3); **Python + TypeScript** language analyzers to keep the plugin interface honest; **dogfood on the team's real repo** before generalizing; **deterministic-first extraction** (AST/git/parsers for structure, LLM only for semantics, provenance on every fact).
 
@@ -21,7 +23,9 @@ docker compose up -d                 # Postgres 16 + pgvector (user: kc / kc, db
 kc --help                            # CLI (init/compile/reconcile/verify/inspect/serve)
 ```
 
-Core code map: `knowledge_compiler/ir.py` (two-layer IR models, ADR-009), `knowledge_compiler/interfaces.py` (stage Protocols + entry-point groups, ADR-007), `knowledge_compiler/cli.py` (run modes, pipeline.md §1).
+Core code map: `ir.py` (two-layer IR models, ADR-009) · `interfaces.py` (stage Protocols, ADR-007) · `collectors/git.py` + `collectors/forge.py` (Collect; FakeForge for tests) · `extractors/python_analyzer.py` + `typescript_analyzer.py` (tree-sitter, ADR-006) · `extractors/llm_extractor.py` + `llm/` (semantic layer, ADR-008; FakeLLMProvider for tests) · `compiler/normalize.py` (identity cascade, normalize.md — determinism checklist §9 is the review gate) · `compiler/diff.py` (removal evidence) · `storage/persist.py` (the atomic commit, ADR-003) · `compiler/run.py` (pipeline orchestration, reconcile, verify) · `wiki/emitter.py` + `wiki/publisher.py` (OKF wiki, ADR-010 branch publishing).
+
+Testing conventions: no mocks — real git repos, real Postgres (integration tests skip loudly when it's down), real tree-sitter; LLM tests use `FakeLLMProvider`. The `llm_cache` is repo-agnostic by design, so tests asserting provider call counts must use a unique `model_id`.
 
 ## Intended Tech Stack
 

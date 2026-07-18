@@ -13,19 +13,23 @@ from knowledge_compiler.storage.schema import Base
 EXPECTED_TABLES = {
     "repositories", "compile_runs", "artifacts", "facts", "entities",
     "relationships", "provenance", "delta_changes", "delta_relationship_changes",
+    "llm_cache",
 }
 
 
-def test_schema_declares_exactly_phase1_tables():
-    # Intent: data-model.md §2 catalog, minus the phases deliberately deferred
-    # (embeddings, llm_cache). A new table appearing here must be a conscious act.
+def test_schema_declares_exactly_expected_tables():
+    # Intent: data-model.md §2 catalog, minus embeddings (deferred to its phase).
+    # A new table appearing here must be a conscious act.
     assert set(Base.metadata.tables) == EXPECTED_TABLES
 
 
 def test_every_table_carries_repo_id():
     # ADR-001 invariant: no schema decision may assume single-repo.
+    # llm_cache is exempt by design (data-model.md §2): content-addressed and
+    # repo-agnostic — identical (template, model, input) is the same answer
+    # in any repo, so sharing entries across repos is correct and saves cost.
     for name, table in Base.metadata.tables.items():
-        if name == "repositories":
+        if name in ("repositories", "llm_cache"):
             continue
         assert "repo_id" in table.columns, f"{name} is missing repo_id"
 

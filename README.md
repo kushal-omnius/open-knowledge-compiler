@@ -1,20 +1,70 @@
 # Knowledge Compiler
 
-Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP).
+Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
-**Status:** Architecture v1.0 frozen; implementation in progress (deterministic compiler first — no API keys required to get a useful knowledge base).
+**Status:** Architecture v1.0 frozen · V1 pipeline implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer). Next: dogfood, then MCP (milestone 2).
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md)
 
+## Quick start
+
+```bash
+python -m venv .venv && .venv\Scripts\activate    # Windows
+pip install -e .[dev]
+docker compose up -d                               # Postgres 16 + pgvector
+
+kc init --slug my-repo --forge-ref github.com/org/my-repo --default-branch main
+kc compile --full                                  # bootstrap: repo -> knowledge base + wiki
+kc inspect                                         # entity/relationship counts, last delta
+kc verify                                          # incremental state ≡ full compile?
+```
+
+No API keys required — the deterministic compiler produces components, APIs, dependencies, test coverage, and a browsable wiki (`kc-wiki/`) on its own.
+
+## Run modes
+
+| Command | What it does |
+|---|---|
+| `kc compile --full` | Bootstrap / escape-hatch full compilation |
+| `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
+| `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
+| `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
+| `kc inspect` | The debugging surface: counts by type + last delta |
+| `kc compile --no-llm` | Deterministic pass only; run marked degraded; semantic entities are never removed |
+
+## Configuration
+
+All external configuration lives in env vars and `kc.toml` (written by `kc init`) — nothing is hardcoded:
+
+- `KC_DATABASE_URL` — Postgres URL (default matches `docker-compose.yml`)
+- `KC_GITHUB_TOKEN` / `GITHUB_TOKEN` — forge API for `--pr`/`reconcile`; `KC_GITHUB_API` for GHE
+- `kc.toml [wiki]` — local publication directory
+- `kc.toml [publisher]` — opt-in loop-safe publishing to a `knowledge/wiki` branch (ADR-010)
+- `kc.toml [llm]` — opt-in semantic layer (ADR-008): business rules, features, risks
+
+## Semantic layer (optional)
+
+```toml
+[llm]
+enabled = true
+provider = "openai"        # or "anthropic" (default)
+# model = "gpt-4o"         # per-provider default applies when omitted
+max_calls_per_run = 200    # budget cap: exceeding fails the run resumably (cache keeps paid work)
+```
+
+```bash
+pip install -e .[llm-openai]      # or .[llm] for Anthropic
+# credentials come from the environment, never from config files:
+#   OPENAI_API_KEY (openai) / ANTHROPIC_API_KEY (anthropic)
+kc compile --full
+```
+
+LLM outputs are schema-validated before persistence, cached content-addressed in Postgres (unchanged files cost zero on recompile), and every semantic fact carries provenance (model, template version, anchors into source). Provider outage degrades the compile gracefully — the deterministic knowledge base is never blocked on an API.
+
 ## Development
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-pip install -e .[dev]
-docker compose up -d            # Postgres + pgvector
-pytest                          # run tests
-pytest tests/test_smoke.py -k hash   # run a single test
-kc --help
+pytest                             # full suite (integration tests skip without Postgres)
+pytest tests/test_normalize.py     # the identity-cascade suite
 ```

@@ -24,8 +24,25 @@ default_branch = "{default_branch}"
 # Plugin activation lands with the first built-in plugins (phase 1).
 
 [wiki]
-# Local publication directory (ADR-010: the GitHub-branch publisher ships it in phase 3).
+# Local publication directory; the branch publisher ships it when enabled (ADR-010).
 output_dir = "kc-wiki"
+
+[publisher]
+# Ship the wiki to a dedicated branch (ADR-010: knowledge/wiki). Explicit opt-in.
+enabled = false
+branch = "knowledge/wiki"
+remote = "origin"
+push = true
+
+[llm]
+# Semantic layer (ADR-008). Explicit opt-in. The deterministic compiler is fully
+# functional without it. Credentials come from the environment, never this file:
+#   provider = "anthropic" -> ANTHROPIC_API_KEY, pip install knowledge-compiler[llm]
+#   provider = "openai"    -> OPENAI_API_KEY,    pip install knowledge-compiler[llm-openai]
+enabled = false
+provider = "anthropic"
+# model = "claude-opus-4-8"   # per-provider default applies when omitted
+max_calls_per_run = 200
 """
 
 

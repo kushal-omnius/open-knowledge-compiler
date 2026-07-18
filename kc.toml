@@ -5,3 +5,14 @@ forge_ref = "github.com/omnius/knowledge-compiler"
 default_branch = "main"
 
 # Plugin activation lands with the first built-in plugins (phase 1).
+
+[wiki]
+output_dir = "kc-wiki"
+
+[llm]
+# Semantic layer (ADR-008). Credentials come from the environment, never this file:
+# provider = "openai" reads OPENAI_API_KEY.
+enabled = true
+provider = "openai"
+# model = "gpt-4o"   # per-provider default applies when omitted
+max_calls_per_run = 200

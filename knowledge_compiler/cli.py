@@ -34,40 +34,104 @@ def init_cmd(slug: str, forge_ref: str, default_branch: str, target_dir: str) ->
 @click.option("--pr", type=int, default=None, help="Incremental compilation of one merged PR.")
 @click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
               show_default=True, help="Repository directory (contains kc.toml).")
-def compile_cmd(full: bool, pr: int | None, repo_dir: str) -> None:
+@click.option("--no-llm", is_flag=True,
+              help="Skip LLM extraction: deterministic pass only, run marked degraded "
+                   "(pipeline.md §6.1). LLM-derived entities are never removed by such runs.")
+def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool) -> None:
     """Compile the repository (pipeline.md §3)."""
     if full == (pr is not None):
         raise click.UsageError("exactly one of --full or --pr is required")
-    if pr is not None:
-        raise click.ClickException("incremental compilation lands in phase 3 — use --full")
-
     from pathlib import Path
 
-    from knowledge_compiler.compiler.run import CompileError, compile_full
+    from knowledge_compiler.compiler.run import CompileError, compile_full, compile_pr
 
     try:
-        s = compile_full(Path(repo_dir))
+        if full:
+            _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm))
+        else:
+            summaries = compile_pr(Path(repo_dir), _gateway(Path(repo_dir)), expect_pr=pr,
+                                   no_llm=no_llm)
+            if not summaries:
+                click.echo(f"PR #{pr} already compiled — nothing to do (idempotent)")
+            for s in summaries:
+                _echo_summary(s)
     except CompileError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"compiled {s.repo_slug} @ {s.commit_sha[:12]} (run {s.compile_run_id})")
+
+
+@main.command("reconcile")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+def reconcile_cmd(repo_dir: str) -> None:
+    """Catch up on merged PRs missed since the last compile (pipeline.md §4)."""
+    from pathlib import Path
+
+    from knowledge_compiler.compiler.run import CompileError, reconcile
+
+    try:
+        summaries = reconcile(Path(repo_dir), _gateway(Path(repo_dir)))
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
+    if not summaries:
+        click.echo("up to date — no merged PRs after the watermark")
+    for s in summaries:
+        _echo_summary(s)
+
+
+def _gateway(repo_dir):
+    from knowledge_compiler.collectors.forge import ForgeError, GitHubGateway
+    from knowledge_compiler.compiler.run import CompileError, read_repo_config
+
+    forge_ref = read_repo_config(repo_dir)["forge_ref"]  # e.g. github.com/org/repo
+    parts = forge_ref.split("/")
+    if len(parts) < 3 or "github" not in parts[0]:
+        raise CompileError(f"cannot derive owner/repo from forge_ref '{forge_ref}' "
+                           "(expected github.com/<owner>/<repo>)")
+    try:
+        return GitHubGateway(owner=parts[1], repo=parts[2])
+    except ForgeError as exc:
+        raise CompileError(str(exc)) from exc
+
+
+def _echo_summary(s) -> None:
+    scope = f"PR #{s.pr_number}" if s.pr_number else "full"
+    click.echo(f"compiled {s.repo_slug} [{scope}] @ {s.commit_sha[:12]} (run {s.compile_run_id})")
     click.echo(f"  entities: {s.entities}  relationships: {s.relationships}")
     click.echo(f"  delta: +{s.added} ~{s.changed} -{s.removed} moved:{s.moved}  dirty: {s.dirty}")
     if s.wiki_dir:
         click.echo(f"  wiki: {s.wiki_pages_written} files -> {s.wiki_dir}")
+    if s.published_sha:
+        click.echo(f"  published: {s.published_sha[:12]} (pushed: {s.pushed})")
     for w in s.warnings:
         click.echo(f"  warning: {w}")
 
 
-@main.command("reconcile")
-def reconcile_cmd() -> None:
-    """Catch up on merged PRs missed since the last compile (pipeline.md §4)."""
-    raise click.ClickException("not implemented yet (phase 1)")
-
-
 @main.command("verify")
-def verify_cmd() -> None:
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+@click.pass_context
+def verify_cmd(ctx: click.Context, repo_dir: str) -> None:
     """Shadow full compile + equivalence check against current state (pipeline.md §7)."""
-    raise click.ClickException("not implemented yet (phase 1)")
+    from pathlib import Path
+
+    from knowledge_compiler.compiler.run import CompileError, verify
+
+    try:
+        report = verify(Path(repo_dir))
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(f"identity evidence: {report.evidence_histogram}")
+    if report.equivalent:
+        click.echo("VERIFIED: incremental state is equivalent to a full compile")
+        return
+    click.echo("DIVERGED: a full compile would produce the following delta:")
+    for op, slug in report.entity_divergences:
+        click.echo(f"  {op}: {slug}")
+    if report.relationship_divergences:
+        click.echo(f"  relationship divergences: {report.relationship_divergences}")
+    click.echo("remedy: kc compile --full (slug-preserving)")
+    ctx.exit(1)
 
 
 @main.command("inspect")

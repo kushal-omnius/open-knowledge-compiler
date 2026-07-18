@@ -137,7 +137,7 @@ class PythonAnalyzer:
         if is_test and kind == "function" and name.startswith("test"):
             fact("test_case_observed", {
                 "node_id": f"{artifact.source_ref}::{name}", "framework": "pytest",
-                "file": artifact.source_ref,
+                "file": artifact.source_ref, "module": module,
             }, anchors=(anchor,))
 
         body = node.child_by_field_name("body")
