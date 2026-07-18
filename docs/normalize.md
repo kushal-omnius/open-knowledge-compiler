@@ -41,7 +41,7 @@ From `source_change_observed` facts (git rename detection, already computed by t
 rename_map: dict[old_path -> new_path]   # single-compile gap only
 ```
 
-The anchor-currency invariant (ir.md §2.2) guarantees stored anchors are at most one compile behind, so `rename_map` never needs transitive composition. `map_anchor(a) = a with file_path replaced via rename_map when present`.
+The anchor-currency invariant (ir.md §2.2) guarantees stored anchors are at most one compile behind, so `rename_map` never needs transitive composition. `map_anchor(a)` replaces `file_path` via the map **and rewrites the symbol_path's module prefix** derived from the old→new file paths — a file rename changes the module prefix of every symbol inside it, and without the prefix rewrite, symbol-granularity overlap scores 0 across renames and identity churns. *(Additive clarification, discovered by the rename test during implementation.)*
 
 ## 4. P2 — Deterministic entities
 
