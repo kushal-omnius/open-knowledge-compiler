@@ -1,0 +1,137 @@
+# Pipeline
+
+> Status: Living specification. Defines the compile execution model and per-stage contracts over the IR ([ir.md](ir.md)) and schema ([data-model.md](data-model.md)).
+> Last updated: 2026-07-18
+
+---
+
+## 1. Run modes
+
+| Mode | Scope | Notes |
+|---|---|---|
+| `kc compile --pr <N>` | the PR's source diff | reconciles first (§4); the normal CI-triggered path (ADR-002) |
+| `kc compile --full` | whole repository | bootstrap + correctness escape hatch (ADR-003); slug-preserving when run against an existing database (ADR-004) |
+| `kc reconcile` | missed merged PRs | standalone catch-up; same machinery as §4 |
+| `kc verify` | whole repository, read-only | shadow full compile + equivalence check (§7); never persists |
+
+All modes run the same stage sequence; only Collect's scope differs (architecture.md §4).
+
+## 2. Execution model
+
+- **Lock:** the compile acquires the per-repo Postgres advisory lock (key = `repositories.id`) before any work; a concurrent compile blocks or exits cleanly (ADR-002).
+- **Idempotence:** if `compile_runs` has a `succeeded` row for `(repo_id, pr_number)`, the run is a no-op (ADR-002).
+- **Two commit disciplines**, resolving what "checkpointing between stages" (architecture.md §4) means precisely:
+  - **Staging writes** — `compile_runs` (status `running`), `artifacts`, `facts`, and `llm_cache` entries — commit incrementally as stages progress. Safe because all are disposable staging or content-addressed (see §6.2 for why eager cache commits are correct).
+  - **The atomic commit** — `entities`, `relationships`, `provenance`, `delta_changes`, and the run's `succeeded` status — is **one transaction** in Persist (ADR-003 invariant). A crash at any point before it leaves compiled state untouched and the run re-runnable.
+
+## 3. Stage contracts
+
+Each stage: what it reads, what it produces, and the invariants it owns. All stage implementations are plugins resolved from `kc.toml` in configuration order (ADR-007).
+
+### 3.1 Collect
+
+- **Reads:** the repository at the compiled commit; forge/Jira APIs. Scope per run mode (§5).
+- **Produces:** `artifacts` rows (typed, content-hashed).
+- **Owns:** PR↔commit↔Jira linkage via **forge API association, never commit parentage** — squash/rebase merges rewrite history, so the PR's file diff and metadata come from the forge, making merge strategy irrelevant to scope (resolves the ADR-002 open item).
+- **Failure:** a collector that cannot reach its source fails the compile loudly (ADR-007 — never silently compile with a subset of configured collectors).
+
+### 3.2 Extract
+
+- **Reads:** staged artifacts (never the repo directly).
+- **Produces:** Fact IR rows (ir.md §2). Deterministic extractors (analyzers per ADR-006, parsers) run first and always; LLM extractors run second, consulting `llm_cache` before every call and writing validated outputs through it (ADR-008).
+- **Owns:** grammar pinning, parse-failure file skips (recorded as warnings, never compile failures — ADR-006); the LLM validation gate and budget accounting (ADR-008); mandatory anchors on candidates (ADR-004).
+- **Records:** which extractor families ran over which scope — required by removal evidence (§5).
+
+### 3.3 Normalize
+
+- **Reads:** this compile's facts + current-state entities.
+- **Produces:** the compile's candidate Knowledge IR (entities incl. Wiki Page derivation, relationships), fully identified.
+- **Owns:** the ADR-004 cascade incl. intra-compile candidate dedup in content-hash order (ir.md §4.2); rename mapping + anchor currency rewrites (ir.md §2.2); conflict surfacing (ir.md §4.3); slug minting with dedup suffixes.
+- **Failure:** an unknown fact shape is a loud failure (ADR-009 — no entity-smuggling through the fact layer).
+
+### 3.4 Diff
+
+- **Reads:** normalized candidate state + current state.
+- **Produces:** the knowledge delta (`entity_changes`, `relationship_changes` — ir.md §3.4), applying the **removal-evidence rule** (§5).
+- **Owns:** `moved` detection (anchor relocation, ADR-004); the dirty-entity set for Emit (ir.md §3.4 dirty rule: entity changes ∪ relationship endpoints).
+
+### 3.5 Persist
+
+- **Reads:** the delta + candidate state.
+- **Produces:** the atomic commit (§2): current-state mutation + append-only delta rows + provenance snapshots + run `succeeded`.
+- **Owns:** ADR-003's single-transaction invariant; slug uniqueness enforcement; provenance denormalization (data-model.md §4).
+
+### 3.6 Emit
+
+- **Reads:** Knowledge IR only (never facts — ADR-009). Input: the dirty-entity set.
+- **Produces:** **publications** — file-shaped renders of compiled knowledge — plus embeddings for dirty entities (per active model generation, ADR-005). The reference publication is the wiki: regenerated Markdown pages for dirty pages (wholesale per page, ir.md), **OKF-conformant** ([okf.md](https://okf.md/) — Open Knowledge Format): each page carries YAML frontmatter (entity slug, type, compile run, provenance refs) over standard Markdown, so the page set is simultaneously a human wiki and an agent-readable OKF bundle with zero extra tooling.
+- **Publisher (generalized concept):** a Publisher is a plugin that ships a publication to a destination. One publication, many possible destinations:
+
+  ```
+  Emit ──▶ publication (wiki / OKF bundle) ──▶ Publisher ──▶ GitHub branch   (reference, ADR-010)
+                                                            GitHub Pages
+                                                            separate knowledge repo
+                                                            Confluence
+                                                            OKF bundle export (directory/archive)
+  ```
+
+  The reference destination is the `knowledge/wiki` branch (ADR-010); every Publisher inherits ADR-010's invariants (loop-safe, destination is publisher-owned and fully regenerable). The canonical home of compiled knowledge remains the database (ADR-001) — publications are renders, never stores.
+- **Owns:** entity→page mapping; embedding `pending` status on provider outage (degrade to FTS, backfill later — ADR-005).
+- **Failure:** emit failures never roll back Persist — compiled state is already committed and correct; emission is re-runnable from the delta (idempotent by content hash).
+
+## 4. Reconciliation algorithm (ADR-002, normative)
+
+At the start of every incremental compile (and as `kc reconcile`):
+
+1. Under the advisory lock, read the watermark: `max(merged_at)` over `succeeded` runs for this repo.
+2. List PRs merged after the watermark from the forge API, ordered by `merged_at` (ties broken by PR number).
+3. For each listed PR not already recorded `succeeded` (idempotence), run the full stage sequence in order — **including the PR that triggered this run**, in its merge-order position.
+4. Each PR is its own compile run with its own atomic commit; a failure stops the sequence there (later PRs remain for the next reconcile — order is never violated by skipping ahead).
+
+Consequence: any single successful trigger heals an arbitrary backlog, in order, exactly once.
+
+## 5. Compile scope & removal evidence
+
+- **Collection scope:** `--full` = whole repo; `--pr` = the PR's forge-reported file diff + its PR/Jira metadata artifacts.
+- **Removal evidence** (ir.md §4.2.1, extended with the extractor condition): Diff may emit `op: removed` only if the entity's evidence location was **in collection scope** *and* **the extractor family that produced it actually ran** over that scope this compile. The second condition matters for degraded runs: in a `--no-llm` compile, LLM-derived entities are never removed — the extractor that could re-observe them didn't run, so absence is not evidence (§6.1).
+
+## 6. Degraded modes
+
+### 6.1 `--no-llm` (and LLM-provider outage)
+
+Resolves the ADR-008 open item: **degraded compiles write to the shared knowledge base** — not a scratch state. Rationale: the deterministic pass is correct on its own (ADR-006 invariant), and freezing all knowledge because prose extraction is down would fail the freshness contract. Semantics:
+
+- Deterministic entities update normally.
+- LLM-derived entities are untouched: not updated, and per §5 never removed.
+- The run is recorded `succeeded` with a `degraded: no-llm` marker in `compile_runs`; the wiki renders deterministic updates, keeping existing LLM prose.
+- The next non-degraded compile reconciles the semantic layer naturally (cache makes re-extraction of unchanged content free).
+
+### 6.2 Budget-cap halt
+
+When the per-run LLM budget cap (`kc.toml`, ADR-008) is reached mid-Extract, the run **fails resumably**: status `failed (budget)`, nothing persisted to compiled state (the atomic commit never ran). Resumption is a plain re-run: completed LLM work survives in `llm_cache`, so the re-run pays only for what wasn't done.
+
+**Clarification to ADR-008's Impact wording** ("cache writes ride the compile transaction"): cache entries commit **eagerly, outside the atomic commit** — otherwise a halted run would lose its cache and resumability would be fiction. This is consistency-safe precisely because the cache is content-addressed and immutable (ADR-008 invariants): an orphaned cache entry from a failed run is simply a prepaid answer. The ADR's invariants are untouched; only the Impact section's transactional phrasing is refined here.
+
+### 6.3 Failure summary
+
+| Failure point | Compiled state | Recovery |
+|---|---|---|
+| Collect/Extract/Normalize/Diff crash | untouched | re-run (staging + cache survive) |
+| Persist crash mid-transaction | untouched (rollback) | re-run |
+| Emit failure after Persist | committed and correct | re-emit from delta; no rollback |
+| Budget halt | untouched | re-run; cache-funded resumption |
+| Reconcile: PR *k* of backlog fails | PRs 1..k-1 committed | next reconcile resumes at *k* — order preserved |
+
+## 7. `kc verify`
+
+Runs Collect + Extract + Normalize as a **shadow full compile** (no Persist, no Emit), then matches the shadow entity set against current state using the ADR-004 cascade itself — never slug equality (ADR-004's reproducibility statement). Reports: entities the incremental history missed / fabricated / mismatched, with match-rate metrics (feeding ADR-004's threshold tuning). Nonzero divergence → nonzero exit; the remedy is a real `kc compile --full` (slug-preserving) into the database.
+
+## 8. Open items
+
+- Concurrent LLM request batching within Extract — throughput engineering, dogfood-tuned.
+- Whether `kc verify` should sample (scoped shadow compiles) for cheap scheduled runs — post-dogfood.
+- Publisher plugin contract: unblocked by [ADR-010](decisions/ADR-010-wiki-destination.md) — input = a publication (dirty pages + delta), output = delivery to one destination (reference: one commit to the `knowledge/wiki` branch); detail lands with the reference GitHub publisher implementation. Additional publishers (Pages, separate knowledge repo, Confluence, OKF bundle export) are additive per ADR-010's invariants.
+
+## References
+
+[ir.md](ir.md) · [data-model.md](data-model.md) · [ADR-002](decisions/ADR-002-ci-trigger.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-006](decisions/ADR-006-language-analyzers.md) · [ADR-007](decisions/ADR-007-plugin-architecture.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-009](decisions/ADR-009-two-layer-ir.md) · architecture.md §3–4

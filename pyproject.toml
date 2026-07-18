@@ -1,0 +1,32 @@
+[project]
+name = "knowledge-compiler"
+version = "0.1.0"
+description = "Compiles software engineering artifacts into a structured, queryable knowledge base"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+kc = "knowledge_compiler.cli:main"
+
+# Built-in plugins register through the same entry-point groups third parties use (ADR-007).
+# Groups are declared in knowledge_compiler.interfaces; entries land with each built-in.
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["knowledge_compiler*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
