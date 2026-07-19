@@ -25,7 +25,7 @@ kc --help                            # CLI (init/compile/reconcile/verify/inspec
 
 Core code map: `ir.py` (two-layer IR models, ADR-009) · `interfaces.py` (stage Protocols, ADR-007) · `collectors/git.py` + `collectors/forge.py` (Collect; FakeForge for tests) · `extractors/python_analyzer.py` + `typescript_analyzer.py` (tree-sitter, ADR-006) · `extractors/llm_extractor.py` + `llm/` (semantic layer, ADR-008; FakeLLMProvider for tests) · `compiler/normalize.py` (identity cascade, normalize.md — determinism checklist §9 is the review gate) · `compiler/diff.py` (removal evidence) · `storage/persist.py` (the atomic commit, ADR-003) · `compiler/run.py` (pipeline orchestration, reconcile, verify) · `wiki/emitter.py` + `wiki/publisher.py` (OKF wiki, ADR-010 branch publishing) · `llm/embeddings.py` + `retrieval/` (embeddings emitter, hybrid search, ADR-005; FakeEmbedder for tests) · `mcp/queries.py` + `mcp/server.py` (read-only MCP serve, never compiles).
 
-Testing conventions: no mocks — real git repos, real Postgres (integration tests skip loudly when it's down), real tree-sitter; LLM tests use `FakeLLMProvider`. The `llm_cache` is repo-agnostic by design, so tests asserting provider call counts must use a unique `model_id`.
+Testing conventions: no mocks — real git repos, real Postgres (integration tests skip loudly when it's down), real tree-sitter; LLM tests use `FakeLLMProvider`, embedding tests use `FakeEmbedder`. Both caches (`llm_cache`, `embeddings`) are keyed in part by `model_id` and are shared/repo-agnostic (`llm_cache`) or persist across recompiles (`embeddings`) by design, so tests asserting call counts must use a unique `model_id` per test.
 
 ## Intended Tech Stack
 

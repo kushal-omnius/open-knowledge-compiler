@@ -104,11 +104,12 @@ Append-only is enforced by policy and privileges (no UPDATE/DELETE grants on the
 
 | Column | Notes |
 |---|---|
-| `entity_id`, `repo_id` | |
-| `model_id` | ADR-005 generation tag; PK is `(entity_id, model_id)` |
-| `vector` | pgvector; **one HNSW partial index per active model generation** (`WHERE model_id = …`), since index dimensionality is fixed per model |
-| `content_hash` | of the embedded text — skip re-embedding when unchanged |
-| `status` | `current` \| `pending` (ADR-005: embedding outage degrades to FTS, backfilled later) |
+| `entity_id` (PK, FK `ON DELETE CASCADE`), `model_id` (PK) | composite PK — one row per (entity, model generation) |
+| `repo_id` | |
+| `vector` | pgvector, dimensionless in-schema (dimensionality varies per model); exact-scan KNN suffices at dogfood scale — **one HNSW partial index per active model generation** (`WHERE model_id = …`) is an activation-time optimization, not required now |
+| `content_hash` | of the embedded text (`llm/embeddings.py::embedding_text`) — skip re-embedding when unchanged |
+| `status` | `current` \| `pending` (ADR-005: embedding outage degrades to FTS, backfilled next compile) |
+| `updated_at` | |
 
 ### `llm_cache`
 

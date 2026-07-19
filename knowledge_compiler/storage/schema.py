@@ -1,10 +1,9 @@
-"""Phase-1 schema: the deterministic compiler's tables (docs/data-model.md §2).
+"""The full data-model.md §2 catalog, added across migrations as each phase
+landed: phase-1 deterministic tables (0001), llm_cache (0002, ADR-008),
+embeddings (0003, ADR-005; search_vector's de-dotted rendering, 0004).
 
-Deferred to their own phases (additive migrations, per data-model.md):
-  embeddings (semantic layer, ADR-005) · llm_cache (LLM layer, ADR-008).
-
-entities.search_vector (generated tsvector) and the append-only grants on
-delta tables are raw SQL in the migration — they have no portable ORM form.
+The append-only grants on delta tables (no UPDATE/DELETE for the app role)
+are raw SQL in the migration — no portable ORM form for privileges.
 """
 
 from __future__ import annotations
