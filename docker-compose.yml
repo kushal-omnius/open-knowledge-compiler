@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: kc
       POSTGRES_PASSWORD: kc
-      POSTGRES_DB: knowledge
+      POSTGRES_DB: kc_wiki
     ports:
       - "5432:5432"
     volumes:
