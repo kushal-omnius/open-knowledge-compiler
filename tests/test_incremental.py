@@ -203,3 +203,59 @@ def test_pr_slice_links_into_out_of_scope_components(env):
     # billing.rules resolved as INTERNAL even though out of scope (combined-map fix)
     assert payload["internal_dependencies"] == ["billing.rules"]
     assert "billing.rules" not in payload["external_dependencies"]
+
+
+def test_jira_facts_mint_story_and_link_to_pr(env):
+    """[jira] enabled + a PR title/body carrying an issue key => a jira_story
+    entity, minted from jira_observed (natural key: the issue key), with a
+    motivates edge to the pull_request it was found on."""
+    from dataclasses import replace
+
+    from knowledge_compiler.collectors.jira import FakeJira, JiraIssue
+    from knowledge_compiler.compiler.run import compile_pr
+    from knowledge_compiler.storage.schema import EntityRow, RelationshipRow, Repository
+
+    repo, slug, merge_pr = env
+    config_text = (repo / "kc.toml").read_text(encoding="utf-8")
+    assert "never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.\nenabled = false" in config_text
+    (repo / "kc.toml").write_text(
+        config_text.replace(
+            "never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.\nenabled = false",
+            "never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.\nenabled = true"),
+        encoding="utf-8")
+
+    pr = merge_pr(601, {"billing/extra.py": "def bonus():\n    return 1\n"})
+    pr = replace(pr, title="DCA-42: add bonus calc", body="Acceptance criteria in DCA-42.")
+
+    fake_jira = FakeJira(issues={"DCA-42": JiraIssue(
+        key="DCA-42", summary="Add bonus calc", status="Done",
+        description="Bonus must be non-negative.", issue_type="Story")})
+
+    compile_pr(repo, FakeForge(prs=[pr]), expect_pr=601, jira_gateway=fake_jira)
+
+    assert "jira-story/dca-42" in current_slugs(slug)
+    with Session(kcdb.make_engine()) as session:
+        repo_id = session.execute(select(Repository.id).where(Repository.slug == slug)).scalar_one()
+        id_to_slug = dict(session.execute(
+            select(EntityRow.id, EntityRow.slug).where(EntityRow.repo_id == repo_id)).all())
+        edges = {(id_to_slug[r.from_entity_id], r.relation_type, id_to_slug[r.to_entity_id])
+                 for r in session.execute(select(RelationshipRow)
+                                          .where(RelationshipRow.repo_id == repo_id)).scalars()}
+    assert ("jira-story/dca-42", "motivates", "pull-request/601") in edges
+
+
+def test_jira_disabled_by_default_no_facts(env):
+    """[jira] enabled=false (the kc init default) => no jira_story entity even
+    when a PR title carries an issue-key-shaped string (ADR-007: activation is
+    explicit, never inferred from content alone)."""
+    from dataclasses import replace
+
+    from knowledge_compiler.compiler.run import compile_pr
+
+    repo, slug, merge_pr = env
+    pr = merge_pr(602, {"billing/extra2.py": "def bonus2():\n    return 2\n"})
+    pr = replace(pr, title="DCA-99: should not be collected")
+
+    compile_pr(repo, FakeForge(prs=[pr]), expect_pr=602)
+
+    assert "jira-story/dca-99" not in current_slugs(slug)

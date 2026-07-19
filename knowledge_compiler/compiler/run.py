@@ -7,6 +7,7 @@ is one transaction. Every incremental compile reconciles first (ADR-002).
 
 from __future__ import annotations
 
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 from knowledge_compiler import FACT_VOCABULARY_VERSION, KNOWLEDGE_MODEL_VERSION
 from knowledge_compiler.collectors.forge import ForgeGateway, MergedPR
 from knowledge_compiler.collectors.git import GitCollector
+from knowledge_compiler.collectors.jira import build_jira_gateway
 from knowledge_compiler.compiler.diff import CompileScope, compute_diff
 from knowledge_compiler.compiler.normalize import Thresholds, normalize
 from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer
@@ -38,6 +40,8 @@ from knowledge_compiler.storage.schema import ArtifactRow, CompileRun, FactRow, 
 
 _FORGE_EXTRACTION = Extraction(method="deterministic", extractor="forge-collector",
                                extractor_version="0.1")
+_JIRA_EXTRACTION = Extraction(method="deterministic", extractor="jira-collector",
+                              extractor_version="0.1")
 
 
 class CompileError(Exception):
@@ -86,12 +90,14 @@ def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
 
 
 def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = None,
-              no_llm: bool = False, llm_provider=None, embedder=None) -> list[CompileSummary]:
+              no_llm: bool = False, llm_provider=None, embedder=None,
+              jira_gateway=None) -> list[CompileSummary]:
     """Process merged PRs after the watermark, in merge order, exactly once
     (pipeline.md §4). Every trigger heals prior gaps; `expect_pr` asserts the
     triggering PR was covered (already-processed => clean no-op)."""
     with _locked_session(repo_dir) as (session, repo, ctx):
-        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder)
+        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder,
+                   jira_gateway=jira_gateway)
         watermark = session.execute(
             select(func.max(CompileRun.merged_at)).where(
                 CompileRun.repo_id == repo.id, CompileRun.status == "succeeded",
@@ -223,6 +229,9 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             live_paths = [f.path for f in pr.files if f.change != "removed"]
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
             extra_facts = _pr_facts(pr)
+            issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
+                              if f.fact_type == "pr_observed"), [])
+            extra_facts += _jira_facts(ctx, issue_keys, pr.number)
         session.add_all(ArtifactRow(repo_id=repo.id, compile_run_id=run.id,
                                     artifact_type=a.artifact_type, source_ref=a.source_ref,
                                     content_hash=a.content_hash, content=a.content)
@@ -358,10 +367,15 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
         return False, [f"LLM provider unavailable — compiled degraded (--no-llm semantics): {exc}"]
 
 
+_ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
+
+
 def _pr_facts(pr: MergedPR) -> list[Fact]:
+    linked_issue_keys = sorted(set(_ISSUE_KEY.findall(f"{pr.title}\n{pr.body}")))
     payload = {"number": pr.number, "title": pr.title, "body": pr.body,
                "merged_at": pr.merged_at.isoformat(), "merge_commit_sha": pr.merge_commit_sha,
-               "files": sorted(f.path for f in pr.files)}
+               "files": sorted(f.path for f in pr.files),
+               "linked_issue_keys": linked_issue_keys}
     facts = [Fact(fact_type="pr_observed", payload=payload,
                   artifact_refs=(f"pr:{pr.number}",), extraction=_FORGE_EXTRACTION,
                   content_hash=content_hash(payload))]
@@ -371,6 +385,26 @@ def _pr_facts(pr: MergedPR) -> list[Fact]:
             facts.append(Fact(fact_type="source_change_observed", payload=p,
                               artifact_refs=(f"pr:{pr.number}",),
                               extraction=_FORGE_EXTRACTION, content_hash=content_hash(p)))
+    return facts
+
+
+def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
+    if not issue_keys:
+        return []
+    jira_cfg = ctx["config"].get("jira", {})
+    if not jira_cfg.get("enabled", False):
+        return []
+    gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg)
+    if gateway is None:
+        return []
+    facts = []
+    for issue in gateway.get_issues(issue_keys):
+        payload = {"key": issue.key, "summary": issue.summary, "status": issue.status,
+                   "description": issue.description, "issue_type": issue.issue_type,
+                   "linked_pr": pr_number}
+        facts.append(Fact(fact_type="jira_observed", payload=payload,
+                          artifact_refs=(f"jira:{issue.key}",), extraction=_JIRA_EXTRACTION,
+                          content_hash=content_hash(payload)))
     return facts
 
 

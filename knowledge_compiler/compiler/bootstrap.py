@@ -60,6 +60,13 @@ provider = "openai"
 # Keys are the coordinate as observed by the analyzer (e.g. a bare import
 # name); values are that dependency's registered `repository.slug`.
 #   omnius_llmlib = "omnius-llmlib"
+
+[jira]
+# Collector (Collect stage): fetches issues linked from a merged PR's
+# title/body (issue-key pattern, e.g. DCA-1234). Explicit opt-in — disabled
+# compiles produce no jira_story entities. Credentials from the environment,
+# never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.
+enabled = false
 """
 
 

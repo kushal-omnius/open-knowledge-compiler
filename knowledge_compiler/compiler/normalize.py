@@ -208,6 +208,7 @@ class _Normalizer:
         self._apis()
         self._test_coverage()
         self._pull_requests()
+        self._jira_stories()
 
     def _pull_requests(self) -> None:
         for f in self._facts_of("pr_observed"):
@@ -215,6 +216,17 @@ class _Normalizer:
             payload = {k: v for k, v in sorted(f.payload.items())}
             self._put(self._entity("pull_request", f"pull-request/{number}",
                                    f"PR #{number}: {f.payload.get('title', '')}", payload),
+                      rule="natural_key", signals={}, facts=[f])
+
+    def _jira_stories(self) -> None:
+        # Natural key = issue key (architecture.md §6: "PR/Jira = their external
+        # ids"). Multiple PRs can link the same issue across compiles; merge on
+        # slug like any other natural-key entity.
+        for f in self._facts_of("jira_observed"):
+            key = f.payload["key"]
+            payload = {k: v for k, v in sorted(f.payload.items())}
+            self._put(self._entity("jira_story", f"jira-story/{slugify(key)}",
+                                   f"{key}: {f.payload.get('summary', '')}", payload),
                       rule="natural_key", signals={}, facts=[f])
 
     def _project(self) -> None:
@@ -492,6 +504,14 @@ class _Normalizer:
                     # related (sqlalchemy, click, ...) — legitimately related but
                     # not linkable entities; silently dropped (dogfood finding,
                     # same class as external coverage targets above)
+            elif e.entity_type == "jira_story":
+                # ir.md §3.3: motivates | Jira Story -> Feature | Pull Request.
+                # PR linkage only for now (from jira_observed.linked_pr, set at
+                # Collect time from the PR title/body issue-key match) — Feature
+                # linkage would need an LLM-derived signal, not attempted here.
+                pr_slug = f"pull-request/{e.payload.get('linked_pr')}"
+                if e.payload.get("linked_pr") is not None and pr_slug in self.entities:
+                    self.relationships.add((e.slug, "motivates", pr_slug))
 
     # -- P6: wiki pages (derived in Normalize — ADR-009 boundary) ------------------------
 
