@@ -3,7 +3,7 @@
 > Status: Implementation specification (the final pre-implementation document per the v1.0 freeze).
 > Composes the rules fixed by [ADR-004](decisions/ADR-004-entity-identity.md), [ir.md](ir.md) §4, and [pipeline.md](pipeline.md) §3.3 into one executable algorithm. Gaps found while implementing this go back into ir.md as additive clarifications — never into new documents.
 > Pseudocode is normative for *behavior*; names and factoring are not.
-> Last updated: 2026-07-18
+> Last updated: 2026-07-19
 
 ---
 
@@ -127,6 +127,9 @@ conflict    = if contents disagree materially, record a conflict (P8) —
 ## 7. P5–P7 — Relationships, wiki pages, anchor currency
 
 - **P5:** candidate `related component paths` resolve to Component slugs via P2's entities (+ rename map for stale paths); unresolvable *internal* paths are recorded as warnings, never guessed (DP 8) — unresolved *external* imports (stdlib, third-party) are silently classified as external dependency coordinates, not warned (dogfood finding: warning on known-externals is noise). Relationship rows materialize per ir.md §3.3/§4.1. **Containment edges are generated over ALL known components (observed ∪ current state)** *(additive clarification, verify-chain finding)*: containment derives from paths alone, so restricting it to observed components would make the always-observed Project (or a touched package) silently drop `contains` edges to out-of-scope children on every PR compile. Resolution of internal-vs-external imports likewise consults the combined map.
+- **Internal-import resolution beyond simple prefix matching** *(additive clarification, dogfood finding on frida)*: `_resolve_internal` first tries the longest dotted-prefix match of the raw import string against known component paths (the case where a project's import root equals the repo root used to name components). Two real-world layouts break that assumption and needed a fallback, both discovered dogfooding on a repo outside the synthetic test fixtures:
+  - **Python — import root ≠ repo root.** When a subdirectory (e.g. `backend/`) is on `PYTHONPATH` rather than the repo root, bare imports like `from db import Claim` share no prefix with the component `backend.db`. Fallback: match the import string as a **unique dotted suffix** of a known component path (`db` matches `backend.db` iff no other component also ends in `.db`). Ambiguous suffixes stay unresolved — the same over-split-over-merge bias as the P3 cascade (vision DP 8), applied here to avoid wrongly linking unrelated modules that happen to share a basename.
+  - **TypeScript — tsconfig path aliases.** Bare specifiers matching a `tsconfig.json` `compilerOptions.paths` alias (e.g. `@/*` -> `./src/*`) are expanded to their real internal module path *before* internal/external classification, at extraction time in the TypeScript analyzer (not in Normalize, since alias config is TS-specific and file-local to resolve). Without this, alias-based imports — the dominant internal-import style in a typical Vite/CRA-convention frontend — were uniformly misclassified as external, hiding most of the real dependency graph.
 - **P6:** Wiki Page entities derive deterministically from the candidate entity set (identity = owning slug + page type) — in Normalize, per the ADR-009 boundary (ir.md §4.1).
 - **P7:** every matched entity's stored anchors are rewritten to the candidate's current-commit anchors (anchor currency, ir.md §2.2). Unmatched entities keep their anchors (they were out of scope or unobserved — Diff decides what that means).
 

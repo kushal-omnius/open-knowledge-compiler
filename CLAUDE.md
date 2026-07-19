@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Architecture v1.0 is FROZEN (2026-07-18).** The spec set: [docs/vision.md](docs/vision.md), [docs/architecture.md](docs/architecture.md), ADR-001…ADR-010 ([docs/decisions/index.md](docs/decisions/index.md)), [docs/ir.md](docs/ir.md), [docs/data-model.md](docs/data-model.md), [docs/pipeline.md](docs/pipeline.md), [docs/normalize.md](docs/normalize.md). ADRs are immutable — changing a decision requires a superseding ADR; living specs accept additive clarifications only (implementation findings are folded in as marked clarifications). Do not create new architecture documents unless implementation reveals a genuine gap. [INITIAL-Brainstorm.md](INITIAL-Brainstorm.md) is the superseded exploratory draft.
 
-**Current phase: V1 pipeline + milestone 2 implemented; dogfood on the team's real repo is the open milestone.** Working: `kc init/compile(--full|--pr|--no-llm)/reconcile/verify/inspect/serve`, Python + TypeScript analyzers, the ADR-004 identity cascade, atomic persist + append-only delta log, OKF wiki emission, loop-safe branch publisher, opt-in LLM semantic layer (anthropic/openai/azure-openai providers, content-addressed cache), opt-in embeddings + hybrid retrieval ([docs/retrieval.md](docs/retrieval.md)), read-only stdio MCP server. Deferred by design: Jira collector, entry-point plugin activation (built-ins wired directly until plugin-sdk.md's trigger fires), HNSW index activation.
+**Current phase: V1 pipeline + milestone 2 implemented; dogfooded on two real team repos (frida, omnius_llmlib), deterministic-only.** Working: `kc init/compile(--full|--pr|--no-llm)/reconcile/verify/inspect/serve`, Python + TypeScript analyzers, the ADR-004 identity cascade, atomic persist + append-only delta log, OKF wiki emission, loop-safe branch publisher, opt-in LLM semantic layer (anthropic/openai/azure-openai providers, content-addressed cache), opt-in embeddings + hybrid retrieval ([docs/retrieval.md](docs/retrieval.md)), read-only stdio MCP server. Dogfooding on frida surfaced two real internal-import-resolution gaps (Python import root ≠ repo root; TypeScript tsconfig path aliases) — both fixed, see [normalize.md](docs/normalize.md) §7. Deferred by design: Jira collector, entry-point plugin activation (built-ins wired directly until plugin-sdk.md's trigger fires), HNSW index activation. Open: enrichment (LLM/embeddings) on the dogfood repos, incremental `--pr` CI wiring.
 
 Key V1 commitments (see vision.md for rationale): the **Living Wiki is the V1 wedge** (MCP/Q&A is milestone 2, test generation milestone 3); **Python + TypeScript** language analyzers to keep the plugin interface honest; **dogfood on the team's real repo** before generalizing; **deterministic-first extraction** (AST/git/parsers for structure, LLM only for semantics, provenance on every fact).
 
@@ -19,7 +19,7 @@ Key V1 commitments (see vision.md for rationale): the **Living Wiki is the V1 we
 pip install -e .[dev]                # install package + dev deps
 pytest                               # run all tests
 pytest tests/test_smoke.py -k hash   # run a single test
-docker compose up -d                 # Postgres 16 + pgvector (user: kc / kc, db: knowledge)
+docker compose up -d                 # Postgres 16 + pgvector (user: kc / kc, db: kc_wiki)
 kc --help                            # CLI (init/compile/reconcile/verify/inspect/serve)
 ```
 

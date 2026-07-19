@@ -2,7 +2,7 @@
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
-**Status:** Architecture v1.0 frozen · V1 pipeline + milestone 2 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Next: dogfood on a real team repo.
+**Status:** Architecture v1.0 frozen · V1 pipeline + milestone 2 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Dogfooded on two real team repos (`kc verify`-clean); next: enable enrichment on them and wire up incremental `--pr` compilation in CI.
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
