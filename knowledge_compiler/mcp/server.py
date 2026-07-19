@@ -87,6 +87,16 @@ def build_server(repo_dir: Path):
                     or {"error": f"no entity '{slug}'"})
 
     @mcp.tool()
+    def test_plan(slug: str) -> dict:
+        """Deterministic test recommendations for a changed entity: everything
+        impact_plan returns, plus concrete targets (APIs or symbols) to write
+        tests against for each coverage gap. Names what needs a test; writing
+        it stays a separate, later step."""
+        with repo_session() as (session, repo_id):
+            return (queries.test_plan(session, repo_id, slug, dep_map=dep_map)
+                    or {"error": f"no entity '{slug}'"})
+
+    @mcp.tool()
     def resolve_dependency(coordinate: str) -> dict:
         """Resolve an external dependency coordinate (e.g. a package/import name
         from a component's external_dependencies) to another repo compiled into

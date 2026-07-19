@@ -204,6 +204,52 @@ def impact_plan(session: Session, repo_id: int, slug: str,
     }
 
 
+def test_plan(session: Session, repo_id: int, slug: str,
+              dep_map: dict[str, str] | None = None) -> dict | None:
+    """Deterministic test-recommendation layer over impact_plan (roadmap step 4,
+    BRAINSTORM-test-generation-eval.md): for each coverage gap, name a concrete
+    target to write a test against -- the component's own APIs when it defines
+    any (method+route+handler is already a machine-readable unit), or its
+    public function/class symbols otherwise. This decides *what* needs a test,
+    not the test itself: writing it is a later, LLM step (roadmap step 6),
+    scored against the declared target this function names (M3 methodology's
+    declared-coverage check)."""
+    plan = impact_plan(session, repo_id, slug, dep_map=dep_map)
+    if plan is None:
+        return None
+
+    slug_to_id = dict(session.execute(select(EntityRow.slug, EntityRow.id)
+                                      .where(EntityRow.repo_id == repo_id)).all())
+    recommendations = []
+    for gap_slug in plan["coverage_gaps"]:
+        component_id = slug_to_id.get(gap_slug)
+        if component_id is None:
+            continue
+        apis = session.execute(
+            select(EntityRow)
+            .join(RelationshipRow, RelationshipRow.from_entity_id == EntityRow.id)
+            .where(RelationshipRow.repo_id == repo_id,
+                   RelationshipRow.relation_type == "defined_in",
+                   RelationshipRow.to_entity_id == component_id)
+            .order_by(EntityRow.slug)).scalars().all()
+        if apis:
+            recommendations.append({
+                "component": gap_slug, "target_kind": "api",
+                "targets": [{"slug": a.slug, "method": a.payload.get("method"),
+                            "route": a.payload.get("route")} for a in apis],
+            })
+        else:
+            component = session.execute(select(EntityRow).where(
+                EntityRow.id == component_id)).scalar_one()
+            symbols = [s["symbol_path"] for s in component.payload.get("symbols", [])
+                      if s.get("kind") in ("function", "class")]
+            recommendations.append({
+                "component": gap_slug, "target_kind": "symbols", "targets": symbols,
+            })
+
+    return {**plan, "test_recommendations": recommendations}
+
+
 def knowledge_stats(session: Session, repo_id: int) -> dict:
     counts = dict(session.execute(
         select(EntityRow.entity_type, func.count()).where(EntityRow.repo_id == repo_id)
