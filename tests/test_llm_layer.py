@@ -69,7 +69,9 @@ def repo_env(tmp_path: Path):
     # enable the semantic layer in kc.toml
     config = (repo / "kc.toml").read_text(encoding="utf-8").replace(
         "[llm]\n# Semantic layer", "[llm]\n# Semantic layer", 1)
-    config = config.replace("enabled = false\nprovider =", "enabled = true\nprovider =")
+    # target the [llm] section precisely — [embeddings] has the same enabled/provider shape
+    config = config.replace('enabled = false\nprovider = "anthropic"',
+                            'enabled = true\nprovider = "anthropic"')
     assert "enabled = true" in config, "kc.toml template changed — fix the toggle above"
     (repo / "kc.toml").write_text(config, encoding="utf-8")
     return repo, slug

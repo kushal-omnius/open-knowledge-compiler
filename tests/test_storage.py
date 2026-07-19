@@ -13,12 +13,12 @@ from knowledge_compiler.storage.schema import Base
 EXPECTED_TABLES = {
     "repositories", "compile_runs", "artifacts", "facts", "entities",
     "relationships", "provenance", "delta_changes", "delta_relationship_changes",
-    "llm_cache",
+    "llm_cache", "embeddings",
 }
 
 
 def test_schema_declares_exactly_expected_tables():
-    # Intent: data-model.md §2 catalog, minus embeddings (deferred to its phase).
+    # Intent: the full data-model.md §2 catalog.
     # A new table appearing here must be a conscious act.
     assert set(Base.metadata.tables) == EXPECTED_TABLES
 

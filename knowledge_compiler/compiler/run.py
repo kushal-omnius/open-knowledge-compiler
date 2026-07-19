@@ -78,19 +78,20 @@ def read_repo_config(repo_dir: Path) -> dict:
 # --- entry points ---------------------------------------------------------------
 
 
-def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None) -> CompileSummary:
+def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
+                 embedder=None) -> CompileSummary:
     with _locked_session(repo_dir) as (session, repo, ctx):
-        ctx.update(no_llm=no_llm, llm_provider=llm_provider)
+        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder)
         return _compile_one(session, repo, ctx, pr=None)
 
 
 def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = None,
-              no_llm: bool = False, llm_provider=None) -> list[CompileSummary]:
+              no_llm: bool = False, llm_provider=None, embedder=None) -> list[CompileSummary]:
     """Process merged PRs after the watermark, in merge order, exactly once
     (pipeline.md §4). Every trigger heals prior gaps; `expect_pr` asserts the
     triggering PR was covered (already-processed => clean no-op)."""
     with _locked_session(repo_dir) as (session, repo, ctx):
-        ctx.update(no_llm=no_llm, llm_provider=llm_provider)
+        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder)
         watermark = session.execute(
             select(func.max(CompileRun.merged_at)).where(
                 CompileRun.repo_id == repo.id, CompileRun.status == "succeeded",
@@ -277,6 +278,23 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
     except Exception as exc:  # noqa: BLE001 — deliberate: emission must not fail the compile
         summary.warnings.append(f"wiki emission failed (compile state is intact): {exc}")
         return summary
+    # Embeddings (ADR-005): same post-persist, never-roll-back contract.
+    emb_cfg = ctx["config"].get("embeddings", {})
+    if emb_cfg.get("enabled", False):
+        try:
+            from knowledge_compiler.llm.embeddings import build_embedder
+            from knowledge_compiler.llm.provider import LLMProviderError
+            from knowledge_compiler.retrieval.embed import emit_embeddings
+
+            try:
+                embedder = ctx.get("embedder") or build_embedder(emb_cfg)
+                _, emb_warnings = emit_embeddings(session, repo.id, embedder, dirty)
+                summary.warnings.extend(emb_warnings)
+            except LLMProviderError as exc:
+                summary.warnings.append(f"embeddings unavailable — FTS-only retrieval: {exc}")
+        except Exception as exc:  # noqa: BLE001 — same contract as emission
+            summary.warnings.append(f"embedding emission failed (compile state intact): {exc}")
+
     try:
         pub_cfg = _publisher_config(ctx["config"])
         if pub_cfg.enabled:

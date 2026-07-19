@@ -32,6 +32,7 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
 | `kc compile --no-llm` | Deterministic pass only; run marked degraded; semantic entities are never removed |
+| `kc serve` | Read-only MCP server (stdio) over the knowledge base — never compiles (`pip install -e .[serve]`) |
 
 ## Configuration
 
@@ -42,6 +43,7 @@ All external configuration lives in env vars and `kc.toml` (written by `kc init`
 - `kc.toml [wiki]` — local publication directory
 - `kc.toml [publisher]` — opt-in loop-safe publishing to a `knowledge/wiki` branch (ADR-010)
 - `kc.toml [llm]` — opt-in semantic layer (ADR-008): business rules, features, risks
+- `kc.toml [embeddings]` — opt-in semantic search vectors (ADR-005); without them `kc serve` search is keyword-only (fully functional)
 
 ## Semantic layer (optional)
 

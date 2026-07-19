@@ -43,6 +43,15 @@ enabled = false
 provider = "anthropic"
 # model = "claude-opus-4-8"   # per-provider default applies when omitted
 max_calls_per_run = 200
+
+[embeddings]
+# Semantic vectors for retrieval (ADR-005). Explicit opt-in; without them,
+# search runs keyword-only (FTS) — fully functional, just not semantic.
+#   provider = "openai"       -> OPENAI_API_KEY
+#   provider = "azure-openai" -> OPENAI_AZURE_* env vars (embedding deployment)
+enabled = false
+provider = "openai"
+# model = "text-embedding-3-small"
 """
 
 

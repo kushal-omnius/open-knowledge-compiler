@@ -188,6 +188,16 @@ def inspect_cmd(repo_dir: str) -> None:
 
 
 @main.command("serve")
-def serve_cmd() -> None:
-    """Read-only MCP server (milestone 2). Never compiles (ADR-002)."""
-    raise click.ClickException("not implemented yet (milestone 2)")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+def serve_cmd(repo_dir: str) -> None:
+    """Read-only MCP server over the compiled knowledge base (stdio). Never
+    compiles (ADR-002) — state updates come from CI-triggered `kc compile`."""
+    from pathlib import Path
+
+    try:
+        from knowledge_compiler.mcp.server import serve
+    except ImportError as exc:
+        raise click.ClickException(
+            "mcp SDK not installed — pip install 'knowledge-compiler[serve]'") from exc
+    serve(Path(repo_dir))

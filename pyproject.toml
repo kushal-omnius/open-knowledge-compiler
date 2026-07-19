@@ -14,6 +14,7 @@ dependencies = [
     "tree-sitter>=0.23",
     "tree-sitter-python>=0.23",
     "tree-sitter-typescript>=0.23",
+    "pgvector>=0.2",
 ]
 
 [project.optional-dependencies]
@@ -25,6 +26,9 @@ llm = [
 ]
 llm-openai = [
     "openai>=1.40",
+]
+serve = [
+    "mcp>=1.0",
 ]
 
 [project.scripts]

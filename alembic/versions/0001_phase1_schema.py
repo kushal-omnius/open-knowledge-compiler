@@ -17,20 +17,12 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Tables come from the single source of truth: storage/schema.py metadata.
+    # Tables come from the single source of truth: storage/schema.py metadata —
+    # including entities.search_vector, an ORM-declared Computed (generated) column.
     Base.metadata.create_all(op.get_bind())
 
-    # Generated FTS column + GIN index (data-model.md §2 entities, §5 keyword search).
-    # Raw SQL: generated tsvector columns have no portable ORM form.
-    op.execute(
-        """
-        ALTER TABLE entities ADD COLUMN search_vector tsvector
-        GENERATED ALWAYS AS (
-            to_tsvector('english', coalesce(name, '') || ' ' || coalesce(payload::text, ''))
-        ) STORED
-        """
-    )
-    op.execute("CREATE INDEX ix_entities_search ON entities USING GIN (search_vector)")
+    # GIN index for keyword search (data-model.md §5)
+    op.execute("CREATE INDEX IF NOT EXISTS ix_entities_search ON entities USING GIN (search_vector)")
 
 
 def downgrade() -> None:

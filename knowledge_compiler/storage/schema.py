@@ -9,11 +9,12 @@ delta tables are raw SQL in the migration — they have no portable ORM form.
 
 from __future__ import annotations
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
-    BigInteger, Boolean, DateTime, ForeignKey, Index, Integer, Text,
+    BigInteger, Boolean, Computed, DateTime, ForeignKey, Index, Integer, Text,
     UniqueConstraint, func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -93,7 +94,13 @@ class EntityRow(Base):
     payload: Mapped[dict] = mapped_column(JSONB)
     content_hash: Mapped[str] = mapped_column(Text)
     anchors: Mapped[list] = mapped_column(JSONB, default=list)  # anchor currency (ir.md §2.2)
-    # search_vector: generated tsvector column added in the migration (raw SQL)
+    # the de-dotted name rendering makes segments of dotted module paths searchable
+    # ('pkg.mod' FTS-tokenizes as one host-token; users search "mod") — dogfood finding
+    search_vector: Mapped[str | None] = mapped_column(
+        TSVECTOR,
+        Computed("to_tsvector('english', coalesce(name, '') || ' ' || "
+                 "replace(coalesce(name, ''), '.', ' ') || ' ' || coalesce(payload::text, ''))",
+                 persisted=True))
     first_compile_run_id: Mapped[int] = mapped_column(ForeignKey("compile_runs.id"))
     last_compile_run_id: Mapped[int] = mapped_column(ForeignKey("compile_runs.id"))
 
@@ -150,6 +157,30 @@ class DeltaChangeRow(Base):
         Index("ix_delta_changes_repo_type", "repo_id", "entity_type", "compile_run_id"),
         Index("ix_delta_changes_slug", "repo_id", "slug"),
     )
+
+
+class EmbeddingRow(Base):
+    """Semantic vectors per entity and model generation (ADR-005).
+
+    `vector` is dimensionless (dimensionality varies per model); `pending`
+    rows (null vector) mark entities awaiting backfill after a provider
+    outage — search degrades to FTS meanwhile. Exact-scan KNN suffices at
+    dogfood scale; an HNSW partial index per generation is an activation-time
+    optimization (data-model.md §5, implementation-level)."""
+
+    __tablename__ = "embeddings"
+
+    entity_id: Mapped[int] = mapped_column(
+        ForeignKey("entities.id", ondelete="CASCADE"), primary_key=True)
+    model_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    repo_id: Mapped[int] = mapped_column(ForeignKey("repositories.id"))
+    vector: Mapped[list | None] = mapped_column(Vector)  # null while pending
+    content_hash: Mapped[str] = mapped_column(Text)      # of the embedded text
+    status: Mapped[str] = mapped_column(Text)            # 'current' | 'pending'
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (Index("ix_embeddings_repo_model", "repo_id", "model_id", "status"),)
 
 
 class LLMCacheRow(Base):
