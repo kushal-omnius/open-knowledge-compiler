@@ -67,7 +67,8 @@ reusable by a future `kc query` CLI:
 | MCP tool | Answers |
 |---|---|
 | `search_knowledge(query, entity_type?, limit?)` | hybrid/FTS search with provenance |
-| `get_entity(slug)` | payload, anchors, relationships, provenance + match evidence |
+| `get_entity(slug)` | payload, anchors, relationships, provenance + match evidence; components also get `cross_repo_dependencies` when an `external_dependencies` entry resolves via `[dependencies]` |
+| `resolve_dependency(coordinate)` | cross-repo lookup (query-time only, `kc.toml` `[dependencies]` map — no compiled edge): does this coordinate name another repo compiled into this database? |
 | `list_entities(entity_type)` | enumeration |
 | `recent_changes(runs?)` | delta log per compile, old→new values |
 | `which_pr_introduced(slug)` | PR/commit attribution from the delta log |
@@ -80,5 +81,5 @@ Claude Code: `claude mcp add kc -- kc serve --dir <repo>`.
 ## 6. Open items
 
 - HNSW index activation policy (needs dogfood-scale data).
-- Cross-repo search UX (post-V1; `repo_id` scoping is already universal).
+- Cross-repo *search* UX (post-V1; `repo_id` scoping is already universal). Cross-repo *dependency resolution* has a first cut — `resolve_dependency`/`get_entity`'s `cross_repo_dependencies`, config-mapped, query-time only (BRAINSTORM-cross-repo-dependencies.md Option B). A compiled rollup edge (Option C in that doc) remains open, gated on the milestone-3 eval-criteria question.
 - Result snippeting/highlighting for keyword hits.

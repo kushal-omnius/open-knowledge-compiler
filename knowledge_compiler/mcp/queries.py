@@ -22,7 +22,36 @@ def resolve_repo(session: Session, slug: str) -> Repository:
     return repo
 
 
-def get_entity(session: Session, repo_id: int, slug: str) -> dict | None:
+def resolve_dependency(session: Session, coordinate: str,
+                       dep_map: dict[str, str]) -> dict | None:
+    """Cross-repo dependency resolution (query-time only, kc.toml `[dependencies]`
+    config map — no compiled edge, no Normalize/schema involvement). Looks up
+    `coordinate` (an external_dependencies string as observed by the analyzer,
+    e.g. `omnius_llmlib.core.predict` for a `from omnius_llmlib.core.predict
+    import ...`) against the map by exact match or dotted-prefix — the same
+    submodule-import pattern normalize.py's internal resolver handles — and if
+    it names another repo compiled into this same database, returns that
+    repo's identity + entity counts."""
+    target_slug = next((slug for key, slug in dep_map.items()
+                       if coordinate == key or coordinate.startswith(key + ".")), None)
+    if target_slug is None:
+        return None
+    repo = session.execute(select(Repository).where(
+        Repository.slug == target_slug)).scalar_one_or_none()
+    if repo is None:
+        return None
+    counts = dict(session.execute(
+        select(EntityRow.entity_type, func.count()).where(EntityRow.repo_id == repo.id)
+        .group_by(EntityRow.entity_type)).all())
+    project = session.execute(select(EntityRow).where(
+        EntityRow.repo_id == repo.id, EntityRow.entity_type == "project")).scalar_one_or_none()
+    return {"coordinate": coordinate, "repo_slug": repo.slug,
+            "project_slug": project.slug if project else None,
+            "entity_counts": counts}
+
+
+def get_entity(session: Session, repo_id: int, slug: str,
+               dep_map: dict[str, str] | None = None) -> dict | None:
     entity = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug == slug)).scalar_one_or_none()
     if entity is None:
@@ -43,7 +72,7 @@ def get_entity(session: Session, repo_id: int, slug: str) -> dict | None:
 
     prov = session.execute(select(ProvenanceRow).where(ProvenanceRow.entity_id == entity.id)
                            .order_by(ProvenanceRow.compile_run_id.desc()).limit(5)).scalars().all()
-    return {
+    result = {
         "slug": entity.slug, "entity_type": entity.entity_type, "name": entity.name,
         "payload": entity.payload, "anchors": entity.anchors or [],
         "relationships": relationships,
@@ -51,6 +80,12 @@ def get_entity(session: Session, repo_id: int, slug: str) -> dict | None:
                         "compile_run": p.compile_run_id,
                         "match_evidence": p.match_evidence} for p in prov],
     }
+    if dep_map and entity.entity_type == "component":
+        cross_repo = [resolved for dep in entity.payload.get("external_dependencies", [])
+                     if (resolved := resolve_dependency(session, dep, dep_map)) is not None]
+        if cross_repo:
+            result["cross_repo_dependencies"] = cross_repo
+    return result
 
 
 def list_entities(session: Session, repo_id: int, entity_type: str,

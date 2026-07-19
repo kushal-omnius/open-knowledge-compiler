@@ -27,6 +27,7 @@ def build_server(repo_dir: Path):
 
     config = read_config(repo_dir)
     repo_slug = config["repository"]["slug"]
+    dep_map = config.get("dependencies", {})
     engine = make_engine()
 
     embedder = None
@@ -68,9 +69,21 @@ def build_server(repo_dir: Path):
     @mcp.tool()
     def get_entity(slug: str) -> dict:
         """Full detail for one entity: payload, source anchors, relationships,
-        and provenance (how the compiler derived it)."""
+        and provenance (how the compiler derived it). For components, also
+        resolves any external_dependencies configured in kc.toml's
+        [dependencies] as links to other repos compiled into this database."""
         with repo_session() as (session, repo_id):
-            return queries.get_entity(session, repo_id, slug) or {"error": f"no entity '{slug}'"}
+            return (queries.get_entity(session, repo_id, slug, dep_map=dep_map)
+                    or {"error": f"no entity '{slug}'"})
+
+    @mcp.tool()
+    def resolve_dependency(coordinate: str) -> dict:
+        """Resolve an external dependency coordinate (e.g. a package/import name
+        from a component's external_dependencies) to another repo compiled into
+        this same database, via kc.toml's [dependencies] config map."""
+        with repo_session() as (session, _repo_id):
+            return (queries.resolve_dependency(session, coordinate, dep_map)
+                    or {"error": f"'{coordinate}' has no configured [dependencies] mapping"})
 
     @mcp.tool()
     def list_entities(entity_type: str, limit: int = 200) -> list[dict]:

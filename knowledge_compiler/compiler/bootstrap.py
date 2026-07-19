@@ -52,6 +52,14 @@ max_calls_per_run = 200
 enabled = false
 provider = "openai"
 # model = "text-embedding-3-small"
+
+[dependencies]
+# Cross-repo dependency resolution (query-time only — kc serve reads this to
+# link an external_dependencies coordinate to another repo compiled into the
+# same database; nothing here is compiled state, no Normalize/schema changes).
+# Keys are the coordinate as observed by the analyzer (e.g. a bare import
+# name); values are that dependency's registered `repository.slug`.
+#   omnius_llmlib = "omnius-llmlib"
 """
 
 
