@@ -29,23 +29,28 @@ _FACT_TYPE = {"business_rules": "business_rule_candidate",
 
 class LLMSemanticExtractor:
     def __init__(self, provider, cache: LLMCache, max_calls: int,
-                 known_symbols: dict[str, list[str]], modules: dict[str, str]) -> None:
+                 known_symbols: dict[str, list[str]], modules: dict[str, str],
+                 skip_files: frozenset[str] = frozenset()) -> None:
         """known_symbols: file -> symbol paths observed by the deterministic pass.
         modules: file -> module path. Both come from analyzer facts — the LLM
-        layer is grounded in the deterministic skeleton, never the reverse."""
+        layer is grounded in the deterministic skeleton, never the reverse.
+        skip_files: excluded from semantic extraction (default: test files —
+        their fixtures read as domain rules; dogfood finding)."""
         self.provider = provider
         self.cache = cache
         self.max_calls = max_calls
         self.known_symbols = known_symbols
         self.modules = modules
+        self.skip_files = skip_files
         self.calls_made = 0
         self.warnings: list[str] = []
 
     def extract(self, artifacts: list[Artifact]) -> list[Fact]:
         facts: list[Fact] = []
         for artifact in sorted(artifacts, key=lambda a: a.source_ref):
-            if artifact.source_ref not in self.modules or artifact.content is None:
-                continue  # not an analyzable source file
+            if (artifact.source_ref not in self.modules or artifact.content is None
+                    or artifact.source_ref in self.skip_files):
+                continue  # not an analyzable source file (or excluded from semantics)
             output = self._complete_cached(artifact)
             if output is None:
                 continue

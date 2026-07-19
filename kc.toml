@@ -13,6 +13,5 @@ output_dir = "kc-wiki"
 # Semantic layer (ADR-008). Credentials come from the environment, never this file:
 # provider = "openai" reads OPENAI_API_KEY.
 enabled = true
-provider = "openai"
-# model = "gpt-4o"   # per-provider default applies when omitted
+provider = "azure-openai"   # deployment/key/endpoint from OPENAI_AZURE_* env vars
 max_calls_per_run = 200

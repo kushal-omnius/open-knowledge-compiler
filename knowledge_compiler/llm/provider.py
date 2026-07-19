@@ -2,7 +2,7 @@
 
 The Anthropic provider is the built-in reference implementation; extractor code
 never imports a vendor SDK (ADR-008 invariant). Credentials resolve from the
-environment via the SDK (ANTHROPIC_API_KEY / auth profile) — never hardcoded.
+environment via the SDK (ANTHROPIC_API_KEY/OPENAI_API_KEY/OPENAI_AZURE_API_KEY / auth profile) — never hardcoded.
 """
 
 from __future__ import annotations
@@ -93,6 +93,45 @@ class OpenAIProvider:
         return json.loads(choice.message.content)
 
 
+class AzureOpenAIProvider(OpenAIProvider):
+    """OpenAI via Azure deployments. Env (never config files):
+    OPENAI_AZURE_ENDPOINT / OPENAI_AZURE_API_KEY / OPENAI_AZURE_DEPLOYMENT
+    (AZURE_OPENAI_* accepted as fallbacks); KC_AZURE_OPENAI_API_VERSION optional.
+    The deployment name plays the model-id role (it also keys the LLM cache)."""
+
+    def __init__(self, model_id: str | None = None) -> None:
+        import os
+
+        try:
+            import openai
+        except ImportError as exc:
+            raise LLMProviderError(
+                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+
+        def env(*names: str) -> str | None:
+            for n in names:
+                if os.environ.get(n):
+                    return os.environ[n]
+            return None
+
+        endpoint = env("OPENAI_AZURE_ENDPOINT", "AZURE_OPENAI_ENDPOINT")
+        api_key = env("OPENAI_AZURE_API_KEY", "AZURE_OPENAI_API_KEY")
+        deployment = model_id or env("OPENAI_AZURE_DEPLOYMENT", "AZURE_OPENAI_DEPLOYMENT")
+        if not (endpoint and api_key and deployment):
+            raise LLMProviderError(
+                "azure-openai needs OPENAI_AZURE_ENDPOINT, OPENAI_AZURE_API_KEY and "
+                "OPENAI_AZURE_DEPLOYMENT in the environment")
+
+        self.model_id = deployment
+        self._openai = openai
+        try:
+            self._client = openai.AzureOpenAI(
+                azure_endpoint=endpoint, api_key=api_key,
+                api_version=os.environ.get("KC_AZURE_OPENAI_API_VERSION", "2024-10-21"))
+        except openai.OpenAIError as exc:
+            raise LLMProviderError(f"azure-openai client init failed: {exc}") from exc
+
+
 def build_provider(llm_config: dict[str, Any]):
     """Provider factory (ADR-007/008): selection is explicit kc.toml configuration.
 
@@ -103,7 +142,10 @@ def build_provider(llm_config: dict[str, Any]):
         return AnthropicProvider(model_id=model or DEFAULT_MODEL)
     if name == "openai":
         return OpenAIProvider(model_id=model or OpenAIProvider.DEFAULT_MODEL)
-    raise LLMProviderError(f"unknown llm provider '{name}' (supported: anthropic, openai)")
+    if name == "azure-openai":
+        return AzureOpenAIProvider(model_id=model)
+    raise LLMProviderError(
+        f"unknown llm provider '{name}' (supported: anthropic, openai, azure-openai)")
 
 
 @dataclass

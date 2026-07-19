@@ -478,9 +478,10 @@ class _Normalizer:
                     resolved = self._resolve_internal(comp_path, set(components))
                     if resolved:
                         self.relationships.add((e.slug, rel, components[resolved]))
-                    else:
-                        self.warnings.append(
-                            f"unresolvable component '{comp_path}' from {e.slug}")
+                    # unresolved paths are external libraries the LLM listed as
+                    # related (sqlalchemy, click, ...) — legitimately related but
+                    # not linkable entities; silently dropped (dogfood finding,
+                    # same class as external coverage targets above)
 
     # -- P6: wiki pages (derived in Normalize — ADR-009 boundary) ------------------------
 

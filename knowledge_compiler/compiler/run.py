@@ -323,10 +323,15 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
         for f in facts:
             if f.fact_type == "symbol_observed":
                 symbols.setdefault(f.payload["file"], []).append(f.payload["symbol_path"])
+        # test files are excluded by default: their fixture code reads as domain
+        # rules to the model (dogfood finding). Evidence-based, language-agnostic
+        # detection: any file that produced a test_case_observed fact.
+        skip = frozenset() if llm_cfg.get("include_tests", False) else frozenset(
+            f.payload["file"] for f in facts if f.fact_type == "test_case_observed")
         extractor = LLMSemanticExtractor(
             provider=provider, cache=LLMCache(session.get_bind()),
             max_calls=llm_cfg.get("max_calls_per_run", 200),
-            known_symbols=symbols, modules=modules)
+            known_symbols=symbols, modules=modules, skip_files=skip)
         facts.extend(extractor.extract(artifacts))
         return True, list(extractor.warnings)
     except LLMBudgetExceeded as exc:
