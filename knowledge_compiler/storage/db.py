@@ -2,7 +2,7 @@
 
 Configuration (CLAUDE.md: externals via env, never hardcoded):
   KC_DATABASE_URL — SQLAlchemy URL. Default matches docker-compose.yml:
-                    postgresql+psycopg://kc:kc@localhost:5432/knowledge
+                    postgresql+psycopg://kc:kc@localhost:5432/kc_wiki
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from typing import Iterator
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session
 
-DEFAULT_DATABASE_URL = "postgresql+psycopg://kc:kc@localhost:5432/knowledge"
+DEFAULT_DATABASE_URL = "postgresql+psycopg://kc:kc@localhost:5432/kc_wiki"
 
 
 def database_url() -> str:
