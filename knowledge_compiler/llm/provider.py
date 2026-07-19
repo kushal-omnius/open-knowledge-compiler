@@ -2,7 +2,8 @@
 
 The Anthropic provider is the built-in reference implementation; extractor code
 never imports a vendor SDK (ADR-008 invariant). Credentials resolve from the
-environment via the SDK (ANTHROPIC_API_KEY/OPENAI_API_KEY/OPENAI_AZURE_API_KEY / auth profile) — never hardcoded.
+environment via the SDK (ANTHROPIC_API_KEY/OPENAI_API_KEY/OPENAI_AZURE_API_KEY/
+CF_ACCOUNT_ID+CF_API_TOKEN / auth profile) — never hardcoded.
 """
 
 from __future__ import annotations
@@ -132,10 +133,72 @@ class AzureOpenAIProvider(OpenAIProvider):
             raise LLMProviderError(f"azure-openai client init failed: {exc}") from exc
 
 
+class CloudflareProvider(OpenAIProvider):
+    """Workers AI via its OpenAI-compatible endpoint. response_format json_schema
+    is not documented as supported there, so the schema is enforced via a
+    forced function/tool call instead — the confirmed-supported mechanism.
+
+    Env (never config files): CF_ACCOUNT_ID, CF_API_TOKEN.
+    Requires `pip install 'knowledge-compiler[llm-openai]'` (same openai SDK,
+    pointed at Cloudflare's base URL)."""
+
+    DEFAULT_MODEL = "@cf/google/gemma-4-26b-a4b-it"
+    _TOOL_NAME = "extraction"
+
+    def __init__(self, model_id: str | None = None) -> None:
+        import os
+
+        try:
+            import openai
+        except ImportError as exc:
+            raise LLMProviderError(
+                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+
+        account_id = os.environ.get("CF_ACCOUNT_ID")
+        api_token = os.environ.get("CF_API_TOKEN")
+        if not (account_id and api_token):
+            raise LLMProviderError(
+                "cloudflare needs CF_ACCOUNT_ID and CF_API_TOKEN in the environment")
+
+        self.model_id = model_id or self.DEFAULT_MODEL
+        self._openai = openai
+        try:
+            self._client = openai.OpenAI(
+                base_url=f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
+                api_key=api_token,
+            )
+        except openai.OpenAIError as exc:
+            raise LLMProviderError(f"cloudflare client init failed: {exc}") from exc
+
+    def complete(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
+        import json
+
+        tool = {"type": "function",
+                "function": {"name": self._TOOL_NAME, "description": "Report the extraction.",
+                             "parameters": schema}}
+        try:
+            response = self._client.chat.completions.create(
+                model=self.model_id,
+                messages=[{"role": "user", "content": prompt}],
+                tools=[tool],
+                tool_choice={"type": "function", "function": {"name": self._TOOL_NAME}},
+            )
+        except self._openai.OpenAIError as exc:
+            raise LLMProviderError(f"cloudflare API error: {exc}") from exc
+        choice = response.choices[0]
+        if choice.finish_reason == "content_filter":
+            raise LLMProviderError("model refused the extraction request")
+        calls = choice.message.tool_calls or []
+        if not calls:
+            raise LLMProviderError(f"no tool call in response (finish: {choice.finish_reason})")
+        return json.loads(calls[0].function.arguments)
+
+
 def build_provider(llm_config: dict[str, Any]):
     """Provider factory (ADR-007/008): selection is explicit kc.toml configuration.
 
-    [llm] provider = "anthropic" (default) | "openai"; model overrides per provider."""
+    [llm] provider = "anthropic" (default) | "openai" | "azure-openai" | "cloudflare";
+    model overrides per provider."""
     name = llm_config.get("provider", "anthropic")
     model = llm_config.get("model")
     if name == "anthropic":
@@ -144,8 +207,10 @@ def build_provider(llm_config: dict[str, Any]):
         return OpenAIProvider(model_id=model or OpenAIProvider.DEFAULT_MODEL)
     if name == "azure-openai":
         return AzureOpenAIProvider(model_id=model)
+    if name == "cloudflare":
+        return CloudflareProvider(model_id=model)
     raise LLMProviderError(
-        f"unknown llm provider '{name}' (supported: anthropic, openai, azure-openai)")
+        f"unknown llm provider '{name}' (supported: anthropic, openai, azure-openai, cloudflare)")
 
 
 @dataclass
