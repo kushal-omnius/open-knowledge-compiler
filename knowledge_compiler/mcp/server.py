@@ -77,6 +77,16 @@ def build_server(repo_dir: Path):
                     or {"error": f"no entity '{slug}'"})
 
     @mcp.tool()
+    def impact_plan(slug: str) -> dict:
+        """Given a changed entity, what would be affected (one-hop, this repo),
+        which affected components have test-coverage gaps, and what it reaches
+        across repos. Not transitive; cross-repo *inbound* impact is out of
+        scope (see queries.impact_plan's docstring)."""
+        with repo_session() as (session, repo_id):
+            return (queries.impact_plan(session, repo_id, slug, dep_map=dep_map)
+                    or {"error": f"no entity '{slug}'"})
+
+    @mcp.tool()
     def resolve_dependency(coordinate: str) -> dict:
         """Resolve an external dependency coordinate (e.g. a package/import name
         from a component's external_dependencies) to another repo compiled into

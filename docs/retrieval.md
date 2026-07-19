@@ -69,6 +69,7 @@ reusable by a future `kc query` CLI:
 | `search_knowledge(query, entity_type?, limit?)` | hybrid/FTS search with provenance |
 | `get_entity(slug)` | payload, anchors, relationships, provenance + match evidence; components also get `cross_repo_dependencies` when an `external_dependencies` entry resolves via `[dependencies]` |
 | `resolve_dependency(coordinate)` | cross-repo lookup (query-time only, `kc.toml` `[dependencies]` map — no compiled edge): does this coordinate name another repo compiled into this database? |
+| `impact_plan(slug)` | composed planning query: one-hop `affected` entities (`depends_on`/`governs`/`implemented_by`/`affects`), which of those have `coverage_gaps`, and outbound `cross_repo_dependencies` — pure composition over `get_entity`/`coverage_for`, no new schema. Cross-repo *inbound* impact is out of scope (per-consumer `[dependencies]` config has no cross-repo registry to search) |
 | `list_entities(entity_type)` | enumeration |
 | `recent_changes(runs?)` | delta log per compile, old→new values |
 | `which_pr_introduced(slug)` | PR/commit attribution from the delta log |

@@ -149,6 +149,61 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
                        "framework": t.payload.get("framework")} for t in tests]}
 
 
+def impact_plan(session: Session, repo_id: int, slug: str,
+                dep_map: dict[str, str] | None = None) -> dict | None:
+    """Composed planning query: given a changed entity, what would be affected
+    (within this repo), which of the affected components have test-coverage
+    gaps, and what this entity reaches across repos. Pure composition over
+    existing queries (get_entity, coverage_for) plus one relationship-graph
+    lookup — no new schema, no new relationship types. This is the
+    "impact/coverage planner" from the post-ADR-011 roadmap
+    (BRAINSTORM-test-generation-eval.md's next steps): step 1 of separating
+    *what needs testing* (deterministic) from *writing the test* (LLM, later).
+
+    "Affected" = one-hop incoming edges of type depends_on/governs/
+    implemented_by/affects — i.e. anything that would need re-examination if
+    `slug` changes: dependents (depends_on), governing business rules
+    (governs), features it implements (implemented_by), risks that name it
+    (affects). Not transitive in this first cut — a multi-hop blast radius is
+    a natural follow-on once this shape is validated against real changes.
+
+    Scope boundary (explicit, not a bug): cross-repo *inbound* impact ("who in
+    another repo depends on this") is not answerable here. ADR-011's
+    [dependencies] map lives in each *consuming* repo's own kc.toml, and
+    `kc serve` only loads the repo it's serving — there is no registry of
+    other repos' dependency maps to search. Only outbound resolution (this
+    entity's own external_dependencies, via get_entity's cross_repo_dependencies)
+    is available today."""
+    entity = get_entity(session, repo_id, slug, dep_map=dep_map)
+    if entity is None:
+        return None
+
+    slug_to_id = dict(session.execute(select(EntityRow.slug, EntityRow.id)
+                                      .where(EntityRow.repo_id == repo_id)).all())
+    id_to_slug = {v: k for k, v in slug_to_id.items()}
+    entity_id = slug_to_id[slug]
+
+    impact_relations = ("depends_on", "governs", "implemented_by", "affects")
+    incoming = session.execute(select(RelationshipRow).where(
+        RelationshipRow.repo_id == repo_id,
+        RelationshipRow.to_entity_id == entity_id,
+        RelationshipRow.relation_type.in_(impact_relations),
+    )).scalars().all()
+    affected = sorted({(r.relation_type, id_to_slug[r.from_entity_id]) for r in incoming})
+
+    coverage_targets = sorted({s for _rel, s in affected if s.startswith("component/")}
+                              | ({slug} if entity["entity_type"] == "component" else set()))
+    coverage = {t: coverage_for(session, repo_id, t) for t in coverage_targets}
+
+    return {
+        "slug": slug, "entity_type": entity["entity_type"],
+        "affected": [{"relation": rel, "slug": s} for rel, s in affected],
+        "coverage_gaps": sorted(t for t, cov in coverage.items() if cov and not cov["covered"]),
+        "coverage_detail": coverage,
+        "cross_repo_dependencies": entity.get("cross_repo_dependencies", []),
+    }
+
+
 def knowledge_stats(session: Session, repo_id: int) -> dict:
     counts = dict(session.execute(
         select(EntityRow.entity_type, func.count()).where(EntityRow.repo_id == repo_id)
