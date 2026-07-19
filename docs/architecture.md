@@ -1,6 +1,6 @@
 # Architecture: Knowledge Compiler
 
-> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR.
+> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR. Post-freeze, new (non-superseding) decisions are still recorded as new ADRs per the process this freeze established — see [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md), added 2026-07-20 during dogfood.
 > Derived from `docs/vision.md` (committed direction) and `INITIAL-Brainstorm.md` (exploratory).
 > This document selects an implementation architecture; it does not re-litigate the vision.
 > Decisions marked **[ADR]** must be recorded in `docs/decisions/` before implementation begins.

@@ -84,6 +84,14 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Depended on by:** — (unblocks the publisher plugin contract, pipeline.md §8)
 - **Related documents:** architecture.md §11, pipeline.md §3.6/§8
 
+### [ADR-011 — Cross-Repo Dependency Resolution](ADR-011-cross-repo-dependency-resolution.md)
+
+- **Status:** Accepted
+- **Summary:** Cross-repo dependency resolution (e.g. frida importing `omnius_llmlib`) is query-time only for V1 — a `kc.toml` `[dependencies]` config map resolved in `kc serve`, matched exact-or-dotted-prefix. No Normalize/Persist/schema changes, no cross-`repo_id` reads during compile. The richer compiled `Project`-to-`Project` rollup edge (or full fine-grained cross-repo entity resolution) is explicitly deferred, not rejected, pending the milestone-3 evaluation-methodology question.
+- **Dependencies:** ADR-001 (`repo_id` isolation invariant), ADR-004 (over-split-over-merge bias, extended to cross-repo linking)
+- **Depended on by:** —
+- **Related documents:** `BRAINSTORM-cross-repo-dependencies.md`, retrieval.md §5
+
 ## Dependency graph
 
 Arrows point from an ADR to what it depends on. ADR-001 and ADR-007 are the two foundations; no cycles.
@@ -111,9 +119,11 @@ graph TD
     ADR009 --> ADR008
     ADR010["ADR-010 Wiki Destination"] --> ADR002
     ADR010 --> ADR003
+    ADR011["ADR-011 Cross-Repo Dependency Resolution"] --> ADR001
+    ADR011 --> ADR004
 ```
 
-All ten ADRs are Accepted (as of 2026-07-18) and immutable per the process in [README.md](README.md) — changes require a superseding ADR.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood (not a change to a frozen one — see the freeze-discipline note below). All are immutable per the process in [README.md](README.md) — changes require a superseding ADR.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 
@@ -140,7 +150,7 @@ Decisions *not* made by this ADR set, listed with the document whose design shou
 | ~~Wiki publishing destination~~ | resolved by [ADR-010](ADR-010-wiki-destination.md) (Proposed) |
 | Identity-matching thresholds | configuration + dogfood tuning (per ADR-004, explicitly not ADR material) |
 | Test-generation evaluation methodology | pre-milestone-3 design doc |
-| Cross-repo dependency resolution: analyzers emit external dependency *coordinates* (ecosystem + name); Normalize resolves coordinates → repository via per-ecosystem resolver plugins + config override. Entity-level edges (Component/API) are primary; `Repository depends_on Repository` is a derived rollup, never the model | pre-milestone-3 design (needed for cross-repo test generation) |
+| ~~Cross-repo dependency resolution~~ | V1 reference behavior resolved by [ADR-011](ADR-011-cross-repo-dependency-resolution.md) (query-time config map); the compiled coordinate+resolver+rollup-edge design sketched here remains an explicitly deferred option in that ADR, not yet decided |
 | Dependency **version constraints** as an additive `dependency_observed` payload field (from lockfiles/manifests — deterministic facts). Non-breaking per ir.md §5 | pre-milestone-3; may land earlier since collection is trivial |
 | **Releases as named checkpoints**: a `releases` label table (version → git tag → commit → compile run) over the existing delta log. Version-skew queries ("what changed in B between A's pinned v2.3 and v2.5?") = delta-window queries between checkpoints ∩ dependency edges — **no entity snapshots**. Possible additive Release entity for wiki/release-notes pages | pre-milestone-3 design |
 | **Rejected (recorded to prevent re-litigation):** per-release entity snapshots / version-attached relationships (`PaymentClient@v2.3`) — this is ADR-003's rejected Option A at release granularity; the delta log + checkpoints serve the use case without the permanent temporal-key tax. Reopening requires superseding ADR-003 with evidence the delta-window mechanism failed | — |
