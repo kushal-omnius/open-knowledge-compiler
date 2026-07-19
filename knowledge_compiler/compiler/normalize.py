@@ -269,6 +269,16 @@ class _Normalizer:
             prefix = ".".join(parts[:i])
             if prefix in internal:
                 return prefix
+
+        # Import-root mismatch fallback (dogfood finding): the project's real Python
+        # import root can be a subdirectory (e.g. `backend/` on PYTHONPATH) rather
+        # than the repo root used to name components, so a bare import like `db`
+        # shares no prefix with its component `backend.db`. Resolve via dotted-suffix
+        # match instead; only when exactly one internal component qualifies, so
+        # ambiguous names stay unresolved (ADR-004's over-split-over-merge bias).
+        candidates = [c for c in internal if c == dep or c.endswith("." + dep)]
+        if len(candidates) == 1:
+            return candidates[0]
         return None
 
     def _apis(self) -> None:

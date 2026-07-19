@@ -7,11 +7,14 @@ is untouched by this file's existence.
 Module convention: file paths map to dotted module ids (src/billing/rules.ts ->
 src.billing.rules); index.ts plays __init__.py's role (directory module, kind
 "package"). Relative import specifiers are internal; bare specifiers are external
-dependency coordinates.
+dependency coordinates — except when they match a tsconfig.json path alias
+(e.g. "@/*" -> "./src/*"), a widely-used convention for internal imports that
+would otherwise be misclassified as external (dogfood finding).
 """
 
 from __future__ import annotations
 
+import json
 import posixpath
 import re
 from importlib.metadata import version as pkg_version
@@ -53,32 +56,111 @@ def _is_test_file(source_ref: str) -> bool:
     return ".test." in name or ".spec." in name
 
 
-def _resolve_import(spec: str, importer_ref: str) -> tuple[str, bool]:
-    """Returns (target, is_internal). Relative specifiers resolve against the
-    importing file's directory; bare specifiers are external coordinates."""
-    if not spec.startswith("."):
-        return spec, False
+# Strips // and /* */ comments from tsconfig.json (which is JSONC, not strict JSON)
+# without touching string contents. Matches a full string OR a comment; comments
+# (group 1) are dropped, strings pass through verbatim via group(0).
+_JSONC_COMMENT = re.compile(r'"(?:\\.|[^"\\])*"|(/\*.*?\*/|//[^\n]*)', re.DOTALL)
+_TRAILING_COMMA = re.compile(r",(\s*[}\]])")
+
+
+def _strip_jsonc(text: str) -> str:
+    text = _JSONC_COMMENT.sub(lambda m: "" if m.group(1) else m.group(0), text)
+    return _TRAILING_COMMA.sub(r"\1", text)
+
+
+# (config_dir, base_url, paths) — config_dir is "" for a repo-root tsconfig.json.
+TsconfigAliases = tuple[str, str, dict[str, list[str]]]
+
+
+def _find_tsconfig_aliases(artifacts: list) -> list[TsconfigAliases]:
+    """Locate tsconfig*.json files and extract their path-alias config
+    (compilerOptions.baseUrl + .paths). Sorted by config_dir depth descending so
+    the nearest enclosing tsconfig wins in a monorepo layout."""
+    configs: list[TsconfigAliases] = []
+    for artifact in artifacts:
+        name = posixpath.basename(artifact.source_ref)
+        if artifact.content is None or not (
+            name == "tsconfig.json" or (name.startswith("tsconfig.") and name.endswith(".json"))
+        ):
+            continue
+        try:
+            data = json.loads(_strip_jsonc(artifact.content))
+        except ValueError:
+            continue
+        paths = (data.get("compilerOptions") or {}).get("paths")
+        if not paths:
+            continue
+        base_url = (data.get("compilerOptions") or {}).get("baseUrl", ".")
+        configs.append((posixpath.dirname(artifact.source_ref), base_url, paths))
+    configs.sort(key=lambda c: len(c[0]), reverse=True)
+    return configs
+
+
+def _applicable_aliases(importer_ref: str, configs: list[TsconfigAliases]) -> TsconfigAliases | None:
     directory = posixpath.dirname(importer_ref)
-    resolved = posixpath.normpath(posixpath.join(directory, spec))
-    base, ext = posixpath.splitext(resolved)
-    if ext in (".ts", ".tsx", ".js", ".jsx"):
-        resolved = base
-    return ".".join(p for p in resolved.split("/") if p and p != "."), True
+    for config_dir, base_url, paths in configs:
+        if config_dir == "" or directory == config_dir or directory.startswith(config_dir + "/"):
+            return config_dir, base_url, paths
+    return None
+
+
+def _match_alias(spec: str, paths: dict[str, list[str]]) -> str | None:
+    """tsconfig `paths` pattern match: "@/*" -> ["./src/*"], or an exact (no "*") pair."""
+    for pattern, targets in paths.items():
+        if not targets:
+            continue
+        target = targets[0]
+        if pattern.endswith("/*"):
+            prefix = pattern[:-2]
+            if spec == prefix or spec.startswith(prefix + "/"):
+                rest = spec[len(prefix):].lstrip("/")
+                return target[:-2] + (("/" + rest) if rest else "") if target.endswith("/*") else target
+        elif spec == pattern:
+            return target
+    return None
+
+
+def _resolve_import(spec: str, importer_ref: str, configs: list[TsconfigAliases]) -> tuple[str, bool]:
+    """Returns (target, is_internal). Relative specifiers resolve against the
+    importing file's directory. Bare specifiers are checked against the nearest
+    tsconfig.json's path aliases before falling back to an external coordinate."""
+    if spec.startswith("."):
+        directory = posixpath.dirname(importer_ref)
+        resolved = posixpath.normpath(posixpath.join(directory, spec))
+        base, ext = posixpath.splitext(resolved)
+        if ext in (".ts", ".tsx", ".js", ".jsx"):
+            resolved = base
+        return ".".join(p for p in resolved.split("/") if p and p != "."), True
+
+    aliases = _applicable_aliases(importer_ref, configs)
+    if aliases is not None:
+        config_dir, base_url, paths = aliases
+        aliased = _match_alias(spec, paths)
+        if aliased is not None:
+            resolved = posixpath.normpath(posixpath.join(config_dir, base_url, aliased))
+            base, ext = posixpath.splitext(resolved)
+            if ext in (".ts", ".tsx", ".js", ".jsx"):
+                resolved = base
+            return ".".join(p for p in resolved.split("/") if p and p != "."), True
+
+    return spec, False
 
 
 class TypeScriptAnalyzer:
     """LanguageAnalyzer plugin (built-in). Facts only — never entities (ADR-009)."""
 
     def analyze(self, artifacts: list[Artifact]) -> list[Fact]:
+        configs = _find_tsconfig_aliases(artifacts)
         facts: list[Fact] = []
         for artifact in artifacts:
             ext = posixpath.splitext(artifact.source_ref)[1]
             if ext not in _PARSERS or artifact.content is None:
                 continue
-            facts.extend(self._analyze_file(artifact, _PARSERS[ext]))
+            facts.extend(self._analyze_file(artifact, _PARSERS[ext], configs))
         return facts
 
-    def _analyze_file(self, artifact: Artifact, parser: Parser) -> list[Fact]:
+    def _analyze_file(self, artifact: Artifact, parser: Parser,
+                       configs: list[TsconfigAliases]) -> list[Fact]:
         ref = artifact.source_ref
         module = _module_path(ref)
         tree = parser.parse(artifact.content.encode("utf-8"))
@@ -98,7 +180,7 @@ class TypeScriptAnalyzer:
         self._walk(tree.root_node, artifact, module, fact, imports, scope=(), is_test=is_test)
 
         for spec in sorted(set(imports)):
-            target, _internal = _resolve_import(spec, ref)
+            target, _internal = _resolve_import(spec, ref, configs)
             fact("dependency_observed", {"from_path": module, "to_path": target})
             if is_test:
                 fact("test_target_observed", {"test_module": module, "target_path": target,
