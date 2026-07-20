@@ -1,0 +1,59 @@
+name: Mutation Testing (manual)
+
+# Exploratory / spike tooling, not a merge gate: mutation testing is slow
+# relative to a normal test run, so this stays workflow_dispatch-only until
+# a mutation-score threshold and cadence are actually decided (see
+# BRAINSTORM-test-generation-eval.md, which this workflow exists to
+# validate for the milestone-3 test-generation eval methodology). Runs on
+# ubuntu-latest specifically because mutmut 3.x has no native Windows
+# support (mutmut#397) — this sidesteps needing WSL on a local dev machine.
+
+on:
+  workflow_dispatch:
+    inputs:
+      paths_to_mutate:
+        description: 'File or directory to mutate (relative to repo root)'
+        required: true
+        default: 'knowledge_compiler/compiler/normalize.py'
+        type: string
+      test_path:
+        description: 'Test file/dir to run as the kill check (relative to repo root)'
+        required: true
+        default: 'tests/test_normalize.py'
+        type: string
+
+jobs:
+  mutmut:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev] mutmut
+
+      - name: Run mutmut
+        run: |
+          mutmut run \
+            --paths-to-mutate "${{ inputs.paths_to_mutate }}" \
+            --runner "python -m pytest ${{ inputs.test_path }} -x -q" \
+            --simple-output --no-progress --CI || true
+
+      - name: Print results summary
+        run: mutmut results
+
+      - name: Generate HTML report of survivors
+        run: mutmut html || true
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutmut-report
+          path: html/
+          if-no-files-found: ignore
