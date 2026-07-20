@@ -38,22 +38,35 @@ jobs:
         run: |
           pip install -e .[dev] mutmut
 
-      - name: Run mutmut
+      # mutmut 3.x dropped --paths-to-mutate/--runner/--CI entirely; the only
+      # way to configure a run is [tool.mutmut] in pyproject.toml (source_paths,
+      # pytest_add_cli_args_test_selection) -- confirmed by reading mutmut's
+      # own configuration.py/__main__.py source, since the CLI --help and the
+      # published docs disagree with each other across 2.x/3.x. Appended here
+      # rather than committed since the target is workflow_dispatch-configurable.
+      - name: Configure mutmut
         run: |
-          mutmut run \
-            --paths-to-mutate "${{ inputs.paths_to_mutate }}" \
-            --runner "python -m pytest ${{ inputs.test_path }} -x -q" \
-            --simple-output --no-progress --CI || true
+          cat >> pyproject.toml <<EOF
+
+          [tool.mutmut]
+          source_paths = ["${{ inputs.paths_to_mutate }}"]
+          pytest_add_cli_args_test_selection = ["${{ inputs.test_path }}"]
+          EOF
+
+      - name: Run mutmut
+        run: mutmut run || true
 
       - name: Print results summary
-        run: mutmut results
+        run: mutmut results | tee mutmut-results.txt
 
-      - name: Generate HTML report of survivors
-        run: mutmut html || true
+      - name: Export CI/CD stats (killed/survived/total counts)
+        run: mutmut export-cicd-stats || true
 
       - name: Upload mutation report
         uses: actions/upload-artifact@v4
         with:
           name: mutmut-report
-          path: html/
-          if-no-files-found: ignore
+          path: |
+            mutmut-results.txt
+            mutants/mutmut-cicd-stats.json
+          if-no-files-found: warn
