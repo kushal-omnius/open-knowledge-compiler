@@ -128,10 +128,41 @@ Weighted by the stated priorities: safety-net + coverage-gap (both ranked highes
 
 **Steelman of the runner-up (Option E):** A reasonable person optimizing purely for rigor would pick historical-bug-replay — it's the only option that measures "would this have caught a real bug" directly, rather than a proxy (mutants, declared coverage). If Option C's mutation-kill signal turns out to correlate poorly with real bug-catching (discoverable only after C has been running a while), E becomes the natural escalation — not a replacement for C's traceability half, but an additional, more expensive validation layer once the cheaper option's limits are known.
 
+## Declared-coverage header format (resolves next-step #2, decided 2026-07-20)
+
+A generated test file carries a **module-level docstring** with a `kc-covers:` block naming the exact compiled entity slugs it claims to verify — directly extending `test_claims.py`'s real "Endpoints covered:" convention (`BRAINSTORM-test-generation-eval.md`'s own grounding), made machine-parseable instead of free prose:
+
+```python
+"""
+<optional human-readable description of what this test file covers>
+
+kc-covers:
+  - api/post-claims
+  - api/get-claims
+  - component/backend-claims-routes
+"""
+```
+
+**Placement — module-level, not per-function.** Two reasons, not one: it matches the real convention already found in `test_claims.py` (declared once per file), and it matches `test_plan`'s own output granularity — recommendations are per gap-*component*, a list of targets, not per individual test assertion. Per-function declaration is a natural finer-grained extension once this coarser version is validated in practice; it is not a prerequisite for shipping the check.
+
+**Parsing — deterministic, no LLM involved in checking** (only in generating): extract the module docstring via `ast.get_docstring()`, locate the `kc-covers:` line, then every following line matching `^\s*-\s*(\S+)\s*$` until a blank line or the docstring's end. Each captured group is one claimed slug. This keeps the *checking* side consistent with ADR-006's deterministic-first spirit even though the artifact being checked (the test) was LLM-written.
+
+**Scoring — three checks, composable into the eval methodology's declared-coverage axis:**
+1. **Existence** — every claimed slug must resolve to a real compiled entity (`get_entity` returns non-null). A claimed slug that doesn't exist is an automatic failure for that test — structurally dishonest, not just imprecise.
+2. **Relevance** — cross-reference claimed slugs against what `test_plan` actually recommended for the gap this test was generated to close. Precision = (claimed slugs that were in `test_plan`'s recommended targets) / (total claimed). Recall = (`test_plan`'s recommended targets that got claimed) / (total recommended).
+3. **No header at all = automatic 0%**, not a skip. A generated test without a `kc-covers:` block doesn't get excused from this scoring axis — it fails it, keeping the metric honest rather than letting silence read as "not applicable."
+
+## Mutation-score threshold decision (resolves next-step #4, decided 2026-07-20)
+
+**Decision: track scores as a reported metric, no hard gate, for now.** 64.4% on `normalize.py` is exactly one data point — not enough to know whether 64% is good, bad, or typical for this codebase's actual testing style. Setting a hard threshold on one data point risks two real failure modes: too strict (blocking legitimate work on modules that simply have less test infrastructure built up yet) or too lax (manufacturing false confidence from a number nobody calibrated). Standard practice for introducing a new quality metric is measure-first, gate-later — the same instinct that made the M3 brainstorm itself insist on running a spike before committing to Option C's mechanism.
+
+**Revisit condition:** once mutation scores exist for several more modules across both dogfood repos, review the actual distribution and set a threshold informed by real data — likely per-repo or per-language rather than one global number, since frida (product code, real business logic) and omnius_llmlib (an LLM-tooling library) plausibly have different natural ceilings that a single global gate would flatten incorrectly.
+
 ## Next steps
 
 1. ~~Run the mutation-testing spike~~ **Done 2026-07-20** — 64.4% baseline on `normalize.py`, tool practical, see above.
-2. Define the declared-coverage header format precisely (what a generated test's docstring must cite, and how it's parsed against compiled `api`/`component`/`business_rule` slugs).
-3. Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once Option C's declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).
-4. Now that a real baseline exists, decide whether 64.4% (or per-module scores like it) becomes a tracked number without a hard gate yet, or whether a minimum-score threshold should be set before milestone 3 work is considered "passing" — the brainstorm didn't settle this, and it's cheaper to decide now with a real number in hand than in the abstract.
-5. Begin the actual milestone-3 test-generation mechanism design, now with a defined success metric to build toward.
+2. ~~Define the declared-coverage header format~~ **Done 2026-07-20** — see above.
+3. ~~Decide the mutation-score threshold question~~ **Done 2026-07-20** — track-only for now, see above.
+4. Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once the declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).
+5. Run mutation testing against a few more modules (both dogfood repos) to build the real distribution the threshold decision above is waiting on.
+6. Begin the actual milestone-3 test-generation mechanism design, now with a defined success metric (declared-coverage + mutation-kill) to build toward.

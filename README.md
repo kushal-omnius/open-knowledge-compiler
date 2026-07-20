@@ -87,7 +87,7 @@ kc compile --full                 # embeds dirty entities as a post-persist stag
 kc serve --dir .                  # read-only MCP server, stdio transport
 ```
 
-Without `[embeddings]`, `kc serve` still works — search runs keyword-only (Postgres FTS) and is fully functional; enabling embeddings adds semantic matching, fused with keyword results via reciprocal-rank fusion. `kc serve` **never compiles** — it only reads whatever the last `kc compile` produced. See [docs/retrieval.md](docs/retrieval.md) for the retrieval design and the full MCP tool list (`search_knowledge`, `get_entity`, `recent_changes`, `which_pr_introduced`, `coverage_for`, …).
+Without `[embeddings]`, `kc serve` still works — search runs keyword-only (Postgres FTS) and is fully functional; enabling embeddings adds semantic matching, fused with keyword results via reciprocal-rank fusion. `kc serve` **never compiles** — it only reads whatever the last `kc compile` produced. See [docs/retrieval.md](docs/retrieval.md) for the retrieval design and the full MCP tool list (`search_knowledge`, `get_entity`, `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats`, `resolve_dependency`, `impact_plan`, `test_plan`, …).
 
 Register with Claude Code: `claude mcp add kc -- kc serve --dir <repo>`.
 
