@@ -83,21 +83,26 @@ def read_repo_config(repo_dir: Path) -> dict:
 
 
 def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
-                 embedder=None) -> CompileSummary:
+                 embedder=None, progress=None) -> CompileSummary:
+    """progress: optional callable(stage: str, i: int, n: int, detail: str), called
+    during the long-running LLM extraction and embeddings stages so a caller can
+    report progress instead of waiting silently for the final summary."""
     with _locked_session(repo_dir) as (session, repo, ctx):
-        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder)
+        ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder,
+                   progress=progress)
         return _compile_one(session, repo, ctx, pr=None)
 
 
 def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = None,
               no_llm: bool = False, llm_provider=None, embedder=None,
-              jira_gateway=None) -> list[CompileSummary]:
+              jira_gateway=None, progress=None) -> list[CompileSummary]:
     """Process merged PRs after the watermark, in merge order, exactly once
     (pipeline.md §4). Every trigger heals prior gaps; `expect_pr` asserts the
-    triggering PR was covered (already-processed => clean no-op)."""
+    triggering PR was covered (already-processed => clean no-op).
+    progress: see compile_full."""
     with _locked_session(repo_dir) as (session, repo, ctx):
         ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder,
-                   jira_gateway=jira_gateway)
+                   jira_gateway=jira_gateway, progress=progress)
         watermark = session.execute(
             select(func.max(CompileRun.merged_at)).where(
                 CompileRun.repo_id == repo.id, CompileRun.status == "succeeded",
@@ -297,7 +302,10 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
 
             try:
                 embedder = ctx.get("embedder") or build_embedder(emb_cfg)
-                _, emb_warnings = emit_embeddings(session, repo.id, embedder, dirty)
+                progress = ctx.get("progress")
+                on_progress = (lambda i, n, ref: progress("embed", i, n, ref)) if progress else None
+                _, emb_warnings = emit_embeddings(session, repo.id, embedder, dirty,
+                                                  on_progress=on_progress)
                 summary.warnings.extend(emb_warnings)
             except LLMProviderError as exc:
                 summary.warnings.append(f"embeddings unavailable — FTS-only retrieval: {exc}")
@@ -355,10 +363,13 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
         # detection: any file that produced a test_case_observed fact.
         skip = frozenset() if llm_cfg.get("include_tests", False) else frozenset(
             f.payload["file"] for f in facts if f.fact_type == "test_case_observed")
+        progress = ctx.get("progress")
+        on_progress = (lambda i, n, ref: progress("llm", i, n, ref)) if progress else None
         extractor = LLMSemanticExtractor(
             provider=provider, cache=LLMCache(session.get_bind()),
             max_calls=llm_cfg.get("max_calls_per_run", 200),
-            known_symbols=symbols, modules=modules, skip_files=skip)
+            known_symbols=symbols, modules=modules, skip_files=skip,
+            on_progress=on_progress)
         facts.extend(extractor.extract(artifacts))
         return True, list(extractor.warnings)
     except LLMBudgetExceeded as exc:

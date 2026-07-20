@@ -8,6 +8,8 @@ invent an anchor (ADR-004 evidence discipline).
 
 from __future__ import annotations
 
+from typing import Callable
+
 from pydantic import ValidationError
 
 from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
@@ -30,31 +32,37 @@ _FACT_TYPE = {"business_rules": "business_rule_candidate",
 class LLMSemanticExtractor:
     def __init__(self, provider, cache: LLMCache, max_calls: int,
                  known_symbols: dict[str, list[str]], modules: dict[str, str],
-                 skip_files: frozenset[str] = frozenset()) -> None:
+                 skip_files: frozenset[str] = frozenset(),
+                 on_progress: Callable[[int, int, str], None] | None = None) -> None:
         """known_symbols: file -> symbol paths observed by the deterministic pass.
         modules: file -> module path. Both come from analyzer facts — the LLM
         layer is grounded in the deterministic skeleton, never the reverse.
         skip_files: excluded from semantic extraction (default: test files —
-        their fixtures read as domain rules; dogfood finding)."""
+        their fixtures read as domain rules; dogfood finding).
+        on_progress: called (index, total, source_ref) after each eligible file
+        completes (cache hit or real call) — this stage is the dominant latency
+        in a compile and was previously silent until the whole run finished."""
         self.provider = provider
         self.cache = cache
         self.max_calls = max_calls
         self.known_symbols = known_symbols
         self.modules = modules
         self.skip_files = skip_files
+        self.on_progress = on_progress
         self.calls_made = 0
         self.warnings: list[str] = []
 
     def extract(self, artifacts: list[Artifact]) -> list[Fact]:
+        eligible = [a for a in sorted(artifacts, key=lambda a: a.source_ref)
+                   if a.source_ref in self.modules and a.content is not None
+                   and a.source_ref not in self.skip_files]
         facts: list[Fact] = []
-        for artifact in sorted(artifacts, key=lambda a: a.source_ref):
-            if (artifact.source_ref not in self.modules or artifact.content is None
-                    or artifact.source_ref in self.skip_files):
-                continue  # not an analyzable source file (or excluded from semantics)
+        for i, artifact in enumerate(eligible, start=1):
             output = self._complete_cached(artifact)
-            if output is None:
-                continue
-            facts.extend(self._to_facts(artifact, output))
+            if output is not None:
+                facts.extend(self._to_facts(artifact, output))
+            if self.on_progress:
+                self.on_progress(i, len(eligible), artifact.source_ref)
         return facts
 
     # -- provider + cache ---------------------------------------------------------

@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+import sys
+
 import click
 
 from knowledge_compiler import __version__
+
+
+def _progress(stage: str, i: int, n: int, detail: str) -> None:
+    """Streamed to stderr (so it never mixes with stdout's final summary/scripting
+    output) with an explicit flush — LLM extraction and embeddings are the two
+    long-running, network-bound stages that were previously silent until the
+    whole compile finished."""
+    click.echo(f"  [{stage}] {i}/{n} {detail}", err=True)
+    sys.stderr.flush()
 
 
 @click.group()
@@ -47,10 +58,10 @@ def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool) -> None
 
     try:
         if full:
-            _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm))
+            _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm, progress=_progress))
         else:
             summaries = compile_pr(Path(repo_dir), _gateway(Path(repo_dir)), expect_pr=pr,
-                                   no_llm=no_llm)
+                                   no_llm=no_llm, progress=_progress)
             if not summaries:
                 click.echo(f"PR #{pr} already compiled — nothing to do (idempotent)")
             for s in summaries:
@@ -69,7 +80,7 @@ def reconcile_cmd(repo_dir: str) -> None:
     from knowledge_compiler.compiler.run import CompileError, reconcile
 
     try:
-        summaries = reconcile(Path(repo_dir), _gateway(Path(repo_dir)))
+        summaries = reconcile(Path(repo_dir), _gateway(Path(repo_dir)), progress=_progress)
     except CompileError as exc:
         raise click.ClickException(str(exc)) from exc
     if not summaries:

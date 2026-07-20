@@ -7,6 +7,8 @@ failure marks the affected rows `pending` and degrades: search falls back to FTS
 
 from __future__ import annotations
 
+from typing import Callable
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,9 +20,11 @@ from knowledge_compiler.storage.schema import EmbeddingRow, EntityRow
 _BATCH = 64
 
 
-def emit_embeddings(session: Session, repo_id: int, embedder,
-                    dirty_slugs: set[str]) -> tuple[int, list[str]]:
-    """Returns (embedded_count, warnings). Commits via the caller's session."""
+def emit_embeddings(session: Session, repo_id: int, embedder, dirty_slugs: set[str],
+                    on_progress: Callable[[int, int, str], None] | None = None,
+                    ) -> tuple[int, list[str]]:
+    """Returns (embedded_count, warnings). Commits via the caller's session.
+    on_progress: called (entities_done, total, "embeddings") after each batch."""
     rows = {r.entity_id: r for r in session.execute(
         select(EmbeddingRow).where(EmbeddingRow.repo_id == repo_id,
                                    EmbeddingRow.model_id == embedder.model_id)).scalars()}
@@ -54,6 +58,8 @@ def emit_embeddings(session: Session, repo_id: int, embedder,
             _upsert(session, rows, repo_id, embedder.model_id, entity, text_hash,
                     vector=vector, status="current")
             embedded += 1
+        if on_progress:
+            on_progress(min(start + _BATCH, len(todo)), len(todo), "embeddings")
     session.commit()
     return embedded, []
 
