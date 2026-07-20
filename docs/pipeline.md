@@ -32,7 +32,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 
 - **Reads:** the repository at the compiled commit; forge/Jira APIs. Scope per run mode (§5).
 - **Produces:** `artifacts` rows (typed, content-hashed).
-- **Owns:** PR↔commit↔Jira linkage via **forge API association, never commit parentage** — squash/rebase merges rewrite history, so the PR's file diff and metadata come from the forge, making merge strategy irrelevant to scope (resolves the ADR-002 open item).
+- **Owns:** PR↔commit linkage via **forge API association, never commit parentage** — squash/rebase merges rewrite history, so the PR's file diff and metadata come from the forge, making merge strategy irrelevant to scope (resolves the ADR-002 open item). PR↔Jira linkage is **issue-key extraction from the PR title/body** (regex, e.g. `DCA-1234`) *(additive clarification)* — not a forge-API-reported link — since neither GitHub's REST PR payload nor a generic forge API reliably exposes structured issue links; the Jira collector then fetches exactly those keys (`collectors/jira.py`).
 - **Failure:** a collector that cannot reach its source fails the compile loudly (ADR-007 — never silently compile with a subset of configured collectors).
 
 ### 3.2 Extract

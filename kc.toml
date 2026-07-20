@@ -1,17 +1,50 @@
 # Knowledge Compiler repository configuration (ADR-007: activation is explicit).
 [repository]
 slug = "knowledge-compiler"
-forge_ref = "github.com/omnius/knowledge-compiler"
+forge_ref = "github.com/kushal-omnius/knowledge-compiler"
 default_branch = "main"
 
 # Plugin activation lands with the first built-in plugins (phase 1).
 
 [wiki]
+# Local publication directory; the branch publisher ships it when enabled (ADR-010).
 output_dir = "kc-wiki"
 
+[publisher]
+# Ship the wiki to a dedicated branch (ADR-010: knowledge/wiki). Explicit opt-in.
+enabled = false
+branch = "knowledge/wiki"
+remote = "origin"
+push = true
+
 [llm]
-# Semantic layer (ADR-008). Credentials come from the environment, never this file:
-# provider = "openai" reads OPENAI_API_KEY.
+# Semantic layer (ADR-008). Explicit opt-in. The deterministic compiler is fully
+# functional without it. Credentials come from the environment, never this file:
+#   provider = "anthropic" -> ANTHROPIC_API_KEY, pip install knowledge-compiler[llm]
+#   provider = "openai"    -> OPENAI_API_KEY,    pip install knowledge-compiler[llm-openai]
 enabled = true
 provider = "azure-openai"   # deployment/key/endpoint from OPENAI_AZURE_* env vars
 max_calls_per_run = 200
+
+[embeddings]
+# Semantic vectors for retrieval (ADR-005). Explicit opt-in; without them,
+# search runs keyword-only (FTS) — fully functional, just not semantic.
+#   provider = "openai"       -> OPENAI_API_KEY
+#   provider = "azure-openai" -> OPENAI_AZURE_* env vars (embedding deployment)
+enabled = true
+provider = "azure-openai"
+
+[dependencies]
+# Cross-repo dependency resolution (query-time only — kc serve reads this to
+# link an external_dependencies coordinate to another repo compiled into the
+# same database; nothing here is compiled state, no Normalize/schema changes).
+# Keys are the coordinate as observed by the analyzer (e.g. a bare import
+# name); values are that dependency's registered `repository.slug`.
+#   omnius_llmlib = "omnius-llmlib"
+
+[jira]
+# Collector (Collect stage): fetches issues linked from a merged PR's
+# title/body (issue-key pattern, e.g. DCA-1234). Explicit opt-in — disabled
+# compiles produce no jira_story entities. Credentials from the environment,
+# never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.
+enabled = false
