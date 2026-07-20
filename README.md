@@ -60,6 +60,9 @@ pip install -e .[llm-openai]      # or .[llm] for Anthropic
 # credentials come from the environment, never from config files:
 #   OPENAI_API_KEY (openai) / ANTHROPIC_API_KEY (anthropic)
 #   OPENAI_AZURE_ENDPOINT / OPENAI_AZURE_API_KEY / OPENAI_AZURE_DEPLOYMENT (azure-openai)
+#   OPENAI_AZURE_DEPLOYMENT names a chat/completion deployment (e.g. gpt-4o-mini) —
+#   a *separate* deployment from embeddings (see below); see llm-usage.md for why
+#   Azure OpenAI needs two distinct deployments even on one resource/endpoint.
 kc compile --full
 ```
 
@@ -76,6 +79,10 @@ provider = "openai"        # "openai" | "azure-openai"
 
 ```bash
 pip install -e .[serve]           # mcp SDK for `kc serve`
+# azure-openai credentials: OPENAI_AZURE_ENDPOINT / OPENAI_AZURE_API_KEY (shared with [llm]) +
+#   OPENAI_AZURE_EMBEDDING_DEPLOYMENT — a dedicated embedding-model deployment
+#   (e.g. text-embedding-3-small), distinct from [llm]'s OPENAI_AZURE_DEPLOYMENT
+#   chat deployment. See llm-usage.md for the full two-deployment rationale.
 kc compile --full                 # embeds dirty entities as a post-persist stage
 kc serve --dir .                  # read-only MCP server, stdio transport
 ```
