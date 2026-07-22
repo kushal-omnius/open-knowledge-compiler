@@ -35,8 +35,13 @@ on:
         required: true
         default: 'pip install -e .[dev]'
         type: string
+      source_root:
+        description: 'Package/dir to copy into the mutmut sandbox (must include every module paths_to_mutate imports from, or cross-module imports break at test time)'
+        required: true
+        default: 'knowledge_compiler'
+        type: string
       paths_to_mutate:
-        description: 'File or directory to mutate (relative to repo root)'
+        description: 'File or glob (relative to repo root) to actually mutate, scoped within source_root via only_mutate'
         required: true
         default: 'knowledge_compiler/compiler/normalize.py'
         type: string
@@ -73,12 +78,21 @@ jobs:
       # own configuration.py/__main__.py source, since the CLI --help and the
       # published docs disagree with each other across 2.x/3.x. Appended here
       # rather than committed since the target is workflow_dispatch-configurable.
+      #
+      # source_paths controls BOTH what gets copied into the mutants/ sandbox
+      # AND what gets mutated (confirmed by reading configuration.py directly).
+      # Scoping it to a single file broke cross-module imports at test time
+      # (e.g. diff.py importing normalize.py — ModuleNotFoundError, since
+      # normalize.py was never copied in). Fix: source_paths copies the whole
+      # source_root; only_mutate (a separate glob-pattern config) narrows which
+      # mutations actually get generated/counted within that copied tree.
       - name: Configure mutmut
         run: |
           cat >> pyproject.toml <<EOF
 
           [tool.mutmut]
-          source_paths = ["${{ inputs.paths_to_mutate }}"]
+          source_paths = ["${{ inputs.source_root }}"]
+          only_mutate = ["${{ inputs.paths_to_mutate }}"]
           pytest_add_cli_args_test_selection = ["${{ inputs.test_path }}"]
           EOF
 
