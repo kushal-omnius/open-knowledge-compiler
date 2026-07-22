@@ -198,6 +198,80 @@ def inspect_cmd(repo_dir: str) -> None:
         click.echo(f"last compile: run {last_run.id} @ {last_run.commit_sha[:12]} — delta {delta_str}")
 
 
+@main.command("validate-test")
+@click.argument("test_file", type=click.Path(exists=True, dir_okay=False))
+@click.option("--for-entity", "for_entity", required=True,
+              help="Entity slug originally passed to `test_plan` for this test's recommendations.")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+@click.pass_context
+def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_dir: str) -> None:
+    """Score a generated test's kc-covers: header against compiled knowledge.
+
+    Never compiles — a downstream check over already-compiled state, same as
+    `kc serve` (BRAINSTORM-test-generation-mechanism.md: the compiler's job
+    ends at knowledge + test_plan; validation is a consumer, not a stage).
+    """
+    from pathlib import Path
+
+    from sqlalchemy.orm import Session
+
+    from knowledge_compiler.compiler.run import CompileError, read_config
+    from knowledge_compiler.mcp.queries import resolve_repo
+    from knowledge_compiler.storage.db import make_engine
+    from knowledge_compiler.validation import score_test
+
+    try:
+        config = read_config(Path(repo_dir))
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
+    slug = config["repository"]["slug"]
+    dep_map = config.get("dependencies", {})
+
+    with Session(make_engine()) as session:
+        try:
+            repo = resolve_repo(session, slug)
+        except LookupError as exc:
+            raise click.ClickException(str(exc)) from exc
+        report = score_test(session, repo.id, Path(test_file), for_entity, dep_map=dep_map)
+
+    if report is None:
+        raise click.ClickException(
+            f"entity '{for_entity}' not found — pass the same slug `test_plan` was run against")
+
+    click.echo(f"kc-covers: {report.test_file}")
+    click.echo(f"  for entity: {report.for_entity}")
+    click.echo()
+    if not report.header_found:
+        click.echo("header:            MISSING -- automatic 0% (no kc-covers: block found)")
+        click.echo()
+        click.echo("SCORE: 0.0%")
+        ctx.exit(1)
+
+    click.echo("header:            FOUND")
+    click.echo(f"claimed slugs:     {', '.join(report.claimed_slugs) or '(none)'}")
+    click.echo()
+    click.echo("existence:")
+    for check in report.existence:
+        click.echo(f"  {check.slug:<28} {'OK' if check.exists else 'MISSING'}")
+    click.echo()
+    click.echo(f"precision/recall vs test_plan({report.for_entity}):")
+    click.echo(f"  citable recommended:  {', '.join(report.citable_recommended) or '(none)'}")
+    click.echo(f"  precision: {report.precision * 100:.1f}%")
+    if report.missing_from_claims:
+        click.echo(f"  missed (recall gap):  {', '.join(report.missing_from_claims)}")
+    click.echo(f"  recall:    {report.recall * 100:.1f}%")
+    if report.extraneous_claims:
+        click.echo(f"  extraneous claims (exist, not recommended): {', '.join(report.extraneous_claims)}")
+    click.echo()
+    click.echo("mutation data:     not checked here -- see mutation-test.yaml for the execution-based signal")
+    click.echo()
+    click.echo(f"SCORE: {report.score_pct}%")
+
+    if report.nonexistent_claims:
+        ctx.exit(1)
+
+
 @main.command("serve")
 @click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
               show_default=True, help="Repository directory (contains kc.toml).")

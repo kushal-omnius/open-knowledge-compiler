@@ -164,5 +164,20 @@ kc-covers:
 2. ~~Define the declared-coverage header format~~ **Done 2026-07-20** — see above.
 3. ~~Decide the mutation-score threshold question~~ **Done 2026-07-20** — track-only for now, see above.
 4. Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once the declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).
-5. Run mutation testing against a few more modules (both dogfood repos) to build the real distribution the threshold decision above is waiting on.
+5. ~~Run mutation testing against a few more modules~~ **Partially done 2026-07-22** — three more Knowledge-Compiler modules run (see distribution below); frida/omnius_llmlib still pending on cross-org CI access (see note).
 6. Begin the actual milestone-3 test-generation mechanism design, now with a defined success metric (declared-coverage + mutation-kill) to build toward.
+
+### Mutation-score distribution (2026-07-22)
+
+Ran via the same `mutation-test.yaml` GitHub Actions workflow (`workflow_dispatch`, `ubuntu-latest`), one module at a time. Mid-way through this batch, scoping `source_paths` to a single file was found to break cross-module imports at test time (`diff.py` importing `normalize.py` failed — `normalize.py` was never copied into the mutmut sandbox); fixed by copying the whole `source_paths = ["knowledge_compiler"]` tree and scoping the actual mutation count via the separate `only_mutate` glob config. `normalize.py`'s original 64.4% predates the fix but is unaffected by it (that module doesn't import a sibling that needed copying).
+
+| Module | Killed | Survived | No-tests | Total | Score (killed/total) |
+|---|---|---|---|---|---|
+| `compiler/normalize.py` | 695 | 383 | — | 1080 | 64.4% |
+| `compiler/diff.py` | 196 | 45 | 12 | 253 | 77.5% |
+| `extractors/python_analyzer.py` | 374 | 87 | 0 | 461 | 81.1% |
+| `extractors/typescript_analyzer.py` | 428 | 228 | 43 | 699 | 61.2% |
+
+**Reading this, not over-reading it (still 4 data points, not a calibrated baseline):** `normalize.py` and `typescript_analyzer.py` — the two modules with the most branching, edge-case logic (the identity cascade; tsconfig alias resolution + JSONC parsing) — score lowest, while `diff.py` and `python_analyzer.py` score highest. Directionally consistent with "more intricate control flow is harder to fully exercise," but this is four modules in one repo, still short of the "several more modules across both dogfood repos" the threshold decision above asked for.
+
+**Decided against, 2026-07-22: frida/omnius_llmlib mutation runs via this workflow.** The cross-org checkout path needs a `CROSS_REPO_TOKEN` repo secret scoped to `omni-us-ea` — not something that will be provisioned, so this path is closed, not just pending. The `target_repo` input stays in `mutation-test.yaml` (harmless, no cost if unused) but the distribution above will not be extended to the other dogfood repos through it. If frida/omnius_llmlib mutation scores are wanted later, the workflow would need to live in each of those repos' own CI instead — a real re-scoping, not a config tweak, and out of scope for now.
