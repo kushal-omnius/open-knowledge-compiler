@@ -27,6 +27,53 @@ Core code map: `ir.py` (two-layer IR models, ADR-009) · `interfaces.py` (stage 
 
 Testing conventions: no mocks — real git repos, real Postgres (integration tests skip loudly when it's down), real tree-sitter; LLM tests use `FakeLLMProvider`, embedding tests use `FakeEmbedder`. Both caches (`llm_cache`, `embeddings`) are keyed in part by `model_id` and are shared/repo-agnostic (`llm_cache`) or persist across recompiles (`embeddings`) by design, so tests asserting call counts must use a unique `model_id` per test.
 
+## Test generation: kc-covers header (required)
+
+Every test file generated or materially rewritten by an AI agent — in this
+repo or in any repo consuming Knowledge Compiler's compiled knowledge — MUST
+carry a `kc-covers:` block in its module-level docstring, naming the exact
+compiled entity slug(s) it targets (BRAINSTORM-test-generation-eval.md's
+declared-coverage convention; `knowledge_compiler/validation.py` is the
+checker). Not optional, not a comment — must be parseable by
+`ast.get_docstring()`.
+
+Format (exact):
+```python
+"""
+<optional one-line description of what this test covers>
+
+kc-covers:
+  - <entity-slug-1>
+  - <entity-slug-2>
+"""
+```
+
+Rules:
+- **Get the slugs from `test_plan`, never invent or guess them.** Call the
+  `test_plan` MCP tool (or CLI equivalent) against the target repo first;
+  its `test_recommendations` name the exact citable slugs for the gap
+  being closed.
+- **One citable slug per recommendation, not the raw targets list:**
+  - `target_kind: "api"` → cite each API's own slug individually
+    (e.g. `api/post-claims`), not the surrounding component.
+  - `target_kind: "symbols"` → cite the gap **component's own slug**
+    (e.g. `component/billing-rules`) — bare symbol paths are never real
+    compiled entities and can never appear here.
+- **Never claim a slug you didn't verify exists** — `get_entity` first if
+  unsure. A claimed-but-fake slug is a hard failure, not a minor inaccuracy.
+- **No header at all is an automatic 0% score** — never skip it, even for a
+  throwaway or exploratory test.
+- The test file being scored can live in a different repo from the code it
+  targets — the header travels with the file itself, not with the target
+  repo (see BRAINSTORM-test-generation-mechanism.md's cross-repo note).
+
+After writing the test, validate it before considering the task done:
+```bash
+kc validate-test <path-to-test-file> --for-entity <originating-slug> --dir <target-repo-dir>
+```
+A clean run exits 0 (header found, no nonexistent-slug claims). Fix and
+re-run if it doesn't — don't hand back a test with an unvalidated header.
+
 ## Intended Tech Stack
 
 - **Implementation language:** Python only (the compiler itself)

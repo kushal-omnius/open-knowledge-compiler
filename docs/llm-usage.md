@@ -1,6 +1,6 @@
-#LLM-USAGE
+# LLM-USAGE
 
-**two separate Azure deployments are needed, of two different model families**, because a chat model and an embedding model do fundamentally different jobs and Azure treats them as distinct deployments even on the same resource.
+**This Example uses AZURE OPENAI Deployments. Two separate LLM deployments are needed, of two different model families.**, because a chat model and an embedding model do fundamentally different jobs and Azure treats them as distinct deployments even on the same resource.
 
 | Purpose | Config section | Model family needed | Reads env var |
 |---|---|---|---|
