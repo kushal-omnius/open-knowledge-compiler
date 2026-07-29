@@ -166,7 +166,7 @@ kc validate-test /path/to/repoC/tests/test_billing.py \
 kc validate-test tests/test_billing.py --for-entity component/billing-rules
 ```
 
-Example output:
+Example output (pure api-kind gap — no ceiling):
 ```
 kc-covers: tests/test_billing.py
   for entity: component/billing-rules
@@ -188,6 +188,18 @@ mutation data:     not checked here -- see mutation-test.yaml for the execution-
 SCORE: 100.0%
 ```
 
+Example output (mixed api-kind + symbols-kind gap — ceiling shown):
+```
+precision/recall vs test_plan(component/backend-storage-blob-utils):
+  citable recommended:  api/delete-claims, api/get-claims, ..., component/backend-storage-blob-utils
+  precision: 100.0%
+  missed (recall gap):  component/backend-integrations-base, ...
+  recall:    72.2%
+  ceiling (black-box / api-kind only): 13/18 = 72.2%  [5 symbols-kind target(s) require unit tests]
+```
+
+The ceiling line appears only when the gap contains symbols-kind targets — components with no HTTP surface whose public functions can only be reached by unit tests importing them directly. A score at the ceiling is at the achievable maximum for a black-box test; closing the remaining recall gap requires switching to unit tests that import internal symbols.
+
 **Score formula:** `((precision + recall) / 2) × 100 × existence_penalty`
 - Precision: fraction of claimed slugs that are citable recommendations
 - Recall: fraction of citable recommendations that were claimed
@@ -197,7 +209,7 @@ SCORE: 100.0%
 - `0` — header found, all claimed slugs exist (imperfect precision/recall is informational)
 - `1` — header missing OR any claimed slug doesn't exist in the knowledge base
 
-See [CLAUDE.md](../CLAUDE.md) for the `kc-covers:` header format and slug-sourcing rules.
+See [CLAUDE.md](../CLAUDE.md) for the `kc-covers:` header format and slug-sourcing rules. The scoring granularity decision (component/API level, not sub-component) is recorded in [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md).
 
 ---
 
@@ -226,7 +238,7 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 | `get_entity(slug)` | Full detail for one entity: payload, source anchors, relationships, provenance. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
 | `impact_plan(slug)` | One-hop impact analysis for a changed entity: what's affected in this repo, which affected components have test-coverage gaps, and what it reaches across repos. |
 | `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Use to drive test generation before writing tests. |
-| `resolve_dependency(coordinate)` | Resolve an external import/package coordinate to another repo compiled into the same database, via `kc.toml [dependencies]`. |
+| `resolve_dependency(coordinate)` | Resolve an external import/package coordinate to another repo compiled into the same database, via `kc.toml [dependencies]` (query-time only — [ADR-011](../docs/decisions/ADR-011-cross-repo-dependency-resolution.md)). |
 | `list_entities(entity_type, limit?)` | List all entities of one type. |
 | `recent_changes(runs?)` | Knowledge deltas of the N most recent compiles: what was added, changed, removed, or moved. |
 | `which_pr_introduced(slug)` | Which PR (or bootstrap compile) first added this entity. |

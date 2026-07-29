@@ -2,25 +2,90 @@
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
-**Status:** Architecture v1.0 frozen · V1 pipeline + milestone 2 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Dogfooded on two real team repos (`kc verify`-clean); next: enable enrichment on them and wire up incremental `--pr` compilation in CI.
+**Status:** Architecture v1.0 frozen · V1 pipeline + milestone 3 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Dogfooded on two real team repos (`kc verify`-clean); next: enable enrichment on them and wire up incremental `--pr` compilation in CI.
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
 
-## Quick start
+## Prerequisites
+
+- **Python 3.11+** — `python --version` to check
+- **Docker Desktop** — for the Postgres database ([download](https://www.docker.com/products/docker-desktop/))
+- **Git** — the repo you want to analyze must be a local git clone
+
+NOTE - No API keys required for the base compile. LLM and embedding providers are opt-in (see below).
+
+## Installation
 
 ```bash
-python -m venv .venv && .venv\Scripts\activate    # Windows
-pip install -e .[dev]
-docker compose up -d                               # Postgres 16 + pgvector
+git clone <knowledge-compiler-repo-url>
+cd knowledge-compiler
 
-kc init --slug my-repo --forge-ref github.com/org/my-repo --default-branch main
-kc compile --full                                  # bootstrap: repo -> knowledge base + wiki
-kc inspect                                         # entity/relationship counts, last delta
-kc verify                                          # incremental state ≡ full compile?
+# Create and activate a virtual environment
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS / Linux
+
+pip install -e .[dev]
+
+# Start Postgres (runs in Docker, port 5432, db=kc_wiki user=kc pass=kc)
+docker compose up -d
 ```
 
-No API keys required — the deterministic compiler produces components, APIs, dependencies, test coverage, and a browsable wiki (`kc-wiki/`) on its own.
+Verify the install:
+
+```bash
+kc --help
+```
+See full CLI Documentation: [kc-cli-reference.md](docs/kc-cli-reference.md)
+
+## Analyze a repository
+
+Point `--dir` at any local git clone.
+
+**Step 1 — Register the repo** (run once):
+
+```bash
+kc init \
+  --slug my-service \
+  --forge-ref github.com/my-org/my-service \
+  --dir /path/to/my-service
+```
+
+This writes a `kc.toml` into `/path/to/my-service` and registers the repo in Postgres.
+
+**Step 2 — Compile** (run from anywhere, `--dir` points at the repo):
+
+```bash
+kc compile --full --dir /path/to/my-service
+```
+
+This runs the full pipeline: Git history → code analysis → entity extraction → wiki generation. First run takes a minute or two depending on repo size.
+
+**Step 3 — Inspect results:**
+
+```bash
+kc inspect --dir /path/to/my-service
+```
+
+```
+repository: my-service
+entities: 312
+  component: 78  api: 24  feature: 61  business_rule: 12  risk: 18  test_coverage: 119
+relationships: 940
+last compile: run 1 @ a3f9c1d — delta add:312  change:0  remove:0
+```
+
+A browsable Markdown wiki is written to `kc-wiki/` inside the analyzed repo.
+
+**Step 4 — Verify (optional):**
+
+```bash
+kc verify --dir /path/to/my-service
+# VERIFIED: incremental state is equivalent to a full compile
+```
+
+No API keys required — the deterministic compiler produces components, APIs, dependencies, test coverage, and the wiki on its own.
 
 ## Run modes
 
@@ -32,6 +97,7 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
 | `kc compile --no-llm` | Deterministic pass only; run marked degraded; semantic entities are never removed |
+| `kc validate-test <file> --for-entity <slug>` | Score a generated test's `kc-covers:` header against compiled knowledge; exits 1 if header missing or any slug doesn't exist ([ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md)) |
 | `kc serve` | Read-only MCP server (stdio) over the knowledge base — never compiles (`pip install -e .[serve]`) |
 
 ## Configuration
@@ -63,12 +129,72 @@ pip install -e .[llm-openai]      # or .[llm] for Anthropic
 #   OPENAI_AZURE_DEPLOYMENT names a chat/completion deployment (e.g. gpt-4o-mini) —
 #   a *separate* deployment from embeddings (see below); see llm-usage.md for why
 #   Azure OpenAI needs two distinct deployments even on one resource/endpoint.
-kc compile --full
+kc compile --full --dir /path/to/my-service
 ```
 
 LLM outputs are schema-validated before persistence, cached content-addressed in Postgres (unchanged files cost zero on recompile), and every semantic fact carries provenance (model, template version, anchors into source). Provider outage degrades the compile gracefully — the deterministic knowledge base is never blocked on an API. Test files are excluded from semantic extraction by default (`[llm] include_tests = true` to override).
 
-## Retrieval and MCP server (optional)
+## MCP server (local)
+
+`kc serve` is a read-only MCP server (stdio transport) over the compiled knowledge base. It **never compiles** — it reads whatever the last `kc compile` produced. Any MCP-compatible AI agent (Claude Code, Claude Desktop, Cursor, VS Code extensions, etc.) can connect to it.
+
+**Prerequisites:** at least one `kc compile --full` run must have succeeded first.
+
+```bash
+pip install -e .[serve]    # adds the MCP SDK dependency
+kc serve --dir /path/to/repo
+```
+
+### Register with Claude Code (CLI)
+
+```bash
+claude mcp add kc -- kc serve --dir /path/to/repo
+```
+
+To serve multiple repos, add one entry per repo:
+
+```bash
+claude mcp add kc-frontend -- kc serve --dir /path/to/frontend
+claude mcp add kc-backend  -- kc serve --dir /path/to/backend
+```
+
+### Register with Claude Desktop / other MCP clients
+
+Add to your MCP client's config file (e.g. `claude_desktop_config.json`, `.claude/mcp.json`, or the equivalent for your client):
+
+```json
+{
+  "mcpServers": {
+    "kc": {
+      "command": "kc",
+      "args": ["serve", "--dir", "/path/to/repo"]
+    }
+  }
+}
+```
+
+If `kc` is not on the system PATH (e.g. inside a venv), use the full path to the executable:
+
+```json
+{
+  "mcpServers": {
+    "kc": {
+      "command": "/path/to/repo/.venv/bin/kc",
+      "args": ["serve", "--dir", "/path/to/repo"]
+    }
+  }
+}
+```
+
+On Windows, replace `/bin/kc` with `\\Scripts\\kc.exe`.
+
+### MCP tools exposed
+
+`search_knowledge`, `get_entity`, `impact_plan`, `test_plan`, `resolve_dependency`, `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats` — see [docs/kc-cli-reference.md](docs/kc-cli-reference.md) for full parameter and return-value documentation.
+
+## Retrieval (optional: semantic search)
+
+Without embeddings, `kc serve` search runs keyword-only (Postgres FTS) — fully functional. Enable embeddings to add semantic matching fused with keyword results via reciprocal-rank fusion:
 
 ```toml
 [embeddings]
@@ -78,22 +204,18 @@ provider = "openai"        # "openai" | "azure-openai"
 ```
 
 ```bash
-pip install -e .[serve]           # mcp SDK for `kc serve`
 # azure-openai credentials: OPENAI_AZURE_ENDPOINT / OPENAI_AZURE_API_KEY (shared with [llm]) +
 #   OPENAI_AZURE_EMBEDDING_DEPLOYMENT — a dedicated embedding-model deployment
 #   (e.g. text-embedding-3-small), distinct from [llm]'s OPENAI_AZURE_DEPLOYMENT
 #   chat deployment. See llm-usage.md for the full two-deployment rationale.
-kc compile --full                 # embeds dirty entities as a post-persist stage
-kc serve --dir .                  # read-only MCP server, stdio transport
+kc compile --full    # embeds dirty entities as a post-persist stage; re-run after enabling
 ```
 
-Without `[embeddings]`, `kc serve` still works — search runs keyword-only (Postgres FTS) and is fully functional; enabling embeddings adds semantic matching, fused with keyword results via reciprocal-rank fusion. `kc serve` **never compiles** — it only reads whatever the last `kc compile` produced. See [docs/retrieval.md](docs/retrieval.md) for the retrieval design and the full MCP tool list (`search_knowledge`, `get_entity`, `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats`, `resolve_dependency`, `impact_plan`, `test_plan`, …).
-
-Register with Claude Code: `claude mcp add kc -- kc serve --dir <repo>`.
+See [docs/retrieval.md](docs/retrieval.md) for the retrieval design.
 
 ## Development
 
 ```bash
 pytest                             # full suite (integration tests skip without Postgres)
-pytest tests/test_normalize.py     # the identity-cascade suite
+pytest tests/test_normalize.py     # only the identity-cascade suite
 ```

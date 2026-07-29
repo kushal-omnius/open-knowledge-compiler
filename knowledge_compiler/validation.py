@@ -46,6 +46,8 @@ class ValidationReport:
     precision: float | None = None
     recall: float | None = None
     citable_recommended: list[str] = field(default_factory=list)
+    api_kind_citable: list[str] = field(default_factory=list)
+    symbols_kind_citable: list[str] = field(default_factory=list)
     missing_from_claims: list[str] = field(default_factory=list)
     extraneous_claims: list[str] = field(default_factory=list)
     nonexistent_claims: list[str] = field(default_factory=list)
@@ -112,8 +114,16 @@ def score_test(session: Session, repo_id: int, test_file: Path, for_entity: str,
                         for s in claimed]
     report.nonexistent_claims = [c.slug for c in report.existence if not c.exists]
 
-    citable = sorted({s for rec in plan["test_recommendations"] for s in citable_targets_for(rec)})
+    api_citable = sorted({s for rec in plan["test_recommendations"]
+                          if rec["target_kind"] == "api"
+                          for s in citable_targets_for(rec)})
+    syms_citable = sorted({s for rec in plan["test_recommendations"]
+                           if rec["target_kind"] != "api"
+                           for s in citable_targets_for(rec)})
+    citable = sorted(set(api_citable) | set(syms_citable))
     report.citable_recommended = citable
+    report.api_kind_citable = api_citable
+    report.symbols_kind_citable = syms_citable
 
     claimed_set, citable_set = set(claimed), set(citable)
     report.extraneous_claims = sorted((claimed_set - citable_set) - set(report.nonexistent_claims))

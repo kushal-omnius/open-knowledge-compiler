@@ -2,7 +2,7 @@
 
 > Status: Living specification, written FROM the milestone-2 implementation (the
 > deferral was deliberate: architecture.md §7 fixed the shape, code fixed the details).
-> Realizes ADR-005 (embeddings) and the serve half of ADR-002.
+> Realizes ADR-005 (embeddings), the serve half of ADR-002, and ADR-011 (cross-repo dependency resolution: query-time config map, `resolve_dependency`/`get_entity` `cross_repo_dependencies`).
 > Last updated: 2026-07-19
 
 ---
@@ -83,5 +83,5 @@ Claude Code: `claude mcp add kc -- kc serve --dir <repo>`.
 ## 6. Open items
 
 - HNSW index activation policy (needs dogfood-scale data).
-- Cross-repo *search* UX (post-V1; `repo_id` scoping is already universal). Cross-repo *dependency resolution* has a first cut — `resolve_dependency`/`get_entity`'s `cross_repo_dependencies`, config-mapped, query-time only (BRAINSTORM-cross-repo-dependencies.md Option B). A compiled rollup edge (Option C in that doc) remains open, gated on the milestone-3 eval-criteria question.
+- Cross-repo *search* UX (post-V1; `repo_id` scoping is already universal). Cross-repo *dependency resolution* has a first cut — `resolve_dependency`/`get_entity`'s `cross_repo_dependencies`, config-mapped, query-time only ([ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md); BRAINSTORM-cross-repo-dependencies.md Option B). A compiled rollup edge (Option C in that doc) remains open, deferred in ADR-011.
 - Result snippeting/highlighting for keyword hits.

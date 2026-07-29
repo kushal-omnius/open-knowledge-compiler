@@ -34,8 +34,8 @@ repo or in any repo consuming Knowledge Compiler's compiled knowledge — MUST
 carry a `kc-covers:` block in its module-level docstring, naming the exact
 compiled entity slug(s) it targets (BRAINSTORM-test-generation-eval.md's
 declared-coverage convention; `knowledge_compiler/validation.py` is the
-checker). Not optional, not a comment — must be parseable by
-`ast.get_docstring()`.
+checker; scoring granularity is component/API level per ADR-012). Not
+optional, not a comment — must be parseable by `ast.get_docstring()`.
 
 Format (exact):
 ```python

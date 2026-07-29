@@ -261,6 +261,12 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
     if report.missing_from_claims:
         click.echo(f"  missed (recall gap):  {', '.join(report.missing_from_claims)}")
     click.echo(f"  recall:    {report.recall * 100:.1f}%")
+    if report.symbols_kind_citable:
+        api_n = len(report.api_kind_citable)
+        total_n = len(report.citable_recommended)
+        ceiling_pct = api_n / total_n * 100 if total_n else 0.0
+        click.echo(f"  ceiling (black-box / api-kind only): {api_n}/{total_n} = {ceiling_pct:.1f}%"
+                   f"  [{len(report.symbols_kind_citable)} symbols-kind target(s) require unit tests]")
     if report.extraneous_claims:
         click.echo(f"  extraneous claims (exist, not recommended): {', '.join(report.extraneous_claims)}")
     click.echo()

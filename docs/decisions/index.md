@@ -92,6 +92,14 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Depended on by:** —
 - **Related documents:** `BRAINSTORM-cross-repo-dependencies.md`, retrieval.md §5
 
+### [ADR-012 — Defer VerificationRequirement Entity](ADR-012-defer-verification-requirement-entity.md)
+
+- **Status:** Accepted
+- **Summary:** `VerificationRequirement` (a candidate entity for LLM-extracted, sub-component verification obligations, e.g. "discount must not exceed 20%") is not added as a compiled entity in V1. Mutation-kill rate is the execution-based signal for sub-component test precision — it closes the motivating gap (declared-coverage can be 100% while missing the exact condition tested) at execution time, without new IR complexity or a richer agent workflow. Deferred, not rejected: reopens if agent-generated tests show a consistent pattern of high declared-coverage + low mutation-kill at scale, or if the component-vs-sub-component granularity mismatch noted in the ADR's rationale is shown to hide real misses.
+- **Dependencies:** ADR-009 (two-layer IR — the entity model this would extend), ADR-008 (LLM semantic layer — the extraction mechanism this would use)
+- **Depended on by:** —
+- **Related documents:** `BRAINSTORM-verification-requirement.md`, `BRAINSTORM-test-generation-eval.md`, `BRAINSTORM-test-generation-mechanism.md` (full spike record)
+
 ## Dependency graph
 
 Arrows point from an ADR to what it depends on. ADR-001 and ADR-007 are the two foundations; no cycles.
@@ -121,9 +129,11 @@ graph TD
     ADR010 --> ADR003
     ADR011["ADR-011 Cross-Repo Dependency Resolution"] --> ADR001
     ADR011 --> ADR004
+    ADR012["ADR-012 Defer VerificationRequirement"] --> ADR009
+    ADR012 --> ADR008
 ```
 
-ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood (not a change to a frozen one — see the freeze-discipline note below). All are immutable per the process in [README.md](README.md) — changes require a superseding ADR.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. All are immutable per the process in [README.md](README.md) — changes require a superseding ADR.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 
@@ -156,4 +166,4 @@ Decisions *not* made by this ADR set, listed with the document whose design shou
 | **Rejected (recorded to prevent re-litigation):** per-release entity snapshots / version-attached relationships (`PaymentClient@v2.3`) — this is ADR-003's rejected Option A at release granularity; the delta log + checkpoints serve the use case without the permanent temporal-key tax. Reopening requires superseding ADR-003 with evidence the delta-window mechanism failed | — |
 | **Lazy snapshot materialization** (distinct from the rejected eager snapshots above): on-demand recompile at a pinned revision, cached as a derived artifact keyed by `(repo, commit, compiler version, config)` — cache key must include compiler/prompt versions or snapshots silently diverge across upgrades. Requires **slug-seeding**: the snapshot compile's identity map is seeded from current state (ADR-004 slug-preserving mechanics extended to scratch scopes), else snapshot entities aren't joinable to current-state slugs | pre-milestone-3 design |
 | **Three-tier correctness rule for historical state** (write down explicitly, or replay creeps into correctness-critical paths): delta-log *replay* for cheap field-level lookups and display; *materialized snapshots* for correctness-critical full state; *recompile* as ground truth. The delta log is never event sourcing (ADR-003 invariant: history, not a reconstruction input) | pre-milestone-3 design |
-| **Verification Requirement** as a candidate entity: business rules decompose into durable verification obligations (boundary/edge cases) that tests map to. Admissible as LLM-derived knowledge (same class as feature narratives) but unproven — evaluate inside the milestone-3 test-generation design; entity status would require a new ADR | milestone-3 design doc |
+| ~~**Verification Requirement** as a candidate entity~~ | Resolved by [ADR-012](ADR-012-defer-verification-requirement-entity.md) (Accepted 2026-07-29): deferred; mutation-kill rate is the V1 sub-component precision signal. Revisit trigger: pattern of ≥80% declared-coverage + ≤40% mutation-kill at scale. |

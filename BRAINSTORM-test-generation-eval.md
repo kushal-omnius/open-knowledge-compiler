@@ -163,7 +163,7 @@ kc-covers:
 1. ~~Run the mutation-testing spike~~ **Done 2026-07-20** — 64.4% baseline on `normalize.py`, tool practical, see above.
 2. ~~Define the declared-coverage header format~~ **Done 2026-07-20** — see above.
 3. ~~Decide the mutation-score threshold question~~ **Done 2026-07-20** — track-only for now, see above.
-4. Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once the declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).
+4. ~~Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once the declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).~~ **Done 2026-07-29** — resolved by [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md): deferred; mutation-kill rate is the V1 sub-component precision signal. See `BRAINSTORM-verification-requirement.md` for the full options analysis.
 5. ~~Run mutation testing against a few more modules~~ **Partially done 2026-07-22** — three more Knowledge-Compiler modules run (see distribution below); frida/omnius_llmlib still pending on cross-org CI access (see note).
 6. Begin the actual milestone-3 test-generation mechanism design, now with a defined success metric (declared-coverage + mutation-kill) to build toward.
 

@@ -131,7 +131,118 @@ Weighted by: fit with the deterministic-first/validated-before-fact philosophy, 
 
 ## Next steps
 
-1. Run the proposed spike: hand `test_plan`'s real frida output to a coding agent, write one real `kc-covers`-tagged test by hand, score it manually — resolves the decisive uncertainty above.
-2. If confirmed: build `kc score-test <path>` (or an MCP `score_test` tool) implementing the three checks from `BRAINSTORM-test-generation-eval.md` (existence, precision/recall vs. `test_plan`, note on mutation-kill via the existing CI workflow).
-3. If the spike shows the manual workflow doesn't stick: revisit Option C with the cache-semantics fix scoped in from the start, not bolted on after.
-4. Once `score_test` exists and has scored a handful of real generated tests, revisit `decisions/index.md:159`'s "Verification Requirement" entity question (M3 step 4, deferred until real `kc-covers` usage exists to observe).
+1. ~~Run the proposed spike: hand `test_plan`'s real frida output to a coding agent, write one real `kc-covers`-tagged test by hand, score it manually — resolves the decisive uncertainty above.~~ Done 2026-07-29 — see spike result below.
+2. ~~If confirmed: build `kc score-test <path>` (or an MCP `score_test` tool) implementing the three checks from `BRAINSTORM-test-generation-eval.md` (existence, precision/recall vs. `test_plan`, note on mutation-kill via the existing CI workflow).~~ Done 2026-07-29 — shipped as `kc validate-test` (same checks, same exit-code contract, per CLAUDE.md).
+3. ~~If the spike shows the manual workflow doesn't stick: revisit Option C with the cache-semantics fix scoped in from the start, not bolted on after.~~ Moot — spike confirmed Option B.
+4. ~~Once `score_test` exists and has scored a handful of real generated tests, revisit `decisions/index.md:159`'s "Verification Requirement" entity question.~~ Done 2026-07-29 — resolved by [ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md): deferred, mutation-kill rate is the V1 sub-component precision signal. See `BRAINSTORM-verification-requirement.md`.
+5. Two new findings surfaced by the spike record below: (a) `test_plan`'s coverage-gap detection has no way to represent an unreachable/dead-code target — both a raw-JSON and a tool-driven agent had to independently discover this via source-reading each time, rather than the compiler surfacing it; open. (b) ~~declared-coverage score has a hard, mathematically-determined ceiling whenever a gap mixes `api`-kind and `symbols`-kind targets and the test is confined to one access mode (e.g. a black-box API/UI test can never claim an internal-function-only target) — `kc validate-test`'s output didn't surface this ceiling, so a sub-100% score could look like "more work to do" when it's actually "at the achievable maximum."~~ Done 2026-07-29 — `kc validate-test` now prints a ceiling line whenever a gap contains symbols-kind targets: `ceiling (black-box / api-kind only): N/M = X%  [K symbols-kind target(s) require unit tests]`.
+
+---
+
+## Spike result (resolves the decisive uncertainty, decided 2026-07-29)
+
+**Target slug:** `component/backend-storage-blob-utils`
+**Repo:** frida (2840 entities, compiled 2026-07-29 with LLM+embeddings)
+
+**Brief given to the subagent — exactly:**
+1. The raw `test_plan` JSON output for `component/backend-storage-blob-utils` (18 citable slugs across 6 recommendations: 13 api-kind claims-routes targets + 5 symbols-kind component targets).
+2. Target repo path: `C:\WORK\frida`.
+3. One instruction: "Write one pytest test file in `C:\WORK\frida\backend\tests\` covering the gap this `test_plan` output names. Give it a `kc-covers:` header naming the exact entity slugs you are testing."
+
+No `kc-covers` spec, no DCA-3301 reference, no header format example — deliberately zero hand-holding.
+
+**File produced:** `C:\WORK\frida\backend\tests\test_blob_utils_cache_claims_routes.py`
+
+**`kc validate-test` result (first pass, unedited):**
+```
+header:      FOUND
+existence:   18/18 OK
+precision:   100.0%
+recall:      100.0%
+SCORE:       100.0%  EXIT: 0
+```
+
+**Rubric outcome:**
+
+| Signal | Result |
+|---|---|
+| Use of brief | Correctly parsed `target_kind`/`targets`/`component` from raw JSON without field names explained |
+| Test file | Real pytest file exercising actual target functions via mocks; no stub/placeholder |
+| `kc-covers:` header | Present in module docstring, all 18 slugs on `- slug` lines, parsed cleanly |
+| `validate-test` exit code | 0 |
+| Score | 100.0% — perfect precision and recall |
+| Effort | One subagent turn, one `validate-test` call, no manual patching |
+
+**Verdict: Option B confirmed.** Every row landed in the "held together" column. The agent correctly derived the citable slugs directly from `test_plan`'s `target_kind`/`targets` field structure without being given the `kc-covers` header spec. The workflow holds together end-to-end with zero hand-holding.
+
+Next step unblocked by this result: item 4 above — revisit `decisions/index.md:159`'s "Verification Requirement" entity question.
+
+---
+
+## Spike 2 (original run, 2026-07-29) — retracted
+
+The original write-up of this section claimed an MCP-enabled subagent produced `tests/api/test_integration_factory.py` scoring **57.1%** (precision 100%, recall 14.3%), with a narrative that the agent had "discovered `test_claims.py` already holds all 13 claims-route slugs and correctly refused to duplicate them."
+
+**On independent re-verification (2026-07-29, same day) this was found to be inaccurate.** Rerunning the exact same `kc validate-test` invocation against the actual file on disk gives **precision 50.0%, recall 5.6%, score 27.8%** — not 57.1%. The produced file's real `kc-covers:` header claims only two slugs (`component/backend-integrations-factory`, `api/post-claims-sync`), testing IntegrationFactory's sync dispatch — a component not in `component/backend-storage-blob-utils`'s `coverage_gaps` list at all, essentially unrelated to the assigned gap. The "correctly refused to duplicate" framing turned out to be *substantively true* (see the ceiling analysis below — `test_claims.py` genuinely does already claim all 13 API-reachable slugs for this gap) but the agent then wandered to unrelated work instead of stopping, and the write-up reported a score that didn't match the artifact it described.
+
+This is kept in the record rather than deleted, as the clearest demonstration of the single most important process lesson from this whole spike arc: **no experiment result goes into a permanent doc without being re-run at write time.** The tool (`kc validate-test`) was correct throughout; every fabrication was in the human/agent narrative layer sitting on top of it.
+
+## Ceiling analysis: `test_claims.py` (pre-existing, not part of either spike)
+
+Before rerunning spike 2 fairly, the file `test_claims.py` (already present in `frida-testing/playwright/tests/api/`, written independently of this exercise) was checked against the same gap:
+
+```
+kc validate-test tests/api/test_claims.py --for-entity component/backend-storage-blob-utils --dir frida
+precision: 100.0%   recall: 72.2% (13/18)   SCORE: 86.1%
+```
+
+This is not a shortfall — it is the **mathematical maximum** achievable by any test confined to one access mode against this gap. `component/backend-storage-blob-utils`'s `test_plan` names 18 citable targets: 13 `api`-kind (HTTP-reachable claims routes) and 5 `symbols`-kind (internal Python functions — `blob_utils.write_bytes`, `document_cache.get_doc_object`, etc.). A black-box API/e2e test can reach the 13 API targets and can **never** reach the 5 symbols-kind ones — they require white-box unit-level import, structurally impossible from outside the process. 72.2% recall is "done," not "14% short." `kc validate-test`'s output doesn't currently say this — it just reports a number that looks incomplete.
+
+## Spike 1b: raw-JSON agent, same gap, `frida-testing` repo (2026-07-29)
+
+To get a fair same-repo comparison (spike 1 wrote a unit test in `frida` itself; the original spike 2 wrote in the separate `frida-testing` repo — two variables changing at once), a raw-JSON agent (zero tool access, same methodology as spike 1) was asked to close the same gap, this time in `frida-testing/playwright`.
+
+**Result: it wrote nothing, correctly.** It found `test_claims.py` already claims all 13 API-reachable targets, confirmed (via grep across `tests/api/`) that none of the 5 symbols-kind targets have any HTTP surface in this test suite, and concluded there was no genuine, non-duplicate gap left to fill — the ceiling above was already claimed. It declined to fabricate a duplicate test rather than force output.
+
+## Redo 1: dead-code target, both access methods (2026-07-29)
+
+To test a **genuinely fresh** gap (not already claimed anywhere), the frontend component `component/frontend-src-components-coveragequestions` (`CoverageQuestions.tsx`) was selected: uncovered in frida's own compiled knowledge, unclaimed by any of the 76 slugs already declared across 30 `kc-covers` headers in `frida-testing`.
+
+Both a raw-JSON agent and a tool-driven agent (using a proxy script mirroring `test_plan`/`get_entity`/`search_knowledge` — see note below) were asked to write a Playwright UI test for it. **Both independently reached the identical conclusion: the component is dead code.** Neither wrote a file. Both found the same evidence — a repo-wide grep found zero imports/JSX usage of `CoverageQuestions` outside its own file, and frida's own `internal-docs/data-testid-conventions.md` explicitly documents it as dead code flagged for removal. The real, live "Coverage Analysis" panel users see is rendered by a completely different file (`CoverageAnalysis.tsx`).
+
+**Finding:** `test_plan` presented this as a normal, actionable coverage gap. It is technically correct (`covered: false` is true) but structurally misleading — the correct remedy is deletion, not a test, and nothing in the compiled knowledge or `test_plan`'s output flags that the target is unreachable. Both agents only caught this by independently reading source and internal docs; the compiler didn't tell them. (Actionable, out of scope for this repo: `CoverageQuestions.tsx` should be deleted or wired in, per frida's own docs.)
+
+## Redo 2: live target, matched vs. mismatched strategy (2026-07-29)
+
+A second fresh, genuinely live target was selected: `component/frontend-src-components-decision` (`Decision.tsx`), confirmed rendered at `AnalysisPanel.tsx:69` (one of four analysis panels shown for a claim), uncovered in frida and unclaimed in `frida-testing`.
+
+**First pass — same variable-confound problem as before:** a raw-JSON agent (spike 1 v2) and a tool-driven agent (spike 2 v2) were given the same target but left free to choose their own test strategy:
+
+| | Spike 1 v2 (raw JSON) | Spike 2 v2 (tool-driven) |
+|---|---|---|
+| Strategy chosen | 4 pure-browser UI tests, no real backend call | 1 test intercepting the request, waiting up to 310s for the real LLM-backed `decision` workflow call to render |
+| Slugs claimed | `decision` + `analysispanel` | `decision` only (declined `analysispanel` — judged not earned by a narrower single test) |
+| Score (independently re-verified) | **100.0%** (100%/100%) | **75.0%** (100%/50%) |
+
+Both scores were independently reproduced via `kc validate-test`, not self-reported, and the `analysispanel` claim in spike 1 v2 was manually spot-checked: it asserts a real thing (`AnalysisPanel.tsx`'s own composition decision — that Decision mounts unconditionally alongside Claim/Coverage/Payout Analysis, unlike the permission-gated `QuestionAnswering`), not a rubber-stamp.
+
+**This again looked like an MCP-vs-not effect, and again wasn't.** The two runs differed in *two* things at once: information access **and** independently-chosen test scope (broad/shallow vs. narrow/deep). To isolate the actual variable, a third run (**spike 2B**) reran the tool-driven approach with the test strategy explicitly held constant to spike 1 v2's (pure browser-state assertions, no real backend call, same composition-assertion pattern):
+
+| | Spike 1 v2 (raw JSON) | Spike 2 (tool-driven, own strategy) | Spike 2B (tool-driven, matched strategy) |
+|---|---|---|---|
+| Strategy | pure-browser | real backend call | pure-browser (matched) |
+| Slugs claimed | decision + analysispanel | decision only | decision + analysispanel |
+| Score | **100.0%** | 75.0% | **100.0%** |
+
+**Finding: when test strategy is held constant, information-access method made no difference.** Spike 2B matched spike 1 v2 exactly (100.0%, both independently reproduced). The 75%/100% gap between the original spike 1 v2 and spike 2 was never about MCP vs. raw JSON — it was entirely downstream of spike 2 independently choosing a narrower, more expensive test scope (a real backend round-trip) and correctly declining to over-claim against that narrower scope. That's a legitimate engineering trade-off, not a quality difference caused by how the agent got its information.
+
+*Methodology note:* the `frida_kc` MCP server wasn't connected in the authoring session, so "tool-driven" runs used a small proxy script calling the exact same `queries.py` functions `kc serve`'s MCP tools call (`test_plan`, `get_entity`, `search_knowledge`), invoked turn-by-turn via Bash rather than as native MCP tool calls. This preserves the actual variable under test (self-directed exploration vs. handed-a-JSON-blob) even though the transport differs from a live MCP connection.
+
+## Consolidated findings across the full spike record
+
+1. **The scoring mechanism (`kc validate-test`) is trustworthy.** Every number in this section that was independently re-run matched what the tool computed. All inaccuracies were in human/agent narrative built on top of it (see the retracted spike 2 above) — the process fix is re-verification at write time, not a tool fix.
+2. **Information-access method (MCP-style tool calls vs. a raw JSON hand-off) did not affect achievable declared-coverage score**, once test strategy is held constant (Redo 2). It also didn't affect the *correctness* of the agent's decision to decline a fabricated test (Redo 1 — both methods converged identically on dead code).
+3. **Two real, previously-undocumented limitations, both low-effort candidate fixes to `test_plan`/`kc validate-test` output, not new pipeline stages or entities:**
+   - No representation of an unreachable/dead-code target (Redo 1) — agents currently must discover this themselves by reading source.
+   - No representation of the access-mode reachability ceiling when a gap mixes `api`-kind and `symbols`-kind targets (ceiling analysis) — a sub-100% score can look incomplete when it's actually at the achievable maximum.
+4. **Option B (external consumer, `kc validate-test` as the downstream check) remains confirmed** — nothing in this fuller record argues for Option C's in-process generation. If anything, the dead-code and ceiling findings argue for *more* human/agent judgment in the loop, not less.

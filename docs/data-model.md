@@ -161,7 +161,7 @@ The durable/disposable line, made explicit:
 
 - Exact SQL types, HNSW/GIN parameters, partitioning of `delta_changes` at scale — implementation, revisited with dogfood data.
 - Artifact `content` size policy for large files (store vs. hash-only + refetch) — decide at collector implementation.
-- Cross-repo queries (post-V1 multi-repo UX) — no schema blocker; `repo_id` scoping is already universal.
+- Cross-repo queries (post-V1 multi-repo UX) — no schema blocker; `repo_id` scoping is already universal. V1 reference behavior (query-time config map, no schema changes) resolved by [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md).
 
 ## References
 
