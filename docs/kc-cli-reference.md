@@ -235,7 +235,7 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 
 | Tool | Description |
 |------|-------------|
-| `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`. |
+| `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`, `jira_story`. |
 | `get_entity(slug)` | Full detail for one entity: payload, source anchors, relationships, provenance. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
 | `impact_plan(slug)` | One-hop impact analysis for a changed entity: what's affected in this repo, which affected components have test-coverage gaps, and what it reaches across repos. |
 | `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Use to drive test generation before writing tests. |
@@ -298,7 +298,13 @@ kc validate-test tests/test_billing.py --for-entity component/billing-rules
 | `GITHUB_TOKEN` | `kc compile --pr`, `kc reconcile` | GitHub API token for PR metadata. |
 | `ANTHROPIC_API_KEY` | `kc compile` (LLM stage) | Required when `[llm] provider = "anthropic"` in `kc.toml`. |
 | `OPENAI_API_KEY` | `kc compile` (LLM + embeddings) | Required when provider is `openai`. |
-| `DATABASE_URL` | all commands | Postgres connection string. Default: `postgresql+psycopg://kc:kc@localhost:5432/kc_wiki`. |
+| `OPENAI_AZURE_ENDPOINT` | `kc compile` (LLM + embeddings) | Required when provider is `azure-openai`. Azure OpenAI resource endpoint URL. |
+| `OPENAI_AZURE_API_KEY` | `kc compile` (LLM + embeddings) | Required when provider is `azure-openai`. |
+| `OPENAI_AZURE_DEPLOYMENT` | `kc compile` (LLM stage) | Required when `[llm] provider = "azure-openai"`. Deployment name for the chat model. |
+| `OPENAI_AZURE_EMBEDDING_DEPLOYMENT` | `kc compile` (embeddings) | Required when `[embeddings] provider = "azure-openai"`. Deployment name for the embedding model. |
+| `CF_ACCOUNT_ID` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
+| `CF_API_TOKEN` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
+| `KC_DATABASE_URL` | all commands | Postgres connection string. Default: `postgresql+psycopg://kc:kc@localhost:5432/kc_wiki`. |
 
 ---
 
@@ -327,6 +333,7 @@ push = true
 enabled = false
 provider = "anthropic"          # anthropic | openai | azure-openai | cloudflare
 max_calls_per_run = 200
+# model = "claude-opus-4-8"    # per-provider default applies when omitted
 
 [embeddings]
 enabled = false

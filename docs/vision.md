@@ -151,11 +151,11 @@ The long-term criterion — agents generating measurably better regression tests
 
 ## Open Questions
 
-Tracked here until resolved into ADRs:
+Tracked here until resolved into ADRs. Resolved items are struck through with a pointer to the resolution.
 
-- **IR shape** — what exactly is the canonical intermediate representation between extraction and persistence?
-- **Versioning** — is knowledge immutable/versioned per merge, or mutated in place with delta history?
-- **Wiki strategy** — regenerate pages wholesale per compile, or incrementally patch? How are cross-links kept consistent?
-- **Retrieval ranking** — keyword vs. semantic vs. hybrid, and how metadata filters influence ranking.
-- **Conflict handling** — when Jira says one thing and code says another, who wins and how is the disagreement surfaced?
-- **Test-generation evaluation** — what does "better test cases" mean measurably? (Must be answered before milestone 3.)
+- ~~**IR shape** — what exactly is the canonical intermediate representation between extraction and persistence?~~ Resolved by [ADR-009](decisions/ADR-009-two-layer-ir.md) (two-layer Fact IR / Knowledge IR); specified in [ir.md](ir.md).
+- ~~**Versioning** — is knowledge immutable/versioned per merge, or mutated in place with delta history?~~ Resolved: mutated in place, append-only delta log as history (ADR-003 + ir.md §5).
+- ~~**Wiki strategy** — regenerate pages wholesale per compile, or incrementally patch? How are cross-links kept consistent?~~ Resolved: wholesale page regeneration per dirty-entity set, published to a dedicated branch ([ADR-010](decisions/ADR-010-wiki-destination.md) + pipeline.md §3.6).
+- ~~**Retrieval ranking** — keyword vs. semantic vs. hybrid, and how metadata filters influence ranking.~~ Resolved: hybrid RRF with keyword-only fallback ([ADR-005](decisions/ADR-005-embeddings-pgvector.md) + [retrieval.md](retrieval.md)).
+- ~~**Conflict handling** — when Jira says one thing and code says another, who wins and how is the disagreement surfaced?~~ Resolved: conflicts are split into separate facts and surfaced; ranking policy is the remaining open sub-question (ir.md §4.3 + normalize.md §8); see ADR index for the future-ADR entry.
+- **Test-generation evaluation** — what does "better test cases" mean measurably? (Must be answered before milestone 3.) → milestone-3 spike in progress; see `BRAINSTORM-test-generation-eval.md`.

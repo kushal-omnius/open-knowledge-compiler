@@ -1,6 +1,6 @@
 # Architecture: Knowledge Compiler
 
-> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR. Post-freeze, new (non-superseding) decisions are still recorded as new ADRs per the process this freeze established — see [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md), added 2026-07-20 during dogfood.
+> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR. Post-freeze, new (non-superseding) decisions are still recorded as new ADRs per the process this freeze established — see [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) (cross-repo dependency resolution, 2026-07-20) and [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) (defer VerificationRequirement entity, 2026-07-29).
 > Derived from `docs/vision.md` (committed direction) and `INITIAL-Brainstorm.md` (exploratory).
 > This document selects an implementation architecture; it does not re-litigate the vision.
 > Decisions marked **[ADR]** must be recorded in `docs/decisions/` before implementation begins.
@@ -53,8 +53,10 @@ kc init                      # register a repo, create schema, write config
 kc compile --full            # bootstrap / escape-hatch full compilation
 kc compile --pr <N>          # incremental compilation of one merged PR
 kc reconcile                 # catch up on merged PRs missed since last compile
-kc serve                     # long-running: MCP server (+ optional wiki static serving)
 kc verify                    # recompile-and-diff: check incremental state ≡ full compile
+kc inspect                   # entity/relationship counts and last delta — first debugging surface
+kc validate-test <f> --for-entity <slug>  # score a generated test's kc-covers: header
+kc serve                     # long-running: read-only MCP server over the knowledge base
 ```
 
 - **Compile runs are batch processes**: start, run the pipeline, exit. No daemon, no queue, no scheduler. Concurrency control is a Postgres advisory lock per repository — a second compile of the same repo blocks or exits.
@@ -228,7 +230,7 @@ knowledge_compiler/
 ├── storage/       # schema, migrations, repositories (SQLAlchemy + Alembic)
 ├── retrieval/     # FTS, vector, hybrid RRF (RetrievalProvider plugins)
 ├── wiki/          # Markdown emitters, page mapping, publishers
-├── mcp/           # MCP server: search_knowledge, get_entity, get_delta, recent_changes
+├── mcp/           # MCP server: search_knowledge, get_entity, impact_plan, test_plan, recent_changes, …
 ├── llm/           # provider interface, cache, prompt templates (versioned)
 └── cli.py         # kc entry point
 tests/             # per-stage fixture-driven tests; golden-file wiki tests
@@ -243,7 +245,7 @@ MCP tools are read-only views over compiled knowledge (retrieval + entity/delta 
 1. **"Full recompilation cheap" is only true with a load-bearing LLM cache** (§10, §12). The cache is core architecture, not an optimization.
 2. **Entity identity is the hardest unsolved problem** and the vision assumes it implicitly by promising deltas (§6). It gets its own ADR and explicit failure-mode handling.
 3. **"Trigger only on merged PRs" needs two exceptions**: bootstrap full compile and reconciliation after missed events (§3).
-4. **Wiki publishing location is undecided but success-critical** — criterion 2 cannot be evaluated until it is chosen (§11).
+4. **Wiki publishing location was undecided but success-critical** — resolved by [ADR-010](decisions/ADR-010-wiki-destination.md): a dedicated `knowledge/wiki` branch in the compiled repo, publisher-pluggable (§11).
 5. **Python+TypeScript analysis under a Python-only implementation constraint** required an explicit resolution (tree-sitter, §8), with the note that TypeScript analysis is syntax-level in V1 (type-aware enrichment via `tsc` is an optional post-V1 plugin, never a core dependency).
 
 ## 15. Architecture Decision Records

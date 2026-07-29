@@ -94,10 +94,10 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | `kc init --slug <slug> --forge-ref <ref>` | Register a repo: run migrations, insert repo row, write `kc.toml`. Run once before first compile. |
 | `kc compile --full` | Bootstrap / escape-hatch full compilation |
 | `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
+| `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
 | `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
-| `kc compile --no-llm` | Deterministic pass only; run marked degraded; semantic entities are never removed |
 | `kc validate-test <file> --for-entity <slug>` | Score a generated test's `kc-covers:` header against compiled knowledge; exits 1 if header missing or any slug doesn't exist ([ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md)) |
 | `kc serve` | Read-only MCP server (stdio) over the knowledge base — never compiles (`pip install -e .[serve]`) |
 
@@ -112,7 +112,11 @@ All external configuration lives in env vars and `kc.toml` (written by `kc init`
 - `kc.toml [llm]` — opt-in semantic layer (ADR-008): business rules, features, risks
 - `kc.toml [embeddings]` — opt-in semantic search vectors (ADR-005); without them `kc serve` search is keyword-only (fully functional)
 
-## Semantic layer (optional)
+## Semantic layer (LLM extraction)(optional)
+
+  - Extracts meaning from code → Feature, BusinessRule, Risk entities
+  - Runs at compile time
+  - Opt-in via `[llm] enabled = true`
 
 ```toml
 [llm]
@@ -193,9 +197,11 @@ On Windows, replace `/bin/kc` with `\\Scripts\\kc.exe`.
 
 `search_knowledge`, `get_entity`, `impact_plan`, `test_plan`, `resolve_dependency` ([ADR-011](docs/decisions/ADR-011-cross-repo-dependency-resolution.md)), `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats` — see [docs/kc-cli-reference.md](docs/kc-cli-reference.md) for full parameter and return-value documentation.
 
-## Retrieval (optional: semantic search)
+## Retrieval: semantic search (embeddings + pgvector)(optional)
 
-Without embeddings, `kc serve` search runs keyword-only (Postgres FTS) — fully functional. Enable embeddings to add semantic matching fused with keyword results via reciprocal-rank fusion:
+ - Without embeddings, `kc serve` search runs keyword-only (Postgres FTS) — fully functional.
+ - Enable embeddings to add semantic matching fused with keyword results via reciprocal-rank fusion.
+ - Opt-in via `[embeddings] enabled = true`
 
 ```toml
 [embeddings]

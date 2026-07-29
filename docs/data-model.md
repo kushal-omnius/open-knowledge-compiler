@@ -34,6 +34,7 @@
 | `status` | `running` \| `succeeded` \| `failed` |
 | `fact_vocabulary_version`, `knowledge_model_version` | per ir.md §5 |
 | `started_at`, `finished_at`, `error` | |
+| `degraded` | boolean; `true` when compiled with `--no-llm` (pipeline.md §6.1) |
 
 Idempotence check (ADR-002): a `succeeded` run for `(repo_id, pr_number)` makes a re-trigger a no-op.
 
@@ -120,7 +121,7 @@ Append-only is enforced by policy and privileges (no UPDATE/DELETE grants on the
 | `cache_key` PK | `hash(template_id + template_version + model_id + input content)` (ADR-008) |
 | `template_id`, `template_version`, `model_id` | denormalized for retention queries |
 | `output` JSONB | schema-validated only (ADR-008 invariant) |
-| `created_at`, `last_hit_at` | |
+| `created_at` | |
 
 ## 3. Delta representation decisions
 
