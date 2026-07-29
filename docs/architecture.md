@@ -248,7 +248,7 @@ MCP tools are read-only views over compiled knowledge (retrieval + entity/delta 
 
 ## 15. Architecture Decision Records
 
-All eight foundational ADRs are written and **Accepted** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
+All ADRs are written and **Accepted** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
 
 - [ADR-001](decisions/ADR-001-postgresql.md) — PostgreSQL as the single knowledge store
 - [ADR-002](decisions/ADR-002-ci-trigger.md) — CI-invoked CLI trigger, reconcile-first
@@ -258,5 +258,9 @@ All eight foundational ADRs are written and **Accepted** — see [decisions/inde
 - [ADR-006](decisions/ADR-006-language-analyzers.md) — tree-sitter as the language-analyzer backbone
 - [ADR-007](decisions/ADR-007-plugin-architecture.md) — Plugin discovery via entry points, activation via config
 - [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) — LLM provider abstraction + content-addressed cache
+- [ADR-009](decisions/ADR-009-two-layer-ir.md) — Two-layer IR: Fact IR (plugin contract) + Knowledge IR (consumer contract)
+- [ADR-010](decisions/ADR-010-wiki-destination.md) — Wiki destination: dedicated branch in the compiled repo
+- [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) — Cross-repo dependency resolution: query-time config map (added 2026-07-20 during dogfood)
+- [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) — Defer VerificationRequirement entity; mutation-kill rate is the V1 sub-component precision signal (added 2026-07-29)
 
 Decisions still unresolved are listed in [decisions/index.md](decisions/index.md) with the future design document responsible for each.

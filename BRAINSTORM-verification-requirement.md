@@ -102,3 +102,5 @@ Does LLM-extracted verification obligations at sub-component granularity close a
 This decision warrants a new ADR (post-freeze additive decision, same precedent as ADR-011). Draft: **ADR-012: Defer VerificationRequirement entity; mutation-kill rate is the V1 signal for sub-component test precision.**
 
 Record: the triggering evidence, the option considered (Option A above), the deferral rationale, and the explicit trigger condition for revisiting (pattern of high declared-coverage + low mutation-kill at scale).
+
+**Done 2026-07-29** — created as [ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md) (Accepted).

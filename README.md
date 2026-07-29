@@ -190,7 +190,7 @@ On Windows, replace `/bin/kc` with `\\Scripts\\kc.exe`.
 
 ### MCP tools exposed
 
-`search_knowledge`, `get_entity`, `impact_plan`, `test_plan`, `resolve_dependency`, `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats` — see [docs/kc-cli-reference.md](docs/kc-cli-reference.md) for full parameter and return-value documentation.
+`search_knowledge`, `get_entity`, `impact_plan`, `test_plan`, `resolve_dependency` ([ADR-011](docs/decisions/ADR-011-cross-repo-dependency-resolution.md)), `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats` — see [docs/kc-cli-reference.md](docs/kc-cli-reference.md) for full parameter and return-value documentation.
 
 ## Retrieval (optional: semantic search)
 

@@ -165,4 +165,4 @@ The durable/disposable line, made explicit:
 
 ## References
 
-[ir.md](ir.md) · [ADR-001](decisions/ADR-001-postgresql.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-005](decisions/ADR-005-embeddings-pgvector.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · architecture.md §5
+[ir.md](ir.md) · [ADR-001](decisions/ADR-001-postgresql.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-005](decisions/ADR-005-embeddings-pgvector.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) · architecture.md §5

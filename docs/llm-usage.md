@@ -5,7 +5,7 @@
 | Purpose | Config section | Model family needed | Reads env var |
 |---|---|---|---|
 | Semantic extraction (business rules / features / risks) | `[llm]` | A **chat/completion GPT model** with Structured Outputs support — `gpt-4o` or `gpt-4o-mini` | `OPENAI_AZURE_DEPLOYMENT` |
-| Embeddings (semantic search vectors) | `[embeddings]` | A dedicated **embedding model** — `text-embedding-3-small` or `text-embedding-3-large` | `OPENAI_AZURE_EMBEDDING_DEPLOYMENT` ([embeddings.py:60](knowledge_compiler/llm/embeddings.py:60)) — separate variable from the chat deployment |
+| Embeddings (semantic search vectors) | `[embeddings]` | A dedicated **embedding model** — `text-embedding-3-small` or `text-embedding-3-large` | `OPENAI_AZURE_EMBEDDING_DEPLOYMENT` ([embeddings.py:60](../knowledge_compiler/llm/embeddings.py)) — separate variable from the chat deployment |
 
 You **can't** use a GPT chat model for embeddings, and you can't use an embedding model for extraction — they're architecturally different (embeddings produce a fixed-size vector, not text/JSON). Azure OpenAI requires you to deploy each as its own named deployment even under the same resource/endpoint.
 
