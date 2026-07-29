@@ -143,7 +143,7 @@ SQLite's trial-UX advantage is real and is deliberately conceded; the reference 
 Affected documents:
 
 - `architecture.md` §5
-- `data-model.md` (planned) — the entire schema
+- `data-model.md` — the entire schema
 - `storage.md` (planned) — operational guidance, migrations, backup
 
 Affected compiler stages:

@@ -145,8 +145,8 @@ Why A over the alternatives: B and D fail the Python-only/single-executable cons
 Affected documents:
 
 - `architecture.md` §8
-- `ir.md` (planned) — fact vocabulary and anchor representation analyzers must emit
-- `pipeline.md` (planned) — Extract stage contract
+- `ir.md` — fact vocabulary and anchor representation analyzers must emit
+- `pipeline.md` — Extract stage contract
 - `plugin-system.md` (planned) — analyzer and enrichment plugin registration
 
 Affected compiler stages:

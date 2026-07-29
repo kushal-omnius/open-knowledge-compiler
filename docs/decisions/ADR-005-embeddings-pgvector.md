@@ -141,8 +141,8 @@ Why A over the alternatives: B and D reintroduce the multi-store consistency pro
 Affected documents:
 
 - `architecture.md` §7
-- `data-model.md` (planned) — `embeddings` schema, model generations
-- `retrieval.md` (planned) — hybrid ranking over these vectors
+- `data-model.md` — `embeddings` schema, model generations
+- `retrieval.md` — hybrid ranking over these vectors
 
 Affected compiler stages:
 

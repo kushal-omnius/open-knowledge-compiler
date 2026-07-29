@@ -135,9 +135,9 @@ Why B over the alternatives: A stores history no consumer reads and taxes every 
 Affected documents:
 
 - `architecture.md` §5 (storage), §4 (Diff/Persist stages)
-- `ir.md` (planned) — delta document is an IR artifact
-- `data-model.md` (planned) — `entities`, `deltas`, `compile_runs` schemas
-- `pipeline.md` (planned) — Persist stage transactionality contract
+- `ir.md` — delta document is an IR artifact
+- `data-model.md` — `entities`, `deltas`, `compile_runs` schemas
+- `pipeline.md` — Persist stage transactionality contract
 
 Affected compiler stages:
 

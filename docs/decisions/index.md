@@ -10,7 +10,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** A single PostgreSQL database is the only persistent store, covering relations, JSONB payloads, full-text search, vectors, transactions, and advisory locks in one system.
 - **Dependencies:** none (foundation)
 - **Depended on by:** ADR-002 (advisory locks, read-only serve), ADR-003 (transactional persist), ADR-005 (pgvector), ADR-008 (cache in Postgres)
-- **Related documents:** architecture.md §5, data-model.md (planned), storage.md (planned)
+- **Related documents:** architecture.md §5, data-model.md, storage.md (planned)
 
 ### [ADR-002 — CI Trigger](ADR-002-ci-trigger.md)
 
@@ -18,7 +18,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Compilation is triggered by CI invoking `kc compile --pr N` on merge, made exactly-once and self-healing by mandatory reconcile-first processing and per-repo advisory locks; the serve process never compiles.
 - **Dependencies:** ADR-001 (locks), ADR-003 (`compile_runs` watermark, delta ordering), ADR-008 (cache bounds backlog cost); related: ADR-004 (in-order processing preserves matching state)
 - **Depended on by:** —
-- **Related documents:** architecture.md §3, pipeline.md (planned), mcp.md (planned)
+- **Related documents:** architecture.md §3, pipeline.md, mcp.md (planned)
 
 ### [ADR-003 — Current State + Delta Log](ADR-003-current-state-delta-log.md)
 
@@ -26,7 +26,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Compiled knowledge is stored as mutable current-state tables plus an append-only delta log, written in one transaction per compile; history is deltas, and the past is recompilable, not stored.
 - **Dependencies:** ADR-001 (transactions)
 - **Depended on by:** ADR-002 (watermarking), ADR-004 (identity matches against current state), ADR-005 (delta-driven re-embedding), ADR-008 (incremental economics)
-- **Related documents:** architecture.md §4–5, ir.md (planned), data-model.md (planned), pipeline.md (planned)
+- **Related documents:** architecture.md §4–5, ir.md, data-model.md, pipeline.md
 
 ### [ADR-004 — Stable Entity Identity](ADR-004-entity-identity.md)
 
@@ -34,7 +34,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Deterministic entities use natural keys; LLM-derived entities use a deterministic match-then-mint cascade (external key → anchor overlap → name similarity); the LLM never assigns identity; over-split beats over-merge; reproducibility holds modulo slug renaming.
 - **Dependencies:** ADR-003 (current state as matching target), ADR-008 (cache prevents extraction flapping)
 - **Depended on by:** ADR-002 (in-order processing), ADR-005 (embeddings excluded from identity), ADR-006 (anchors as extractor obligation), ADR-008 (identity invariant enforced at the LLM layer); vision.md Design Principle 8 originates here
-- **Related documents:** architecture.md §6, ir.md (planned), data-model.md (planned), pipeline.md (planned)
+- **Related documents:** architecture.md §6, ir.md, data-model.md, pipeline.md
 
 ### [ADR-005 — Embeddings](ADR-005-embeddings-pgvector.md)
 
@@ -42,7 +42,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Embeddings live in pgvector as derived, disposable, model-tagged artifacts computed from compiled entities (never raw source), re-embedded delta-first, and excluded from identity and deltas.
 - **Dependencies:** ADR-001 (single store), ADR-003 (delta-driven), ADR-004 (identity exclusion), ADR-007 (embedding/retrieval providers as plugins)
 - **Depended on by:** —
-- **Related documents:** architecture.md §7, data-model.md (planned), retrieval.md (planned)
+- **Related documents:** architecture.md §7, data-model.md, retrieval.md
 
 ### [ADR-006 — Language Analyzer](ADR-006-language-analyzers.md)
 
@@ -50,7 +50,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** tree-sitter is the mandatory language-analyzer backbone (in-process Python, no Node.js) with optional per-language enrichment plugins; the deterministic pass must alone produce a correct structural knowledge base.
 - **Dependencies:** ADR-007 (analyzers are plugins); related: ADR-004 (anchors feed the identity cascade)
 - **Depended on by:** —
-- **Related documents:** architecture.md §8, §12, ir.md (planned), pipeline.md (planned), plugin-system.md (planned)
+- **Related documents:** architecture.md §8, §12, ir.md, pipeline.md, plugin-system.md (planned)
 
 ### [ADR-007 — Plugin Architecture](ADR-007-plugin-architecture.md)
 
@@ -58,7 +58,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Plugins are discovered via packaging entry points and activated only by explicit `kc.toml` configuration; installing a package never changes compilation output; built-ins have no privileged path; interfaces are versioned and fail loudly.
 - **Dependencies:** none (foundation)
 - **Depended on by:** ADR-005 (providers), ADR-006 (analyzers), ADR-008 (LLM providers)
-- **Related documents:** architecture.md §9, plugin-system.md (planned), pipeline.md (planned)
+- **Related documents:** architecture.md §9, plugin-system.md (planned), pipeline.md
 
 ### [ADR-008 — LLM Abstraction](ADR-008-llm-abstraction-caching.md)
 
@@ -66,7 +66,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** LLM access goes through one thin schema-validated provider interface (providers as plugins) with a load-bearing content-addressed cache in Postgres keyed by (prompt template version, model, input content) — making full recompilation affordable and extraction output stable.
 - **Dependencies:** ADR-001 (cache storage), ADR-003 (incremental economics), ADR-007 (providers as plugins)
 - **Depended on by:** ADR-002 (backlog catch-up cost), ADR-004 (flapping prevention assumption)
-- **Related documents:** architecture.md §10, §12, data-model.md (planned), pipeline.md (planned), plugin-system.md (planned)
+- **Related documents:** architecture.md §10, §12, data-model.md, pipeline.md, plugin-system.md (planned)
 
 ### [ADR-009 — Two-Layer IR](ADR-009-two-layer-ir.md)
 
@@ -74,7 +74,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** The canonical IR has two versioned layers with a directional boundary — Fact IR (per-compile extraction output, identity-free, the plugin contract) and Knowledge IR (durable entities + relationships, the consumer contract) — with Normalize as the only crossing point; the delta is a derived Knowledge IR artifact.
 - **Dependencies:** ADR-003 (delta as derived artifact), ADR-004 (entity definition, identity boundary), ADR-006 (analyzers emit canonical facts), ADR-007 (fail-loud policy), ADR-008 (validated LLM candidates)
 - **Depended on by:** — (implemented by `ir.md`)
-- **Related documents:** ir.md (implements it), data-model.md (planned), pipeline.md (planned), plugin-system.md (planned)
+- **Related documents:** ir.md (implements it), data-model.md, pipeline.md, plugin-system.md (planned)
 
 ### [ADR-010 — Wiki Destination](ADR-010-wiki-destination.md)
 

@@ -91,6 +91,7 @@ No API keys required — the deterministic compiler produces components, APIs, d
 
 | Command | What it does |
 |---|---|
+| `kc init --slug <slug> --forge-ref <ref>` | Register a repo: run migrations, insert repo row, write `kc.toml`. Run once before first compile. |
 | `kc compile --full` | Bootstrap / escape-hatch full compilation |
 | `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
 | `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |

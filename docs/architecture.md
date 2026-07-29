@@ -4,7 +4,7 @@
 > Derived from `docs/vision.md` (committed direction) and `INITIAL-Brainstorm.md` (exploratory).
 > This document selects an implementation architecture; it does not re-litigate the vision.
 > Decisions marked **[ADR]** must be recorded in `docs/decisions/` before implementation begins.
-> Last updated: 2026-07-17
+> Last updated: 2026-07-29
 
 ---
 
@@ -36,11 +36,11 @@ The vision intentionally leaves these open. Each is listed with the reasonable o
 | A5 | Target-language parsing | tree-sitter · per-language native tooling (ast, TS compiler API) | **tree-sitter backbone, optional per-language enrichment** | **ADR-006** |
 | A6 | Plugin discovery | entry points · config-file registry · both | **Entry points for discovery, config for activation** | **ADR-007** |
 | A7 | LLM provider & caching | direct SDK · litellm-style router · thin custom interface | **Thin custom interface + content-addressed cache in Postgres** | **ADR-008** |
-| A8 | Wiki destination | directory in target repo · separate git branch · standalone output dir | **Standalone output directory, publisher pluggable** | flag only |
+| A8 | Wiki destination | directory in target repo · separate git branch · standalone output dir | **Dedicated `knowledge/wiki` branch in the compiled repo; publisher pluggable** | **ADR-010** |
 | A9 | DB access layer | raw SQL · SQLAlchemy + Alembic | SQLAlchemy Core + Alembic | no (reversible) |
 | A10 | Retrieval ranking | FTS only · vector only · hybrid RRF | Hybrid with Reciprocal Rank Fusion | no (tunable later) |
 
-Details and tradeoffs in the sections below. All eight ADRs referenced in this table have since been written and **Accepted** (see §15 and [decisions/index.md](decisions/index.md)); the recommendations below are now decisions.
+Details and tradeoffs in the sections below. All ADRs referenced in this table (A1–A8) have since been written and **Accepted** (see §15 and [decisions/index.md](decisions/index.md)); the recommendations below are now decisions.
 
 ---
 

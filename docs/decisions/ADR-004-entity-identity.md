@@ -208,9 +208,9 @@ This ADR establishes rules that every future component MUST obey — they are no
 Affected documents:
 
 - `architecture.md` §6 — this ADR refines the matching cascade order and adds the reproducibility-modulo-renaming statement (architecture.md to be updated after acceptance; not modified by this ADR)
-- `ir.md` (planned) — the canonical IR relies on the entity definition and invariants established here: every IR entity carries a stable slug, and identity fields are outside the LLM-writable surface
-- `data-model.md` (planned) — `entities.natural_key`, slug format, match-evidence columns (fired rule + numeric signals) in `provenance`
-- `pipeline.md` (planned) — Normalize stage contract gains the matching step; Diff consumes matched identities
+- `ir.md` — the canonical IR relies on the entity definition and invariants established here: every IR entity carries a stable slug, and identity fields are outside the LLM-writable surface
+- `data-model.md` — `entities.natural_key`, slug format, match-evidence columns (fired rule + numeric signals) in `provenance`
+- `pipeline.md` — Normalize stage contract gains the matching step; Diff consumes matched identities
 
 Affected compiler stages:
 
@@ -240,5 +240,5 @@ Revisit this ADR if:
 
 - `docs/vision.md` — Design Principles 3 (deterministic whenever possible) and 5 (reproducible ≙ semantically equivalent; nondeterminism in wording, never in provenance or structure)
 - `docs/architecture.md` — §6 (entity identity), §4 (pipeline: Normalize/Diff), §14 (challenge #2)
-- ADR-003 (planned) — current-state + delta log: the state this cascade matches against
-- ADR-008 (planned) — LLM cache: prevents extraction flapping, making match inputs stable
+- ADR-003 — current-state + delta log: the state this cascade matches against
+- ADR-008 — LLM cache: prevents extraction flapping, making match inputs stable

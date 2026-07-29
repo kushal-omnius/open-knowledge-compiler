@@ -142,7 +142,7 @@ Affected documents:
 
 - `architecture.md` §9
 - `plugin-system.md` (planned) — the detailed contract per interface, versioning and deprecation policy
-- `pipeline.md` (planned) — how the orchestrator resolves and orders activated plugins
+- `pipeline.md` — how the orchestrator resolves and orders activated plugins
 
 Affected compiler stages:
 

@@ -155,8 +155,8 @@ Why A over the alternatives: B imports a dependency treadmill and still doesn't 
 Affected documents:
 
 - `architecture.md` §10, §12
-- `data-model.md` (planned) — `llm_cache` schema, retention
-- `pipeline.md` (planned) — Extract stage cache consultation, budget-cap halt semantics
+- `data-model.md` — `llm_cache` schema, retention
+- `pipeline.md` — Extract stage cache consultation, budget-cap halt semantics
 - `plugin-system.md` (planned) — `LLMProvider` interface contract
 
 Affected compiler stages:

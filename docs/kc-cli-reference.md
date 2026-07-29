@@ -196,6 +196,7 @@ precision/recall vs test_plan(component/backend-storage-blob-utils):
   missed (recall gap):  component/backend-integrations-base, ...
   recall:    72.2%
   ceiling (black-box / api-kind only): 13/18 = 72.2%  [5 symbols-kind target(s) require unit tests]
+  extraneous claims (exist, not recommended): component/unrelated-module
 ```
 
 The ceiling line appears only when the gap contains symbols-kind targets — components with no HTTP surface whose public functions can only be reached by unit tests importing them directly. A score at the ceiling is at the achievable maximum for a black-box test; closing the remaining recall gap requires switching to unit tests that import internal symbols.
@@ -311,23 +312,31 @@ slug = "my-service"
 forge_ref = "github.com/acme/my-service"
 default_branch = "main"
 
+[wiki]
+# Local publication directory; the branch publisher ships it when enabled (ADR-010).
+output_dir = "kc-wiki"
+
+[publisher]
+# Ship the wiki to a dedicated branch (ADR-010: knowledge/wiki). Explicit opt-in.
+enabled = false
+branch = "knowledge/wiki"
+remote = "origin"
+push = true
+
 [llm]
 enabled = false
 provider = "anthropic"          # anthropic | openai | azure-openai | cloudflare
+max_calls_per_run = 200
 
 [embeddings]
 enabled = false
 provider = "openai"             # openai | azure-openai
-
-[wiki]
-enabled = true
-output_dir = "kc-wiki"
-publish_branch = "kc-wiki"
+# model = "text-embedding-3-small"
 
 [jira]
 enabled = false
 
 [dependencies]
-# Cross-repo: map import prefixes to other compiled repo slugs
+# Cross-repo: map import prefixes to other compiled repo slugs (ADR-011)
 # omnius_llmlib = "omnius-llmlib"
 ```

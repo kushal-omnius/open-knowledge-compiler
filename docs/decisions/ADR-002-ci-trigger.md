@@ -146,7 +146,7 @@ Why A over the alternatives: B pays for a standing service and still needs A's r
 Affected documents:
 
 - `architecture.md` §3
-- `pipeline.md` (planned) — Collect scope per trigger type; reconciliation algorithm detail
+- `pipeline.md` — Collect scope per trigger type; reconciliation algorithm detail
 - `mcp.md` (planned) — serve process boundaries (read-only invariant)
 
 Affected compiler stages:
