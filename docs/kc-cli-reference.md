@@ -20,7 +20,7 @@ kc init --slug <slug> --forge-ref <ref> [--default-branch <branch>] [--dir <path
 
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
-| `--slug` | yes | — | Unique identifier for this repo in the knowledge base (e.g. `frida`). |
+| `--slug` | yes | — | Unique identifier for this repo in the knowledge base (e.g. `knowledge-compiler`). |
 | `--forge-ref` | yes | — | Canonical forge reference (e.g. `github.com/org/repo`). |
 | `--default-branch` | no | `main` | Branch the compiler tracks. |
 | `--dir` | no | `.` | Directory to write `kc.toml` into. |
@@ -125,7 +125,7 @@ kc inspect
 
 Example output:
 ```
-repository: frida
+repository: knowledge-compiler
 entities: 2765
   component: 312
   feature: 517
@@ -345,5 +345,5 @@ enabled = false
 
 [dependencies]
 # Cross-repo: map import prefixes to other compiled repo slugs (ADR-011)
-# omnius_llmlib = "omnius-llmlib"
+# repoB = "repoB"
 ```

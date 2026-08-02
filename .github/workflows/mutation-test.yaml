@@ -8,8 +8,7 @@ name: Mutation Testing (manual)
 # ubuntu-latest specifically because mutmut 3.x has no native Windows
 # support (mutmut#397) — this sidesteps needing WSL on a local dev machine.
 
-# Generalized (2026-07-22) to also run against the dogfood repos (frida,
-# omnius_llmlib — both in the omni-us-ea org, not this repo's org): checkout
+# Generalized (2026-07-22) to also run against the dogfood repos: checkout
 # now targets an arbitrary repo/ref via inputs, defaulting to this repo when
 # left blank so the original knowledge-compiler-only usage is unchanged.
 # Cross-org checkout needs a PAT with read access to omni-us-ea — the

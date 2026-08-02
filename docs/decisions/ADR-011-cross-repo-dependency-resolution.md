@@ -12,7 +12,7 @@ Accepted
 
 Each repository compiles into an isolated `repo_id` partition of one shared Postgres database (ADR-001). When a component in one repo imports a package that is itself another repo compiled into the same database, the compiler has no way to recognize that — the import shows up as an opaque string in `external_dependencies`, indistinguishable from a genuine third-party library. `decisions/index.md` (line 143) flagged this as a pre-milestone-3 design item, needed before test generation can reason across a dependency boundary (vision.md use case 4).
 
-The dogfood repos gave this real grounding: `frida/backend/requirements.txt` pins `omnius-llmlib[bm25,phoenix]==2.10.2`, and multiple frida files `import omnius_llmlib` — a live cross-repo dependency between two repos already compiled into this database, not a hypothetical.
+The dogfood repos gave this real grounding: `repoA/backend/requirements.txt` pins `repoB[bm25,phoenix]==2.10.2`, and multiple repoA files `import repoB` — a live cross-repo dependency between two repos already compiled into this database, not a hypothetical.
 
 `BRAINSTORM-cross-repo-dependencies.md` worked through the option space in detail (refinement mode, starting from the coordinate-resolution sketch already recorded at `decisions/index.md:143`). This ADR records the outcome.
 
@@ -39,7 +39,7 @@ Leave `external_dependencies` opaque; answer cross-repo questions by manually op
 
 A `[dependencies]` table (coordinate → repo slug) resolved entirely in the `kc serve` query layer. No Normalize, Persist, or schema changes.
 
-**Pros:** ships in hours; handles real naming mismatches (PyPI package `omnius_llmlib`, repo slug `omnius-llmlib`) trivially as one config entry; two-way door.
+**Pros:** ships in hours; handles real naming mismatches (PyPI package `repoB`, repo slug `repoB`) trivially as one config entry; two-way door.
 **Cons:** the mapping is per-installation config, not compiled knowledge — invisible to the delta log; every consumer (wiki, MCP, future test-gen) must independently apply it.
 
 ### Option C — Coordinate-tagged facts + compile-time resolver → `Project`-to-`Project` rollup edge
@@ -61,11 +61,11 @@ Normalize reads another repo's already-persisted state during compile and create
 **Option B — query-time resolution via a `kc.toml` `[dependencies]` config map.** No Normalize, Persist, or schema changes. Implemented as:
 
 - `kc.toml`'s `[dependencies]` section (added to the `kc init` template): keys are the dependency coordinate as observed by the analyzer, values are the target's registered `repository.slug`.
-- `mcp/queries.py::resolve_dependency(session, coordinate, dep_map)` — looks up a coordinate by **exact match or dotted prefix** (the same submodule-import pattern `normalize.py`'s internal resolver handles: `omnius_llmlib.core.predict` must match a `omnius_llmlib` config key), and if it names a registered repo, returns that repo's slug, project entity, and entity counts.
+- `mcp/queries.py::resolve_dependency(session, coordinate, dep_map)` — looks up a coordinate by **exact match or dotted prefix** (the same submodule-import pattern `normalize.py`'s internal resolver handles: `repoB.core.predict` must match a `repoB` config key), and if it names a registered repo, returns that repo's slug, project entity, and entity counts.
 - `mcp/queries.py::get_entity()` annotates `component`-type entities with a `cross_repo_dependencies` list, resolving every `external_dependencies` entry against the map.
 - A standalone `resolve_dependency` MCP tool for direct lookups without an entity slug.
 
-Validated against the real dogfood pair: `frida`'s `component/backend-app` correctly resolves both `omnius_llmlib.core.output` and `omnius_llmlib.core.predict` to the registered `omnius-llmlib` repo (123 components, 256 test_coverage entities).
+Validated against the real dogfood pair: `repo A`'s `component/backend-app` correctly resolves both `repoB.core.output` and `repoB.core.predict` to the registered `repo B` repo (123 components, 256 test_coverage entities).
 
 **Option C is not rejected — it is deferred**, exactly as ADR-010 deferred its static-site publisher option. The brainstorm's decisive uncertainty — whether milestone 3's test-generation use case needs component-level granularity from day one, or whether "depends on repo X, go read its wiki" is sufficient for a first cut — is unresolved, and resolving it is cheaper after the milestone-3 evaluation-methodology question (`decisions/index.md:142`) is answered than before. Building Option C's schema/resolver machinery now, against an unvalidated granularity assumption, would risk the same "confident but wrong" failure mode this ADR is designed to avoid (see Option D's rejection).
 
@@ -82,7 +82,7 @@ Option D remains rejected for the reasons above; revisiting it requires either a
 
 ### Positive
 
-- Unblocks the concrete dogfood use case (frida ↔ omnius_llmlib) with an afternoon of work, not a schema migration.
+- Unblocks the concrete dogfood use case (repo A ↔ repo B) with an afternoon of work, not a schema migration.
 - Reversible: Option C or D can be layered on later without deprecating this mechanism.
 - Naming mismatches (PyPI/npm package name vs. registered repo slug) are handled by explicit config, not guessed.
 
@@ -106,7 +106,7 @@ Option D remains rejected for the reasons above; revisiting it requires either a
 
 ## Assumptions
 
-- The two-repo dogfood pair (frida, omnius_llmlib) is representative enough of near-term cross-repo needs to validate this mechanism before generalizing.
+- The two-repo dogfood pair (repo A, repo B used as a dependency in repo A) is representative enough of near-term cross-repo needs to validate this mechanism before generalizing.
 - Milestone 3's actual granularity requirement is still unknown — this ADR deliberately does not guess it.
 
 ## Open Questions

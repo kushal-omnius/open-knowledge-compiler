@@ -8,11 +8,11 @@
 ## Constraints & assumptions
 
 **Hard constraints:**
-- Real dogfood repos (frida, omnius_llmlib) are the evaluation target, not a synthetic benchmark.
+- Real dogfood repos (repoA, repoB) are the evaluation target, not a synthetic benchmark.
 - Both automated and human-review evaluation capacity exist; automated should carry most of the load (per the answered questions — safety-net + coverage-gap are the ranked priorities, both automatable in principle).
 - Provenance is non-negotiable (vision DP 4) — a generated test's claims about what it covers must be checkable against the compiled KB, not just asserted.
 
-**Grounding from `frida-testing/playwright`** (scoped narrowly, per correction — not the parent `frida-testing` workspace, which covers unrelated LLM-evaluation tooling):
+**Grounding from `repoA-testing/playwright`** (scoped narrowly, per correction — not the parent `repoA-testing` workspace, which covers unrelated LLM-evaluation tooling):
 - Test files declare a structured docstring header enumerating the **exact endpoints they cover** (method + path) and cite the **specific backend source file/permission model** behind assertions (e.g. `test_claims.py`'s header lists all 14 `/api/claims/*` endpoints and notes "see `backend/claims/routes.py`" for permission behavior).
 - Timeouts are always explicit, sized and commented to the endpoint's actual behavior (DB-backed vs. LLM-backed) — not guessed.
 - The `api`/`ui`/`e2e` tier split exists, but `api` being more built-out so far is a **pilot-stage fact, not a stated team preference** (corrected during this session — do not treat it as a design principle).
@@ -20,7 +20,7 @@
 
 **What this grounding actually tells us:** the team's own bar for "this test is well-formed" is **declared, structured traceability to the exact real thing being verified** — not vibes, not raw prose. `test_claims.py`'s "Endpoints covered:" header is doing, by hand, almost exactly what Knowledge Compiler's `api` entities (`method`, `route`, `handler`, `defined_in`) already represent as compiled, machine-readable state. That's the concrete anchor point for a measurable definition of "better."
 
-**Assumption made without asking:** milestone-3 test generation, if built, most plausibly targets source-level tests colocated with frida's/omnius_llmlib's own repos (the same tier as `backend/tests/test_claims.py`, which Knowledge Compiler already compiles as `test_coverage` entities) — not the separate live-environment Playwright suite, which needs infrastructure (deployed app, Keycloak, real claim data) outside anything the compiler touches. If this assumption is wrong, several options below (especially the mutation-testing ones) need rethinking, since mutation testing requires running the target code directly.
+**Assumption made without asking:** milestone-3 test generation, if built, most plausibly targets source-level tests colocated with repoA's/repoB's own repos (the same tier as `backend/tests/test_claims.py`, which Knowledge Compiler already compiles as `test_coverage` entities) — not the separate live-environment Playwright suite, which needs infrastructure (deployed app, Keycloak, real claim data) outside anything the compiler touches. If this assumption is wrong, several options below (especially the mutation-testing ones) need rethinking, since mutation testing requires running the target code directly.
 
 **Success criterion:** a methodology exists such that, given a set of Knowledge-Compiler-generated tests, a single measurable score (or small vector of scores) can be computed largely without manual review, and that score should correlate with whether the tests would actually catch a real regression.
 
@@ -60,7 +60,7 @@
 
 ### Option C: Declared-coverage + mutation-kill rate + periodic human spot-check (recommended)
 
-**Sketch:** Extend Option B with an execution-based signal: for each generated test, run mutation testing (e.g. `mutmut` for Python, since frida's backend and omnius_llmlib are both Python — flagged as an assumption pending a real tooling check, not verified fresh this session) scoped to *only* the source file(s) the test's declared header cites. A test "passes" quality-wise if (a) its declared coverage is accurate (Option B) and (b) it kills a meaningful fraction of mutants introduced specifically in the cited entity's implementation. A small, periodic human-review sample (mirroring the "spot-check" capacity you said exists) checks for the failure mode Option B alone can't catch — a test that's structurally honest and kills mutants, but is still testing the wrong thing in spirit (e.g. asserting an implementation detail rather than the actual business rule).
+**Sketch:** Extend Option B with an execution-based signal: for each generated test, run mutation testing (e.g. `mutmut` for Python, since repoA's backend and repoB are both Python — flagged as an assumption pending a real tooling check, not verified fresh this session) scoped to *only* the source file(s) the test's declared header cites. A test "passes" quality-wise if (a) its declared coverage is accurate (Option B) and (b) it kills a meaningful fraction of mutants introduced specifically in the cited entity's implementation. A small, periodic human-review sample (mirroring the "spot-check" capacity you said exists) checks for the failure mode Option B alone can't catch — a test that's structurally honest and kills mutants, but is still testing the wrong thing in spirit (e.g. asserting an implementation detail rather than the actual business rule).
 
 **Pros:** Directly answers both ranked priorities (safety-net via mutation-kill rate, coverage-gap via the declared-coverage cross-check against `coverage_for`'s existing uncovered-component list) with a composite score, not just one axis. Mutation-scoping to only the cited entity keeps the expensive part (running mutation testing) bounded instead of running it over entire files/repos.
 
@@ -92,13 +92,13 @@
 
 ### Option E: Historical-bug-replay (contrarian option)
 
-**Sketch:** Knowledge Compiler's own delta log (ADR-003) already tracks PR-level history with old→new values and `which_pr_introduced`. Identify past bug-fixing PRs in frida/omnius_llmlib's real history, check out the pre-fix commit, run a Knowledge-Compiler-generated test (written from the post-fix understanding of the relevant business rule) against the pre-fix code, and require it to **fail** there and **pass** post-fix. Success is measured as: what fraction of known historical bugs would this generated test suite have caught, had it existed at the time?
+**Sketch:** Knowledge Compiler's own delta log (ADR-003) already tracks PR-level history with old→new values and `which_pr_introduced`. Identify past bug-fixing PRs in repoA/repoB's real history, check out the pre-fix commit, run a Knowledge-Compiler-generated test (written from the post-fix understanding of the relevant business rule) against the pre-fix code, and require it to **fail** there and **pass** post-fix. Success is measured as: what fraction of known historical bugs would this generated test suite have caught, had it existed at the time?
 
 **Pros:** Uses real, already-compiled project history as ground truth instead of synthetic mutants or human judgment — arguably the most rigorous signal available, and uniquely enabled by Knowledge Compiler's own delta log (no other option in this document could reuse compiled state this directly). Directly validates the "regression safety net" priority in the most literal sense: would this actually have caught a real bug.
 
-**Cons:** Requires identifying which historical PRs were genuine bug fixes (not every PR is) — likely needs either commit-message heuristics or a human-tagged sample, an upfront cost this document doesn't scope. Also requires being able to check out and run old commits of frida/omnius_llmlib in isolation, which needs a runnable environment for arbitrary historical revisions (dependencies, migrations, etc. as they were then) — a real operational cost, not just a query.
+**Cons:** Requires identifying which historical PRs were genuine bug fixes (not every PR is) — likely needs either commit-message heuristics or a human-tagged sample, an upfront cost this document doesn't scope. Also requires being able to check out and run old commits of repoA/repoB in isolation, which needs a runnable environment for arbitrary historical revisions (dependencies, migrations, etc. as they were then) — a real operational cost, not just a query.
 
-**Pre-mortem:** Six months on, the historical-bug corpus turns out tiny (most PRs in frida's history are features, not bug fixes) or the old-revision runnability problem (stale dependencies, broken migrations at old commits) makes replay too flaky to trust, and the option quietly degrades into "run it against the 3 bugs we could get working" — directionally right but statistically thin.
+**Pre-mortem:** Six months on, the historical-bug corpus turns out tiny (most PRs in repoA's history are features, not bug fixes) or the old-revision runnability problem (stale dependencies, broken migrations at old commits) makes replay too flaky to trust, and the option quietly degrades into "run it against the 3 bugs we could get working" — directionally right but statistically thin.
 
 **Reversibility:** Two-way as an evaluation technique (nothing about generated tests themselves depends on it), but building the historical-replay harness is a real one-time investment that doesn't transfer if abandoned.
 
@@ -156,7 +156,7 @@ kc-covers:
 
 **Decision: track scores as a reported metric, no hard gate, for now.** 64.4% on `normalize.py` is exactly one data point — not enough to know whether 64% is good, bad, or typical for this codebase's actual testing style. Setting a hard threshold on one data point risks two real failure modes: too strict (blocking legitimate work on modules that simply have less test infrastructure built up yet) or too lax (manufacturing false confidence from a number nobody calibrated). Standard practice for introducing a new quality metric is measure-first, gate-later — the same instinct that made the M3 brainstorm itself insist on running a spike before committing to Option C's mechanism.
 
-**Revisit condition:** once mutation scores exist for several more modules across both dogfood repos, review the actual distribution and set a threshold informed by real data — likely per-repo or per-language rather than one global number, since frida (product code, real business logic) and omnius_llmlib (an LLM-tooling library) plausibly have different natural ceilings that a single global gate would flatten incorrectly.
+**Revisit condition:** once mutation scores exist for several more modules across both dogfood repos, review the actual distribution and set a threshold informed by real data — likely per-repo or per-language rather than one global number, since repoA (product code, real business logic) and repoB (an LLM-tooling library) plausibly have different natural ceilings that a single global gate would flatten incorrectly.
 
 ## Next steps
 
@@ -164,7 +164,7 @@ kc-covers:
 2. ~~Define the declared-coverage header format~~ **Done 2026-07-20** — see above.
 3. ~~Decide the mutation-score threshold question~~ **Done 2026-07-20** — track-only for now, see above.
 4. ~~Revisit `decisions/index.md:159`'s "Verification Requirement" entity question once the declared-coverage convention has run long enough in practice to know whether it deserves to graduate from test metadata into compiled Knowledge IR state (which would need its own ADR, per that item's note).~~ **Done 2026-07-29** — resolved by [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md): deferred; mutation-kill rate is the V1 sub-component precision signal. See `BRAINSTORM-verification-requirement.md` for the full options analysis.
-5. ~~Run mutation testing against a few more modules~~ **Partially done 2026-07-22** — three more Knowledge-Compiler modules run (see distribution below); frida/omnius_llmlib still pending on cross-org CI access (see note).
+5. ~~Run mutation testing against a few more modules~~ **Partially done 2026-07-22** — three more Knowledge-Compiler modules run (see distribution below); repoA/repoB still pending on cross-org CI access (see note).
 6. Begin the actual milestone-3 test-generation mechanism design, now with a defined success metric (declared-coverage + mutation-kill) to build toward.
 
 ### Mutation-score distribution (2026-07-22)
@@ -180,4 +180,4 @@ Ran via the same `mutation-test.yaml` GitHub Actions workflow (`workflow_dispatc
 
 **Reading this, not over-reading it (still 4 data points, not a calibrated baseline):** `normalize.py` and `typescript_analyzer.py` — the two modules with the most branching, edge-case logic (the identity cascade; tsconfig alias resolution + JSONC parsing) — score lowest, while `diff.py` and `python_analyzer.py` score highest. Directionally consistent with "more intricate control flow is harder to fully exercise," but this is four modules in one repo, still short of the "several more modules across both dogfood repos" the threshold decision above asked for.
 
-**Decided against, 2026-07-22: frida/omnius_llmlib mutation runs via this workflow.** The cross-org checkout path needs a `CROSS_REPO_TOKEN` repo secret scoped to `omni-us-ea` — not something that will be provisioned, so this path is closed, not just pending. The `target_repo` input stays in `mutation-test.yaml` (harmless, no cost if unused) but the distribution above will not be extended to the other dogfood repos through it. If frida/omnius_llmlib mutation scores are wanted later, the workflow would need to live in each of those repos' own CI instead — a real re-scoping, not a config tweak, and out of scope for now.
+**Decided against, 2026-07-22: repoA/repoB mutation runs via this workflow.** The cross-org checkout path needs a `CROSS_REPO_TOKEN` repo secret scoped to `omni-us-ea` — not something that will be provisioned, so this path is closed, not just pending. The `target_repo` input stays in `mutation-test.yaml` (harmless, no cost if unused) but the distribution above will not be extended to the other dogfood repos through it. If repoA/repoB mutation scores are wanted later, the workflow would need to live in each of those repos' own CI instead — a real re-scoping, not a config tweak, and out of scope for now.

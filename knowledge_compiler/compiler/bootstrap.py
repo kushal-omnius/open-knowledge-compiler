@@ -59,7 +59,7 @@ provider = "openai"
 # same database; nothing here is compiled state, no Normalize/schema changes).
 # Keys are the coordinate as observed by the analyzer (e.g. a bare import
 # name); values are that dependency's registered `repository.slug`.
-#   omnius_llmlib = "omnius-llmlib"
+#   repoB = "repoB"
 
 [jira]
 # Collector (Collect stage): fetches issues linked from a merged PR's

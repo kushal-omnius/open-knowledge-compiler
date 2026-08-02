@@ -87,7 +87,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 ### [ADR-011 — Cross-Repo Dependency Resolution](ADR-011-cross-repo-dependency-resolution.md)
 
 - **Status:** Accepted
-- **Summary:** Cross-repo dependency resolution (e.g. frida importing `omnius_llmlib`) is query-time only for V1 — a `kc.toml` `[dependencies]` config map resolved in `kc serve`, matched exact-or-dotted-prefix. No Normalize/Persist/schema changes, no cross-`repo_id` reads during compile. The richer compiled `Project`-to-`Project` rollup edge (or full fine-grained cross-repo entity resolution) is explicitly deferred, not rejected, pending the milestone-3 evaluation-methodology question.
+- **Summary:** Cross-repo dependency resolution (e.g. `X` importing `Y`) is query-time only for V1 — a `kc.toml` `[dependencies]` config map resolved in `kc serve`, matched exact-or-dotted-prefix. No Normalize/Persist/schema changes, no cross-`repo_id` reads during compile. The richer compiled `Project`-to-`Project` rollup edge (or full fine-grained cross-repo entity resolution) is explicitly deferred, not rejected, pending the milestone-3 evaluation-methodology question.
 - **Dependencies:** ADR-001 (`repo_id` isolation invariant), ADR-004 (over-split-over-merge bias, extended to cross-repo linking)
 - **Depended on by:** —
 - **Related documents:** `BRAINSTORM-cross-repo-dependencies.md`, retrieval.md §5

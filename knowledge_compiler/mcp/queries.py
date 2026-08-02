@@ -27,7 +27,7 @@ def resolve_dependency(session: Session, coordinate: str,
     """Cross-repo dependency resolution (query-time only, kc.toml `[dependencies]`
     config map — no compiled edge, no Normalize/schema involvement). Looks up
     `coordinate` (an external_dependencies string as observed by the analyzer,
-    e.g. `omnius_llmlib.core.predict` for a `from omnius_llmlib.core.predict
+    e.g. `repoB.core.predict` for a `from repoB.core.predict
     import ...`) against the map by exact match or dotted-prefix — the same
     submodule-import pattern normalize.py's internal resolver handles — and if
     it names another repo compiled into this same database, returns that
