@@ -54,15 +54,39 @@ kc init \
 
 This writes a `kc.toml` into `/path/to/my-service` and registers the repo in Postgres.
 
-**Step 2 — Compile** (run from anywhere, `--dir` points at the repo):
+**Step 2 — Load credentials** (if using LLM / embeddings):
+
+KC reads env vars directly — it does not auto-load `.env` files. Load them before compiling:
 
 ```bash
-kc compile --full --dir /path/to/my-service
+# PowerShell
+Get-Content .env | ForEach-Object { if ($_ -match '^([^#][^=]*)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), 'Process') } }
+
+# macOS / Linux
+set -a && source .env && set +a
 ```
 
-This runs the full pipeline: Git history → code analysis → entity extraction → wiki generation. First run takes a minute or two depending on repo size.
+Or use `python-dotenv` (no shell quoting issues):
 
-**Step 3 — Inspect results:**
+```bash
+pip install python-dotenv
+python -m dotenv run -- kc compile --full --dir /path/to/my-service
+```
+
+Skip this step entirely if running `--no-llm` (no credentials needed for the deterministic pass).
+
+**Step 3 — Compile** (run from anywhere, `--dir` points at the repo):
+
+```bash
+kc compile --full --dir /path/to/my-service        # with LLM (requires credentials)
+kc compile --full --no-llm --dir /path/to/my-service  # deterministic only, no credentials
+```
+
+This runs the full pipeline: Git history → code analysis → entity extraction → wiki generation. First run takes a minute or two depending on repo size. During the run, `[llm] i/n <file> --changed` lines stream to stderr for each file that required a real LLM call (cache hits are silent); `[embed] n/total <N> entities --changed` lines stream once per batch of 64 dirty entities. Add `-v` to see a per-slug entity breakdown in the final summary.
+
+A run with `--no-llm` is marked `degraded` — it produces all structural entities (Component, API, TestCoverage, PullRequest) but skips Feature, BusinessRule, and Risk extraction. Previously extracted semantic entities are never removed by a degraded run.
+
+**Step 4 — Inspect results:**
 
 ```bash
 kc inspect --dir /path/to/my-service
@@ -78,7 +102,7 @@ last compile: run 1 @ a3f9c1d — delta add:312  change:0  remove:0
 
 A browsable Markdown wiki is written to `kc-wiki/` inside the analyzed repo.
 
-**Step 4 — Verify (optional):**
+**Step 5 — Verify (optional):**
 
 ```bash
 kc verify --dir /path/to/my-service
@@ -93,9 +117,11 @@ No API keys required — the deterministic compiler produces components, APIs, d
 |---|---|
 | `kc init --slug <slug> --forge-ref <ref>` | Register a repo: run migrations, insert repo row, write `kc.toml`. Run once before first compile. |
 | `kc compile --full` | Bootstrap / escape-hatch full compilation |
+| `kc compile --full -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
 | `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
 | `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
+| `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
 | `kc validate-test <file> --for-entity <slug>` | Score a generated test's `kc-covers:` header against compiled knowledge; exits 1 if header missing or any slug doesn't exist ([ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md)) |
@@ -219,6 +245,34 @@ kc compile --full    # embeds dirty entities as a post-persist stage; re-run aft
 ```
 
 See [docs/retrieval.md](docs/retrieval.md) for the retrieval design.
+
+## Cross-repo workflows
+
+When Repo A depends on Repo B, and a QA agent writes tests in Repo C, compile all repos into the same KC database and declare the dependency in `kc.toml`:
+
+```bash
+# Compile both repos into the same KC_DATABASE_URL
+kc init --slug repo-b --forge-ref github.com/org/repo-b --dir /path/to/repoB
+kc compile --full --dir /path/to/repoB
+
+kc init --slug repo-a --forge-ref github.com/org/repo-a --dir /path/to/repoA
+kc compile --full --dir /path/to/repoA
+```
+
+In Repo A's `kc.toml`:
+
+```toml
+[dependencies]
+# import prefix → compiled slug in the same database (ADR-011, query-time only)
+repo_b = "repo-b"
+```
+
+The QA agent connects to `kc serve --dir /path/to/repoA`. It can then:
+- Call `test_plan("component/something")` — cross-repo reachability included
+- Call `resolve_dependency("repo_b.SomeClass")` — gets Repo B's full entity detail
+- Run `kc validate-test /path/to/repoC/tests/test_x.py --for-entity component/something --dir /path/to/repoA` — test file and knowledge base are decoupled
+
+See [docs/cross-repo-workflows.md](docs/cross-repo-workflows.md) for the full setup guide and current limitations.
 
 ## Development
 

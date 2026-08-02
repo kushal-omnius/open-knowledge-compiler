@@ -61,6 +61,7 @@ class CompileSummary:
     moved: int
     dirty: int
     warnings: list[str]
+    entity_changes: list = None  # list[EntityChange] — kept as plain list to avoid circular import at dataclass level
     pr_number: int | None = None
     wiki_dir: str | None = None
     wiki_pages_written: int = 0
@@ -281,6 +282,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         added=ops.count("added"), changed=ops.count("changed"),
         removed=ops.count("removed"), moved=ops.count("moved"),
         dirty=len(dirty), warnings=list(candidate.warnings) + llm_warnings,
+        entity_changes=list(delta.entity_changes),
         pr_number=pr.number if pr else None,
     )
 

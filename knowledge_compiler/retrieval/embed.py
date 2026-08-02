@@ -59,7 +59,7 @@ def emit_embeddings(session: Session, repo_id: int, embedder, dirty_slugs: set[s
                     vector=vector, status="current")
             embedded += 1
         if on_progress:
-            on_progress(min(start + _BATCH, len(todo)), len(todo), "embeddings")
+            on_progress(min(start + _BATCH, len(todo)), len(todo), f"{len(batch)} entities --changed")
     session.commit()
     return embedded, []
 

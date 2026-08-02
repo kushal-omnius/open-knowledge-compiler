@@ -48,7 +48,9 @@ def init_cmd(slug: str, forge_ref: str, default_branch: str, target_dir: str) ->
 @click.option("--no-llm", is_flag=True,
               help="Skip LLM extraction: deterministic pass only, run marked degraded "
                    "(pipeline.md §6.1). LLM-derived entities are never removed by such runs.")
-def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool) -> None:
+@click.option("--verbose", "-v", is_flag=True,
+              help="Print each added/changed/removed/moved entity slug in the summary.")
+def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool, verbose: bool) -> None:
     """Compile the repository (pipeline.md §3)."""
     if full == (pr is not None):
         raise click.UsageError("exactly one of --full or --pr is required")
@@ -58,14 +60,14 @@ def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool) -> None
 
     try:
         if full:
-            _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm, progress=_progress))
+            _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm, progress=_progress), verbose)
         else:
             summaries = compile_pr(Path(repo_dir), _gateway(Path(repo_dir)), expect_pr=pr,
                                    no_llm=no_llm, progress=_progress)
             if not summaries:
                 click.echo(f"PR #{pr} already compiled — nothing to do (idempotent)")
             for s in summaries:
-                _echo_summary(s)
+                _echo_summary(s, verbose)
     except CompileError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -73,7 +75,9 @@ def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool) -> None
 @main.command("reconcile")
 @click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
               show_default=True, help="Repository directory (contains kc.toml).")
-def reconcile_cmd(repo_dir: str) -> None:
+@click.option("--verbose", "-v", is_flag=True,
+              help="Print each added/changed/removed/moved entity slug in the summary.")
+def reconcile_cmd(repo_dir: str, verbose: bool) -> None:
     """Catch up on merged PRs missed since the last compile (pipeline.md §4)."""
     from pathlib import Path
 
@@ -86,7 +90,7 @@ def reconcile_cmd(repo_dir: str) -> None:
     if not summaries:
         click.echo("up to date — no merged PRs after the watermark")
     for s in summaries:
-        _echo_summary(s)
+        _echo_summary(s, verbose)
 
 
 def _gateway(repo_dir):
@@ -104,11 +108,16 @@ def _gateway(repo_dir):
         raise CompileError(str(exc)) from exc
 
 
-def _echo_summary(s) -> None:
+def _echo_summary(s, verbose: bool = False) -> None:
     scope = f"PR #{s.pr_number}" if s.pr_number else "full"
     click.echo(f"compiled {s.repo_slug} [{scope}] @ {s.commit_sha[:12]} (run {s.compile_run_id})")
     click.echo(f"  entities: {s.entities}  relationships: {s.relationships}")
     click.echo(f"  delta: +{s.added} ~{s.changed} -{s.removed} moved:{s.moved}  dirty: {s.dirty}")
+    if verbose and s.entity_changes:
+        symbols = {"added": "+", "changed": "~", "removed": "-", "moved": ">"}
+        for op in ("added", "changed", "removed", "moved"):
+            for c in (c for c in s.entity_changes if c.op == op):
+                click.echo(f"    {symbols[op]} {c.slug}  [{c.entity_type}]")
     if s.wiki_dir:
         click.echo(f"  wiki: {s.wiki_pages_written} files -> {s.wiki_dir}")
     if s.published_sha:

@@ -14,6 +14,8 @@
 | `kc reconcile` | missed merged PRs | standalone catch-up; same machinery as §4 |
 | `kc verify` | whole repository, read-only | shadow full compile + equivalence check (§7); never persists |
 
+Both `kc compile` and `kc reconcile` accept `--verbose / -v`: prints a per-slug breakdown of added/changed/removed/moved entities in the final summary (counts are always shown; the breakdown is opt-in to avoid noise on large repos).
+
 All modes run the same stage sequence; only Collect's scope differs (architecture.md §4).
 
 ## 2. Execution model
@@ -40,6 +42,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 - **Reads:** staged artifacts (never the repo directly).
 - **Produces:** Fact IR rows (ir.md §2). Deterministic extractors (analyzers per ADR-006, parsers) run first and always; LLM extractors run second, consulting `llm_cache` before every call and writing validated outputs through it (ADR-008).
 - **Owns:** grammar pinning, parse-failure file skips (recorded as warnings, never compile failures — ADR-006); the LLM validation gate and budget accounting (ADR-008); mandatory anchors on candidates (ADR-004).
+- **Progress:** `[llm] i/n <file> --changed` is emitted to stderr for each file that required a real LLM call (cache miss). Cache hits are silent — the progress stream only reflects actual network work, so a mostly-cached run produces few or no lines.
 - **Records:** which extractor families ran over which scope — required by removal evidence (§5).
 
 ### 3.3 Normalize
@@ -76,6 +79,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
   ```
 
   The reference destination is the `knowledge/wiki` branch (ADR-010); every Publisher inherits ADR-010's invariants (loop-safe, destination is publisher-owned and fully regenerable). The canonical home of compiled knowledge remains the database (ADR-001) — publications are renders, never stores.
+- **Progress:** `[embed] n/total <N> entities --changed` is emitted to stderr once per batch of 64 entities. All entities in the batch are by definition dirty or pending (unchanged-hash rows are filtered before batching), so `--changed` is accurate for every line.
 - **Owns:** entity→page mapping; embedding `pending` status on provider outage (degrade to FTS, backfill later — ADR-005).
 - **Failure:** emit failures never roll back Persist — compiled state is already committed and correct; emission is re-runnable from the delta (idempotent by content hash).
 

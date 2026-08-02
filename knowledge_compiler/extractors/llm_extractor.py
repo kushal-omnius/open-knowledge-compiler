@@ -58,21 +58,22 @@ class LLMSemanticExtractor:
                    and a.source_ref not in self.skip_files]
         facts: list[Fact] = []
         for i, artifact in enumerate(eligible, start=1):
-            output = self._complete_cached(artifact)
+            output, reason = self._complete_cached(artifact)
             if output is not None:
                 facts.extend(self._to_facts(artifact, output))
-            if self.on_progress:
-                self.on_progress(i, len(eligible), artifact.source_ref)
+            if self.on_progress and reason == "changed":
+                self.on_progress(i, len(eligible), f"{artifact.source_ref} --changed")
         return facts
 
     # -- provider + cache ---------------------------------------------------------
 
-    def _complete_cached(self, artifact: Artifact) -> ExtractionOut | None:
+    def _complete_cached(self, artifact: Artifact) -> tuple[ExtractionOut | None, str]:
+        """Returns (result, reason) where reason is 'cached' or 'changed'."""
         key = cache_key(TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
                         artifact.content_hash)
         cached = self.cache.get(key)
         if cached is not None:
-            return ExtractionOut.model_validate(cached)  # cache holds validated output only
+            return ExtractionOut.model_validate(cached), "cached"  # cache holds validated output only
 
         prompt = build_prompt(artifact.source_ref, self.modules[artifact.source_ref],
                               self.known_symbols.get(artifact.source_ref, []),
@@ -90,12 +91,12 @@ class LLMSemanticExtractor:
                 if attempt == 2:
                     self.warnings.append(
                         f"LLM output failed validation twice for {artifact.source_ref}: {exc}")
-                    return None
+                    return None, "changed"
                 continue
             self.cache.put(key, TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
                            validated.model_dump())
-            return validated
-        return None
+            return validated, "changed"
+        return None, "changed"
 
     # -- facts ---------------------------------------------------------------------
 
