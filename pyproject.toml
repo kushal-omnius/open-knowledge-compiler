@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
 dependencies = [
     "click>=8.1",
+    "python-dotenv>=1.2.2",
     "pydantic>=2.7",
     "sqlalchemy>=2.0",
     "alembic>=1.13",
@@ -16,7 +17,6 @@ dependencies = [
     "tree-sitter-typescript>=0.23",
     "pgvector>=0.2",
 ]
-
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
@@ -28,7 +28,10 @@ llm-openai = [
     "openai>=1.40",
 ]
 serve = [
-    "mcp>=1.0",
+    "mcp>=1.0,<2.0",
+]
+all = [
+    "knowledge-compiler[dev,llm,llm-openai,serve]",
 ]
 
 [project.scripts]

@@ -22,11 +22,11 @@ git clone <knowledge-compiler-repo-url>
 cd knowledge-compiler
 
 # Create and activate a virtual environment
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS / Linux
+python -m venv venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS / Linux
 
-pip install -e .[dev]
+pip install -e .[all]
 
 # Start Postgres (runs in Docker, port 5432, db=kc_wiki user=kc pass=kc)
 docker compose up -d
@@ -210,7 +210,7 @@ If `kc` is not on the system PATH (e.g. inside a venv), use the full path to the
 {
   "mcpServers": {
     "kc": {
-      "command": "/path/to/repo/.venv/bin/kc",
+      "command": "/path/to/repo/venv/bin/kc",
       "args": ["serve", "--dir", "/path/to/repo"]
     }
   }

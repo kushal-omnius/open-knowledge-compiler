@@ -15,7 +15,7 @@ Key V1 commitments (see vision.md for rationale): the **Living Wiki is the V1 we
 ## Development Commands
 
 ```bash
-.venv\Scripts\activate               # Windows venv (created; deps installed)
+venv\Scripts\activate               # Windows venv (created; deps installed)
 pip install -e .[dev]                # install package + dev deps
 pytest                               # run all tests
 pytest tests/test_smoke.py -k hash   # run a single test
