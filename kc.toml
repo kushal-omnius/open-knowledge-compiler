@@ -1,7 +1,7 @@
 # Knowledge Compiler repository configuration (ADR-007: activation is explicit).
 [repository]
 slug = "knowledge-compiler"
-forge_ref = "github.com/<org>/open-knowledge-compiler"
+forge_ref = "github.com/kushal-omnius/open-knowledge-compiler"
 default_branch = "main"
 
 # Plugin activation lands with the first built-in plugins (phase 1).

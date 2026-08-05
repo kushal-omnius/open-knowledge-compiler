@@ -24,8 +24,8 @@ NOTE - No API keys required for the base compile. LLM and embedding providers ar
 ## Installation
 
 ```bash
-git clone <knowledge-compiler-repo-url>
-cd knowledge-compiler
+git clone https://github.com/kushal-omnius/open-knowledge-compiler.git
+cd open-knowledge-compiler
 
 # Create and activate a virtual environment
 python -m venv venv

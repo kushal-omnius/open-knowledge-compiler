@@ -9,7 +9,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Status:** Accepted
 - **Summary:** A single PostgreSQL database is the only persistent store, covering relations, JSONB payloads, full-text search, vectors, transactions, and advisory locks in one system.
 - **Dependencies:** none (foundation)
-- **Depended on by:** ADR-002 (advisory locks, read-only serve), ADR-003 (transactional persist), ADR-005 (pgvector), ADR-008 (cache in Postgres)
+- **Depended on by:** ADR-002 (advisory locks, read-only serve), ADR-003 (transactional persist), ADR-005 (pgvector), ADR-008 (cache in Postgres), ADR-013 (durable-store invariant the OKF migration story relies on)
 - **Related documents:** architecture.md §5, data-model.md, storage.md (planned)
 
 ### [ADR-002 — CI Trigger](ADR-002-ci-trigger.md)
@@ -25,7 +25,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Status:** Accepted
 - **Summary:** Compiled knowledge is stored as mutable current-state tables plus an append-only delta log, written in one transaction per compile; history is deltas, and the past is recompilable, not stored.
 - **Dependencies:** ADR-001 (transactions)
-- **Depended on by:** ADR-002 (watermarking), ADR-004 (identity matches against current state), ADR-005 (delta-driven re-embedding), ADR-008 (incremental economics)
+- **Depended on by:** ADR-002 (watermarking), ADR-004 (identity matches against current state), ADR-005 (delta-driven re-embedding), ADR-008 (incremental economics), ADR-013 (delta log as the mechanism `log.md`'s date-grouped history derives from)
 - **Related documents:** architecture.md §4–5, ir.md, data-model.md, pipeline.md
 
 ### [ADR-004 — Stable Entity Identity](ADR-004-entity-identity.md)
@@ -33,7 +33,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Status:** Accepted
 - **Summary:** Deterministic entities use natural keys; LLM-derived entities use a deterministic match-then-mint cascade (external key → anchor overlap → name similarity); the LLM never assigns identity; over-split beats over-merge; reproducibility holds modulo slug renaming.
 - **Dependencies:** ADR-003 (current state as matching target), ADR-008 (cache prevents extraction flapping)
-- **Depended on by:** ADR-002 (in-order processing), ADR-005 (embeddings excluded from identity), ADR-006 (anchors as extractor obligation), ADR-008 (identity invariant enforced at the LLM layer); vision.md Design Principle 8 originates here
+- **Depended on by:** ADR-002 (in-order processing), ADR-005 (embeddings excluded from identity), ADR-006 (anchors as extractor obligation), ADR-008 (identity invariant enforced at the LLM layer), ADR-013 (slug stability assumed by re-render-not-recompile); vision.md Design Principle 8 originates here
 - **Related documents:** architecture.md §6, ir.md, data-model.md, pipeline.md
 
 ### [ADR-005 — Embeddings](ADR-005-embeddings-pgvector.md)
@@ -73,7 +73,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Status:** Accepted
 - **Summary:** The canonical IR has two versioned layers with a directional boundary — Fact IR (per-compile extraction output, identity-free, the plugin contract) and Knowledge IR (durable entities + relationships, the consumer contract) — with Normalize as the only crossing point; the delta is a derived Knowledge IR artifact.
 - **Dependencies:** ADR-003 (delta as derived artifact), ADR-004 (entity definition, identity boundary), ADR-006 (analyzers emit canonical facts), ADR-007 (fail-loud policy), ADR-008 (validated LLM candidates)
-- **Depended on by:** — (implemented by `ir.md`)
+- **Depended on by:** ADR-013 (the Fact IR / Knowledge IR boundary enabling Emit-stage-only reruns); implemented by `ir.md`
 - **Related documents:** ir.md (implements it), data-model.md, pipeline.md, plugin-system.md (planned)
 
 ### [ADR-010 — Wiki Destination](ADR-010-wiki-destination.md)
@@ -81,7 +81,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Status:** Accepted
 - **Summary:** The wiki publishes to a dedicated `knowledge/wiki` branch in the compiled repository (forge-rendered Markdown, publisher-owned, loop-safe by construction since branch pushes are not the ADR-002 trigger event). The Publisher concept is general (publication → destination; see pipeline.md §3.6): Pages, separate knowledge repo, Confluence, and OKF bundle export are additive publishers. **The canonical home of compiled knowledge is the database (ADR-001); this ADR places only the human-readable render.**
 - **Dependencies:** ADR-002 (trigger scoping the loop-safety argument), ADR-003 (delta log as history of record)
-- **Depended on by:** — (unblocks the publisher plugin contract, pipeline.md §8)
+- **Depended on by:** ADR-013 (wiki as disposable, wholesale-regenerated build artifact — the property the OKF migration story depends on); unblocks the publisher plugin contract, pipeline.md §8
 - **Related documents:** architecture.md §11, pipeline.md §3.6/§8
 
 ### [ADR-011 — Cross-Repo Dependency Resolution](ADR-011-cross-repo-dependency-resolution.md)

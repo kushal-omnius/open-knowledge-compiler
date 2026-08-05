@@ -34,7 +34,7 @@ Living specs (`docs/ir.md`, `docs/data-model.md`, `docs/pipeline.md`, `docs/norm
 ## Development setup
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/kushal-omnius/open-knowledge-compiler.git
 cd open-knowledge-compiler
 python -m venv .venv && .venv\Scripts\activate   # Windows; source .venv/bin/activate elsewhere
 pip install -e .[all]

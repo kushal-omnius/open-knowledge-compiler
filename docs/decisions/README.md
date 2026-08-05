@@ -29,5 +29,6 @@ This directory records the significant architectural decisions of the Knowledge 
 | [ADR-010](ADR-010-wiki-destination.md) | Wiki destination: dedicated branch in the compiled repo | Accepted |
 | [ADR-011](ADR-011-cross-repo-dependency-resolution.md) | Cross-repo dependency resolution: query-time config map | Accepted |
 | [ADR-012](ADR-012-defer-verification-requirement-entity.md) | Defer VerificationRequirement entity; mutation-kill is the V1 signal | Accepted |
+| [ADR-013](ADR-013-open-source-okf-conformance.md) | Open-source release as `open-knowledge-compiler` + OKF spec-version conformance and migration | Proposed |
 
 See [index.md](index.md) for summaries, dependencies, the dependency graph, and the list of unresolved decisions deferred to future design documents.
