@@ -135,7 +135,7 @@ entities: 2765
   test_coverage: 201
   pull_request: 1342
 relationships: 8410
-last compile: run 47 @ a3f9c1d20b12 — delta add:14  change:3  remove:1
+last compile: run 47 @ a3f9c1d20b12 [2026-07-18 09:14:22] — delta add:14  change:3  remove:1
 ```
 
 ---

@@ -16,7 +16,7 @@ Key V1 commitments (see vision.md for rationale): the **Living Wiki is the V1 we
 
 ```bash
 venv\Scripts\activate               # Windows venv (created; deps installed)
-pip install -e .[dev]                # install package + dev deps
+pip install -e .[all]                # install all deps
 pytest                               # run all tests
 pytest tests/test_smoke.py -k hash   # run a single test
 docker compose up -d                 # Postgres 16 + pgvector (user: kc / kc, db: kc_wiki)

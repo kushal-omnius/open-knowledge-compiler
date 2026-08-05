@@ -222,3 +222,4 @@ __marimo__/
 # Knowledge Compiler local wiki publication (published via the branch publisher, ADR-010)
 kc-wiki/
 BRAINSTORM-*
+todo.md

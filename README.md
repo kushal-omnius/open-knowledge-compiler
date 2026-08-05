@@ -97,7 +97,7 @@ repository: my-service
 entities: 312
   component: 78  api: 24  feature: 61  business_rule: 12  risk: 18  test_coverage: 119
 relationships: 940
-last compile: run 1 @ a3f9c1d — delta add:312  change:0  remove:0
+last compile: run 1 @ a3f9c1d20b12 [2026-07-18 09:14:22] — delta add:312  change:0  remove:0
 ```
 
 A browsable Markdown wiki is written to `kc-wiki/` inside the analyzed repo.

@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 
 import click
+
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="[%(asctime)s][%(filename)s][%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 from knowledge_compiler import __version__
 
@@ -204,7 +212,8 @@ def inspect_cmd(repo_dir: str) -> None:
             .where(DeltaChangeRow.compile_run_id == last_run.id)
             .group_by(DeltaChangeRow.op).order_by(DeltaChangeRow.op)).all()
         delta_str = "  ".join(f"{op}:{count}" for op, count in ops) or "empty"
-        click.echo(f"last compile: run {last_run.id} @ {last_run.commit_sha[:12]} — delta {delta_str}")
+        ts = last_run.finished_at.strftime("%Y-%m-%d %H:%M:%S") if last_run.finished_at else "unknown"
+        click.echo(f"last compile: run {last_run.id} @ {last_run.commit_sha[:12]} [{ts}] — delta {delta_str}")
 
 
 @main.command("validate-test")
