@@ -6,7 +6,6 @@ Revises: 0004
 Create Date: 2026-08-05
 """
 from alembic import op
-import sqlalchemy as sa
 
 revision = "0005"
 down_revision = "0004"
@@ -15,8 +14,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("compile_runs", sa.Column("okf_spec_version", sa.Text(), nullable=True))
+    # IF NOT EXISTS: migration 0001's create_all() (schema.py is the live source of
+    # truth) already creates this column on a fresh database, since schema.py now
+    # declares it — matches the idempotent pattern 0002-0004 already established.
+    op.execute("ALTER TABLE compile_runs ADD COLUMN IF NOT EXISTS okf_spec_version TEXT")
 
 
 def downgrade() -> None:
-    op.drop_column("compile_runs", "okf_spec_version")
+    op.execute("ALTER TABLE compile_runs DROP COLUMN IF EXISTS okf_spec_version")

@@ -17,6 +17,13 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Base.metadata.create_all() below creates every table storage/schema.py
+    # currently declares (the single source of truth) — not a frozen snapshot of
+    # what existed when this migration was written. Since schema.py now includes
+    # embeddings.vector (pgvector), the extension must exist before create_all()
+    # runs on a fresh database, not just by the time migration 0003 gets to it.
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
     # Tables come from the single source of truth: storage/schema.py metadata —
     # including entities.search_vector, an ORM-declared Computed (generated) column.
     Base.metadata.create_all(op.get_bind())
