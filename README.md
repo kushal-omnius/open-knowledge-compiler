@@ -8,7 +8,7 @@
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
-**Status:** Architecture v1.0 frozen · V1 pipeline + milestone 3 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Dogfooded on two real team repos (`kc verify`-clean); next: enable enrichment on them and wire up incremental `--pr` compilation in CI.
+**Status:** Architecture v1.0 frozen · V1 pipeline implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF v0.2-conformant wiki with loop-safe branch publishing and its own `kc validate-okf` checker, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Apache-2.0, dogfooded on real repositories including compiling itself (`kc verify`-clean, `kc validate-okf`-conformant). CI runs the full test suite on every push/PR against a real Postgres instance. Next: incremental `--pr` compilation wired into CI for this repo itself, and a real entry-point plugin ecosystem beyond the built-ins.
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
@@ -128,7 +128,44 @@ relationships: 940
 last compile: run 1 @ a3f9c1d20b12 [2026-07-18 09:14:22] — delta add:312  change:0  remove:0
 ```
 
-A browsable Markdown wiki is written to `kc-wiki/` inside the analyzed repo.
+A browsable Markdown wiki is written to `kc-wiki/` inside the analyzed repo. This is a real, unedited page from this project's own `kc-wiki/component/` — Open Knowledge Compiler compiling itself:
+
+```yaml
+---
+type: component
+title: "knowledge_compiler.wiki.emitter"
+slug: component/knowledge-compiler-wiki-emitter
+repo: knowledge-compiler
+compile_run: 1365
+commit: f4f91e0a7428b263baa6af08d3388226bf68ed83
+files:
+  - knowledge_compiler/wiki/emitter.py
+generated:
+  by: process:knowledge-compiler/0.1.0
+  at: 2026-08-05T19:31:59.019805+00:00
+---
+```
+```markdown
+# knowledge_compiler.wiki.emitter
+
+**Kind:** module · **Language:** python
+
+**Files:** `knowledge_compiler/wiki/emitter.py`
+
+## Symbols
+
+| Symbol | Kind |
+|---|---|
+| `knowledge_compiler.wiki.emitter.WikiEmitter` | class |
+| `knowledge_compiler.wiki.emitter.WikiEmitter.emit` | method |
+| `knowledge_compiler.wiki.emitter.WikiEmitter._render_index` | method |
+...
+
+## Depends on
+- `knowledge_compiler.ir`
+```
+
+That YAML frontmatter is the OKF-conformant part — every field either required (`type`), recommended (`title`), or an explicit KC extension (`slug`, `repo`, `compile_run`, `commit`, `files`), plus a spec-shaped `generated: {by, at}` provenance block. `kc validate-okf` checks exactly this structure holds across the whole bundle.
 
 **Step 5 — Verify (optional):**
 
