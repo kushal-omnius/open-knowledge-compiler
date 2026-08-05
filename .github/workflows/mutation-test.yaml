@@ -8,13 +8,14 @@ name: Mutation Testing (manual)
 # ubuntu-latest specifically because mutmut 3.x has no native Windows
 # support (mutmut#397) — this sidesteps needing WSL on a local dev machine.
 
-# Generalized (2026-07-22) to also run against the dogfood repos: checkout
-# now targets an arbitrary repo/ref via inputs, defaulting to this repo when
-# left blank so the original knowledge-compiler-only usage is unchanged.
-# Cross-org checkout needs a PAT with read access to omni-us-ea — the
-# workflow-dispatch token used to trigger this run is scoped to this repo's
-# own account and can't read that org, so a separate `CROSS_REPO_TOKEN`
-# repo secret (resource-owner = omni-us-ea) is required for target_repo runs.
+# Generalized (2026-07-22) to also run against other repos (e.g. a dogfood
+# target): checkout now targets an arbitrary repo/ref via inputs, defaulting
+# to this repo when left blank so the original knowledge-compiler-only usage
+# is unchanged. Cross-org checkout needs a PAT with read access to whichever
+# org owns target_repo — the workflow-dispatch token used to trigger this run
+# is scoped to this repo's own account and can't read a different org, so a
+# separate `CROSS_REPO_TOKEN` repo secret (resource-owner = the target org)
+# is required for target_repo runs.
 
 on:
   workflow_dispatch:

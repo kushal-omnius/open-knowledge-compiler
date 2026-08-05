@@ -2,7 +2,7 @@
 
 > Status: Living specification. Realizes [ir.md](ir.md) in PostgreSQL per [ADR-001](decisions/ADR-001-postgresql.md).
 > Logical schema level: columns and keys are normative; exact SQL types, index parameters, and Alembic migrations are implementation.
-> Last updated: 2026-07-18
+> Last updated: 2026-08-05
 
 ---
 
@@ -32,7 +32,7 @@
 | `scope` | `full` \| `pr` |
 | `pr_number`, `commit_sha`, `merged_at` | `merged_at` is the reconciliation watermark (ADR-002): next reconcile lists PRs merged after `max(merged_at)` of successful runs |
 | `status` | `running` \| `succeeded` \| `failed` |
-| `fact_vocabulary_version`, `knowledge_model_version` | per ir.md §5 |
+| `fact_vocabulary_version`, `knowledge_model_version`, `okf_spec_version` | per ir.md §5; `okf_spec_version` records the OKF spec version this run's wiki emission targeted — a historical record of what was targeted at that compile, not a live pointer (ADR-013). Nullable: rows predating ADR-013 have none. |
 | `started_at`, `finished_at`, `error` | |
 | `degraded` | boolean; `true` when compiled with `--no-llm` (pipeline.md §6.1) |
 
@@ -166,4 +166,4 @@ The durable/disposable line, made explicit:
 
 ## References
 
-[ir.md](ir.md) · [ADR-001](decisions/ADR-001-postgresql.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-005](decisions/ADR-005-embeddings-pgvector.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) · architecture.md §5
+[ir.md](ir.md) · [ADR-001](decisions/ADR-001-postgresql.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-005](decisions/ADR-005-embeddings-pgvector.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) · [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) · architecture.md §5

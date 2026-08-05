@@ -2,7 +2,7 @@
 
 ADR-002 invariant: serve NEVER compiles. It reads whatever state the last
 CI-invoked compile produced. Transport: stdio (V1 agents — Claude Code, etc.).
-Requires `pip install 'knowledge-compiler[serve]'`.
+Requires `pip install 'open-knowledge-compiler[serve]'`.
 """
 
 from __future__ import annotations

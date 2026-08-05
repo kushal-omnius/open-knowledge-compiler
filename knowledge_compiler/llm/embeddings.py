@@ -17,7 +17,7 @@ from knowledge_compiler.llm.provider import LLMProviderError
 
 
 class OpenAIEmbedder:
-    """OPENAI_API_KEY from environment; pip install 'knowledge-compiler[llm-openai]'."""
+    """OPENAI_API_KEY from environment; pip install 'open-knowledge-compiler[llm-openai]'."""
 
     DEFAULT_MODEL = "text-embedding-3-small"
 
@@ -26,7 +26,7 @@ class OpenAIEmbedder:
             import openai
         except ImportError as exc:
             raise LLMProviderError(
-                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+                "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
         self.model_id = model_id
         self._openai = openai
         try:
@@ -53,7 +53,7 @@ class AzureOpenAIEmbedder(OpenAIEmbedder):
             import openai
         except ImportError as exc:
             raise LLMProviderError(
-                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+                "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
 
         endpoint = os.environ.get("OPENAI_AZURE_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
         api_key = os.environ.get("OPENAI_AZURE_API_KEY") or os.environ.get("AZURE_OPENAI_API_KEY")

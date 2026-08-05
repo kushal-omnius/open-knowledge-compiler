@@ -4,16 +4,24 @@ Reads Knowledge IR only (ADR-009 — never facts). Pages regenerate wholesale bu
 only dirty ones (ir.md: no intra-page patching); indexes and recent-changes always
 regenerate (they are views over the whole state / delta log).
 
-OKF (https://okf.md/): YAML frontmatter over standard Markdown — the page set is
-simultaneously the human wiki and an agent-readable knowledge bundle.
+OKF (https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md,
+v0.2 — see ADR-013 for the version-tracking/migration story): YAML frontmatter over
+standard Markdown — the page set is simultaneously the human wiki and an
+agent-readable knowledge bundle. `index.md` and `log.md` are reserved filenames with
+spec-defined structure (§8-9): neither carries general frontmatter, and `log.md` is
+a date-grouped, prose changelog distinct from `recent-changes.md` (a KC-specific,
+last-compile-only convenience view — not a reserved OKF filename, so it keeps
+frontmatter freely).
 """
 
 from __future__ import annotations
 
 import posixpath
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
+from knowledge_compiler import OKF_SPEC_VERSION, __version__
 from knowledge_compiler.ir import Entity, Relationship
 
 # entity types that own a page (normalize.md P6 owners)
@@ -24,21 +32,34 @@ _DO_NOT_EDIT = (
     "The wiki is a build artifact (ADR-010); fix the source or the compiler. -->"
 )
 
+# OKF v0.2 §7 actor convention for the `generated.by` / `verified[].by` fields.
+_GENERATED_BY = f"process:knowledge-compiler/{__version__}"
+
+# OKF v0.2 §9 log.md convention words per delta op.
+_OP_LOG_LABEL = {
+    "added": "**Creation**",
+    "changed": "**Update**",
+    "removed": "**Deprecation**",
+    "moved": "**Update**",
+}
+
 
 @dataclass(frozen=True)
 class WikiContext:
     repo_slug: str
     compile_run_id: int
     commit_sha: str
+    finished_at: datetime | None = None
 
 
 @dataclass(frozen=True)
 class RunDelta:
-    """One compile's delta-log summary for the recent-changes page."""
+    """One compile's delta-log summary for the log/recent-changes pages."""
 
     compile_run_id: int
     commit_sha: str
     changes: tuple[tuple[str, str, str], ...]  # (op, slug, entity_type)
+    finished_at: datetime | None = None
 
 
 @dataclass
@@ -86,7 +107,8 @@ class WikiEmitter:
                                        self._render_page(owner, state, ctx)))
 
         written.append(self._write("index.md", self._render_index(state, ctx)))
-        written.append(self._write("recent-changes.md", self._render_recent(recent, ctx)))
+        written.append(self._write("log.md", self._render_log(recent)))
+        written.append(self._write("recent-changes.md", self._render_recent_changes(recent)))
         return written
 
     # -- rendering ------------------------------------------------------------------
@@ -103,9 +125,12 @@ class WikiEmitter:
             f"commit: {ctx.commit_sha}",
         ]
         if files:
-            lines.append("sources:")
+            lines.append("files:")
             lines.extend(f"  - {f}" for f in files)
-        lines += ["generated: true", "---", ""]
+        if ctx.finished_at is not None:
+            lines += ["generated:", f"  by: {_GENERATED_BY}",
+                     f"  at: {ctx.finished_at.isoformat()}"]
+        lines += ["---", ""]
         return "\n".join(lines)
 
     def _render_page(self, owner: Entity, state: _State, ctx: WikiContext) -> str:
@@ -190,11 +215,15 @@ class WikiEmitter:
         return out
 
     def _render_index(self, state: _State, ctx: WikiContext) -> str:
-        lines = ["---", f"title: \"{ctx.repo_slug} — engineering knowledge\"", "type: index",
-                 f"repo: {ctx.repo_slug}", f"compile_run: {ctx.compile_run_id}",
-                 f"commit: {ctx.commit_sha}", "generated: true", "---", "", _DO_NOT_EDIT, "",
-                 f"# {ctx.repo_slug}", "",
-                 "Compiled engineering knowledge. [Recent changes](recent-changes.md)", ""]
+        # OKF v0.2 §8: index.md carries NO general frontmatter — the sole sanctioned
+        # exception is an optional bundle-root `okf_version`. Repo/commit/compile-run
+        # context that used to live in frontmatter moves into body prose instead.
+        lines = ["---", f'okf_version: "{OKF_SPEC_VERSION}"', "---", "",
+                 _DO_NOT_EDIT, "", f"# {ctx.repo_slug} — engineering knowledge", "",
+                 f"Repo: `{ctx.repo_slug}` · Compile run: {ctx.compile_run_id} · "
+                 f"Commit: `{ctx.commit_sha[:12]}`", "",
+                 "Compiled engineering knowledge. [Recent changes](recent-changes.md) · "
+                 "[Log](log.md)", ""]
         for entity_type in PAGE_OWNER_TYPES:
             owners = sorted((e for e in state.by_slug.values() if e.entity_type == entity_type),
                             key=lambda e: e.slug)
@@ -206,22 +235,53 @@ class WikiEmitter:
             lines.append("")
         return "\n".join(lines).rstrip() + "\n"
 
-    def _render_recent(self, recent: list[RunDelta], ctx: WikiContext) -> str:
+    def _render_log(self, recent: list[RunDelta]) -> str:
+        """OKF v0.2 §9 `log.md`: reserved filename, no frontmatter, date-grouped
+        (ISO 8601 headings, newest first), prose entries. Full multi-compile
+        chronological history, distinct from `recent-changes.md`'s last-compile-only
+        scope."""
+        lines = [_DO_NOT_EDIT, "", "# Log", ""]
+        if not recent:
+            lines += ["No compiles recorded yet.", ""]
+            return "\n".join(lines).rstrip() + "\n"
+
+        current_date: str | None = None
+        for run in recent:
+            date = run.finished_at.strftime("%Y-%m-%d") if run.finished_at else "unknown date"
+            if date != current_date:
+                lines += [f"## {date}", ""]
+                current_date = date
+            if not run.changes:
+                lines += [f"No knowledge changes — compile run {run.compile_run_id} "
+                         f"(`{run.commit_sha[:12]}`).", ""]
+                continue
+            for op, slug, entity_type in run.changes:
+                label = _OP_LOG_LABEL.get(op, f"**{op.title()}**")
+                lines.append(f"{label} `{slug}` ({entity_type}) — compile run "
+                            f"{run.compile_run_id} (`{run.commit_sha[:12]}`).")
+            lines.append("")
+        return "\n".join(lines).rstrip() + "\n"
+
+    def _render_recent_changes(self, recent: list[RunDelta]) -> str:
+        """KC-specific convenience view, not a reserved OKF filename: only the
+        latest compile's delta. Frontmatter is fine here (see module docstring)."""
         lines = ["---", "title: \"Recent changes\"", "type: recent_changes",
-                 f"repo: {ctx.repo_slug}", "generated: true", "---", "", _DO_NOT_EDIT, "",
-                 "# Recent changes", ""]
+                 "generated: true", "---", "", _DO_NOT_EDIT, "",
+                 "# Recent changes (last compile)", ""]
         if not recent:
             lines.append("No compiles recorded yet.")
-        for run in recent:
-            lines += [f"## Compile {run.compile_run_id} — `{run.commit_sha[:12]}`", ""]
-            if not run.changes:
-                lines += ["No knowledge changes.", ""]
-                continue
+            return "\n".join(lines).rstrip() + "\n"
+        run = recent[0]
+        lines += [f"## Compile {run.compile_run_id} — `{run.commit_sha[:12]}`", ""]
+        if not run.changes:
+            lines += ["No knowledge changes.", ""]
+        else:
             for op, slug, entity_type in run.changes:
                 target = (f"[{slug}]({page_path(slug)})"
                           if entity_type in PAGE_OWNER_TYPES else f"`{slug}`")
                 lines.append(f"- **{op}** {target}")
             lines.append("")
+        lines.append("Full chronological history: [log.md](log.md).")
         return "\n".join(lines).rstrip() + "\n"
 
     # -- io ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 > Status: Living specification. Structure fixed by [ADR-009](decisions/ADR-009-two-layer-ir.md) (Accepted).
 > Field-level storage detail (column types, indexes) belongs to `data-model.md`; this document defines the *logical* contracts.
-> Last updated: 2026-07-18
+> Last updated: 2026-08-05
 
 ---
 
@@ -241,12 +241,13 @@ When facts disagree — e.g., `api_endpoint_observed(source=openapi)` with no co
 - **Fact layer:** *additive* changes (new fact types, new optional payload fields) are non-breaking and bump minor. Changing or removing an existing fact type's semantics is breaking and bumps major. Plugins declare the fact-vocabulary versions they emit against ([ADR-007](decisions/ADR-007-plugin-architecture.md) versioned-interface invariant); mismatches fail loudly at activation.
 - **Knowledge layer:** entity schema and relationship *semantics* changes are breaking by default (consumers — wiki, MCP, deltas — read this layer). New relationship types and new optional entity payload fields are the additive exception.
 - **Migration story:** because compiled artifacts are disposable (vision Design Principle 5), a breaking knowledge-model change is handled by **full recompilation into the existing database** (slug-preserving, per ADR-004), not by data migration. The delta log is the one durable history: breaking changes to the *delta vocabulary* therefore need an explicit compatibility note in `data-model.md`.
+- **A third tracked version, orthogonal to the two above:** `okf_spec_version` records which version of the external [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) spec the Emit stage's wiki bundle targeted for that compile ([ADR-013](decisions/ADR-013-open-source-okf-conformance.md)). It versions a *rendering* of Knowledge IR, not Knowledge IR itself — a breaking OKF spec bump is handled by an Emit-stage code change plus a re-render (`kc compile --emit-only`), never a Knowledge IR migration, since the wiki is disposable and wholesale-regenerated (ADR-010) rather than durable state.
 
 ---
 
 ## References
 
 - [ADR-009](decisions/ADR-009-two-layer-ir.md) — the structural decision this document implements
-- [ADR-003](decisions/ADR-003-current-state-delta-log.md) — delta as derived artifact; [ADR-004](decisions/ADR-004-entity-identity.md) — identity classes, anchors, evidence; [ADR-006](decisions/ADR-006-language-analyzers.md) — analyzer fact obligations; [ADR-007](decisions/ADR-007-plugin-architecture.md) — versioned plugin interfaces; [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) — validated LLM payloads
+- [ADR-003](decisions/ADR-003-current-state-delta-log.md) — delta as derived artifact; [ADR-004](decisions/ADR-004-entity-identity.md) — identity classes, anchors, evidence; [ADR-006](decisions/ADR-006-language-analyzers.md) — analyzer fact obligations; [ADR-007](decisions/ADR-007-plugin-architecture.md) — versioned plugin interfaces; [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) — validated LLM payloads; [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) — the third tracked version (`okf_spec_version`) and its re-render-not-migrate story
 - `docs/architecture.md` §4–6
 - Open items originating here: conflict-resolution policy ADR (future); delta `change_summary` granularity and schema detail → `data-model.md`

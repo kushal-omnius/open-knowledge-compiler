@@ -1,10 +1,10 @@
 # Architecture: Knowledge Compiler
 
-> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR. Post-freeze, new (non-superseding) decisions are still recorded as new ADRs per the process this freeze established — see [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) (cross-repo dependency resolution, 2026-07-20) and [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) (defer VerificationRequirement entity, 2026-07-29).
+> Status: **v1.0 — FROZEN (2026-07-18).** All decisions ratified in ADR-001…ADR-010 ([decisions/index.md](decisions/index.md)); changes require a superseding ADR. Post-freeze, new (non-superseding) decisions are still recorded as new ADRs per the process this freeze established — see [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) (cross-repo dependency resolution, 2026-07-20), [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) (defer VerificationRequirement entity, 2026-07-29), and [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) (open-source release + OKF spec-version conformance/migration, 2026-08-05, Proposed).
 > Derived from `docs/vision.md` (committed direction) and `INITIAL-Brainstorm.md` (exploratory).
 > This document selects an implementation architecture; it does not re-litigate the vision.
 > Decisions marked **[ADR]** must be recorded in `docs/decisions/` before implementation begins.
-> Last updated: 2026-07-29
+> Last updated: 2026-08-05
 
 ---
 
@@ -52,10 +52,12 @@ Details and tradeoffs in the sections below. All ADRs referenced in this table (
 kc init                      # register a repo, create schema, write config
 kc compile --full            # bootstrap / escape-hatch full compilation
 kc compile --pr <N>          # incremental compilation of one merged PR
+kc compile --emit-only       # re-render the wiki from already-compiled Knowledge IR only (ADR-013)
 kc reconcile                 # catch up on merged PRs missed since last compile
 kc verify                    # recompile-and-diff: check incremental state ≡ full compile
 kc inspect                   # entity/relationship counts and last delta — first debugging surface
 kc validate-test <f> --for-entity <slug>  # score a generated test's kc-covers: header
+kc validate-okf              # check the emitted wiki bundle against OKF conformance rules (ADR-013)
 kc serve                     # long-running: read-only MCP server over the knowledge base
 ```
 
@@ -229,7 +231,7 @@ knowledge_compiler/
 ├── extractors/    # deterministic + LLM extractors, language analyzers (tree-sitter)
 ├── storage/       # schema, migrations, repositories (SQLAlchemy + Alembic)
 ├── retrieval/     # FTS, vector, hybrid RRF (RetrievalProvider plugins)
-├── wiki/          # Markdown emitters, page mapping, publishers
+├── wiki/          # Markdown emitters, page mapping, publishers, OKF conformance checker (okf_conformance.py, ADR-013)
 ├── mcp/           # MCP server: search_knowledge, get_entity, impact_plan, test_plan, recent_changes, …
 ├── llm/           # provider interface, cache, prompt templates (versioned)
 └── cli.py         # kc entry point
@@ -250,7 +252,7 @@ MCP tools are read-only views over compiled knowledge (retrieval + entity/delta 
 
 ## 15. Architecture Decision Records
 
-All ADRs are written and **Accepted** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
+ADR-001 through ADR-012 are written and **Accepted**; ADR-013 is **Proposed** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
 
 - [ADR-001](decisions/ADR-001-postgresql.md) — PostgreSQL as the single knowledge store
 - [ADR-002](decisions/ADR-002-ci-trigger.md) — CI-invoked CLI trigger, reconcile-first
@@ -264,5 +266,6 @@ All ADRs are written and **Accepted** — see [decisions/index.md](decisions/ind
 - [ADR-010](decisions/ADR-010-wiki-destination.md) — Wiki destination: dedicated branch in the compiled repo
 - [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) — Cross-repo dependency resolution: query-time config map (added 2026-07-20 during dogfood)
 - [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) — Defer VerificationRequirement entity; mutation-kill rate is the V1 sub-component precision signal (added 2026-07-29)
+- [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) — Open-source release as `open-knowledge-compiler` + OKF spec-version conformance and migration (Proposed 2026-08-05)
 
 Decisions still unresolved are listed in [decisions/index.md](decisions/index.md) with the future design document responsible for each.

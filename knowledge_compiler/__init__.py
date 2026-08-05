@@ -8,3 +8,8 @@ __version__ = "0.1.0"
 # IR layer versions, recorded per compile run (ir.md §5).
 FACT_VOCABULARY_VERSION = "0.1"
 KNOWLEDGE_MODEL_VERSION = "0.1"
+
+# OKF (Open Knowledge Format) spec version the wiki emitter targets, recorded per
+# compile run alongside the IR versions above (ADR-013). Spec: github.com/
+# GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
+OKF_SPEC_VERSION = "0.2"

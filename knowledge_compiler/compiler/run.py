@@ -15,7 +15,9 @@ from pathlib import Path
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from knowledge_compiler import FACT_VOCABULARY_VERSION, KNOWLEDGE_MODEL_VERSION
+from knowledge_compiler import (
+    FACT_VOCABULARY_VERSION, KNOWLEDGE_MODEL_VERSION, OKF_SPEC_VERSION,
+)
 from knowledge_compiler.collectors.forge import ForgeGateway, MergedPR
 from knowledge_compiler.collectors.git import GitCollector
 from knowledge_compiler.collectors.jira import build_jira_gateway
@@ -138,6 +140,40 @@ class VerifyReport:
     evidence_histogram: dict[str, int]               # cascade-rule usage (threshold tuning data)
 
 
+def emit_only(repo_dir: Path) -> CompileSummary:
+    """Emit-stage-only rerun against already-compiled Knowledge IR — no
+    Collect/Extract/Normalize, no new `compile_runs` row (ADR-013's cheap
+    OKF-spec-version rollout path: a spec bump is a `wiki/emitter.py` code
+    change plus a re-render, never a data migration or a full recompile).
+
+    Reuses the most recent succeeded run's identity (commit, compile_run_id)
+    for the emitted frontmatter — this run is not new history, so nothing is
+    persisted to `compile_runs`; only the wiki bundle on disk changes.
+    Requires at least one prior successful compile.
+    """
+    with _locked_session(repo_dir) as (session, repo, ctx):
+        last_run = session.execute(
+            select(CompileRun).where(CompileRun.repo_id == repo.id,
+                                     CompileRun.status == "succeeded")
+            .order_by(CompileRun.id.desc()).limit(1)).scalar_one_or_none()
+        if last_run is None:
+            raise CompileError(
+                f"no successful compile found for '{ctx['repo_slug']}' — "
+                f"run `kc compile --full` first")
+
+        state = load_current_state(session, repo.id, ctx["repo_slug"])
+        wiki_pages_written = _emit_wiki(session, ctx["repo_slug"], last_run,
+                                        ctx["wiki_dir"], dirty=set())
+        summary = CompileSummary(
+            repo_slug=ctx["repo_slug"], compile_run_id=last_run.id,
+            commit_sha=last_run.commit_sha, entities=len(state.entities),
+            relationships=len(state.relationships), added=0, changed=0, removed=0,
+            moved=0, dirty=0, warnings=[], wiki_pages_written=wiki_pages_written,
+            wiki_dir=str(ctx["wiki_dir"]))
+        _publish_wiki(ctx, summary, last_run.id, last_run.commit_sha)
+        return summary
+
+
 def verify(repo_dir: Path) -> VerifyReport:
     """Shadow compile: Collect + Extract + Normalize + Diff — zero writes.
     Empty delta <=> incremental history is equivalent to a fresh full compile.
@@ -222,7 +258,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
                      merged_at=pr.merged_at if pr else None,
                      commit_sha=commit_sha, status="running",
                      fact_vocabulary_version=FACT_VOCABULARY_VERSION,
-                     knowledge_model_version=KNOWLEDGE_MODEL_VERSION)
+                     knowledge_model_version=KNOWLEDGE_MODEL_VERSION,
+                     okf_spec_version=OKF_SPEC_VERSION)
     session.add(run)
     session.commit()  # staging commit 1
 
@@ -314,18 +351,22 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         except Exception as exc:  # noqa: BLE001 — same contract as emission
             summary.warnings.append(f"embedding emission failed (compile state intact): {exc}")
 
+    _publish_wiki(ctx, summary, run.id, commit_sha)
+    return summary
+
+
+def _publish_wiki(ctx: dict, summary: CompileSummary, run_id: int, commit_sha: str) -> None:
     try:
         pub_cfg = _publisher_config(ctx["config"])
         if pub_cfg.enabled:
             from knowledge_compiler.wiki.publisher import GitBranchPublisher
 
             result = GitBranchPublisher(ctx["repo_dir"], pub_cfg).publish(
-                ctx["wiki_dir"], f"kc: compile run {run.id} @ {commit_sha[:12]}")
+                ctx["wiki_dir"], f"kc: compile run {run_id} @ {commit_sha[:12]}")
             summary.published_sha = result.commit_sha if result.committed else None
             summary.pushed = result.pushed
     except Exception as exc:  # noqa: BLE001 — same contract as emission
         summary.warnings.append(f"wiki publish failed (compile state is intact): {exc}")
-    return summary
 
 
 def _llm_configured(ctx: dict) -> bool:
@@ -451,9 +492,11 @@ def _emit_wiki(session: Session, repo_slug: str, run: CompileRun, wiki_dir: Path
             .where(DeltaChangeRow.compile_run_id == r.id)
             .order_by(DeltaChangeRow.slug)).all()
         recent.append(RunDelta(compile_run_id=r.id, commit_sha=r.commit_sha,
+                               finished_at=r.finished_at,
                                changes=tuple((op, slug, et) for op, slug, et in changes)))
 
     emitter = WikiEmitter(wiki_dir)
-    ctx = WikiContext(repo_slug=repo_slug, compile_run_id=run.id, commit_sha=run.commit_sha)
+    ctx = WikiContext(repo_slug=repo_slug, compile_run_id=run.id, commit_sha=run.commit_sha,
+                      finished_at=run.finished_at)
     written = emitter.emit(state.entities, state.relationships, dirty, recent, ctx)
     return len(written)

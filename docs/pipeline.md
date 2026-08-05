@@ -1,7 +1,7 @@
 # Pipeline
 
 > Status: Living specification. Defines the compile execution model and per-stage contracts over the IR ([ir.md](ir.md)) and schema ([data-model.md](data-model.md)).
-> Last updated: 2026-07-18
+> Last updated: 2026-08-05
 
 ---
 
@@ -13,6 +13,7 @@
 | `kc compile --full` | whole repository | bootstrap + correctness escape hatch (ADR-003); slug-preserving when run against an existing database (ADR-004) |
 | `kc reconcile` | missed merged PRs | standalone catch-up; same machinery as §4 |
 | `kc verify` | whole repository, read-only | shadow full compile + equivalence check (§7); never persists |
+| `kc compile --emit-only` | Emit stage only, against already-compiled Knowledge IR | no Collect/Extract/Normalize, no new `compile_runs` row; the cheap OKF-spec-version rollout path (ADR-013, §3.6) |
 
 Both `kc compile` and `kc reconcile` accept `--verbose / -v`: prints a per-slug breakdown of added/changed/removed/moved entities in the final summary (counts are always shown; the breakdown is opt-in to avoid noise on large repos).
 
@@ -67,7 +68,8 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 ### 3.6 Emit
 
 - **Reads:** Knowledge IR only (never facts — ADR-009). Input: the dirty-entity set.
-- **Produces:** **publications** — file-shaped renders of compiled knowledge — plus embeddings for dirty entities (per active model generation, ADR-005). The reference publication is the wiki: regenerated Markdown pages for dirty pages (wholesale per page, ir.md), **OKF-conformant** ([okf.md](https://okf.md/) — Open Knowledge Format): each page carries YAML frontmatter (entity slug, type, compile run, provenance refs) over standard Markdown, so the page set is simultaneously a human wiki and an agent-readable OKF bundle with zero extra tooling.
+- **Produces:** **publications** — file-shaped renders of compiled knowledge — plus embeddings for dirty entities (per active model generation, ADR-005). The reference publication is the wiki: regenerated Markdown pages for dirty pages (wholesale per page, ir.md), **OKF v0.2-conformant** ([SPEC.md](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) — Open Knowledge Format; see [docs/okf-conformance.md](okf-conformance.md) for the full spec-to-emitter mapping): each page carries YAML frontmatter (entity slug, type, compile run, provenance refs) over standard Markdown, so the page set is simultaneously a human wiki and an agent-readable OKF bundle with zero extra tooling. Two reserved OKF filenames get exact-spec treatment — `index.md` (no general frontmatter beyond an optional bundle-root `okf_version`) and `log.md` (no frontmatter, date-grouped, prose changelog entries) — alongside a third, KC-specific `recent-changes.md` (not spec-reserved, frontmatter unrestricted) scoped to only the latest compile's delta, distinct from `log.md`'s full chronological history (ADR-013).
+- **Spec-version tracking:** every compile run records `okf_spec_version` (alongside `fact_vocabulary_version`/`knowledge_model_version`, ir.md §5) — the OKF spec version its wiki emission targeted. `kc compile --emit-only` re-renders the wiki from already-compiled Knowledge IR with no new compile run — the migration path for rolling out a spec-version bump across previously-compiled repos without re-running Collect/Extract/Normalize (ADR-013). `kc validate-okf` checks an emitted bundle against the conformance rules directly.
 - **Publisher (generalized concept):** a Publisher is a plugin that ships a publication to a destination. One publication, many possible destinations:
 
   ```
@@ -140,4 +142,4 @@ Runs Collect + Extract + Normalize as a **shadow full compile** (no Persist, no 
 
 ## References
 
-[ir.md](ir.md) · [data-model.md](data-model.md) · [ADR-002](decisions/ADR-002-ci-trigger.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-006](decisions/ADR-006-language-analyzers.md) · [ADR-007](decisions/ADR-007-plugin-architecture.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-009](decisions/ADR-009-two-layer-ir.md) · architecture.md §3–4
+[ir.md](ir.md) · [data-model.md](data-model.md) · [ADR-002](decisions/ADR-002-ci-trigger.md) · [ADR-003](decisions/ADR-003-current-state-delta-log.md) · [ADR-004](decisions/ADR-004-entity-identity.md) · [ADR-006](decisions/ADR-006-language-analyzers.md) · [ADR-007](decisions/ADR-007-plugin-architecture.md) · [ADR-008](decisions/ADR-008-llm-abstraction-caching.md) · [ADR-009](decisions/ADR-009-two-layer-ir.md) · [ADR-010](decisions/ADR-010-wiki-destination.md) · [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) · [okf-conformance.md](okf-conformance.md) · architecture.md §3–4

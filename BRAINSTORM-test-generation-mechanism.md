@@ -125,13 +125,13 @@ Weighted by: fit with the deterministic-first/validated-before-fact philosophy, 
 
 **Decisive uncertainty:** whether "milestone 3 done" is expected to mean an automatic, no-agent-required pipeline capability (in which case Option C, cache-semantics fix included, becomes necessary) or an enabled workflow that an agent performs using KC's compiled knowledge (in which case B is sufficient as designed). This is a product-expectation question, not a technical one, and it isn't resolved by anything already written down.
 
-**Proposed spike (half a day):** Take `test_plan`'s real output for one actual coverage gap on frida, hand it to a coding agent in a normal working session, have it write a `kc-covers`-tagged test by hand using the published header spec, then run it through a manually-built `score_test` check plus the existing mutmut workflow. If that loop feels adequate, B is confirmed as sufficient; if the friction of "someone has to remember to do this" feels like the real blocker, that's the concrete signal to build C instead.
+**Proposed spike (half a day):** Take `test_plan`'s real output for one actual coverage gap on repo-a, hand it to a coding agent in a normal working session, have it write a `kc-covers`-tagged test by hand using the published header spec, then run it through a manually-built `score_test` check plus the existing mutmut workflow. If that loop feels adequate, B is confirmed as sufficient; if the friction of "someone has to remember to do this" feels like the real blocker, that's the concrete signal to build C instead.
 
 **Steelman of the runner-up (Option C):** A reasonable person optimizing for "milestone 3 actually ships something automatic" would pick C — it's the only option where running one command produces a test file without a human/agent workflow decision in the loop, and reusing ADR-008's existing provider/cache machinery is genuinely less new plumbing than it sounds. The cache-semantics mismatch (unchanged input → same output, which is wrong for "give me a different attempt") is real but fixable — a generation-specific cache bypass or a nonce in the content hash would resolve it without abandoning the rest of ADR-008's machinery. If Option B's spike above shows the manual workflow never actually happens in practice, C is the correct escalation, not a fallback.
 
 ## Next steps
 
-1. ~~Run the proposed spike: hand `test_plan`'s real frida output to a coding agent, write one real `kc-covers`-tagged test by hand, score it manually — resolves the decisive uncertainty above.~~ Done 2026-07-29 — see spike result below.
+1. ~~Run the proposed spike: hand `test_plan`'s real repo-a output to a coding agent, write one real `kc-covers`-tagged test by hand, score it manually — resolves the decisive uncertainty above.~~ Done 2026-07-29 — see spike result below.
 2. ~~If confirmed: build `kc score-test <path>` (or an MCP `score_test` tool) implementing the three checks from `BRAINSTORM-test-generation-eval.md` (existence, precision/recall vs. `test_plan`, note on mutation-kill via the existing CI workflow).~~ Done 2026-07-29 — shipped as `kc validate-test` (same checks, same exit-code contract, per CLAUDE.md).
 3. ~~If the spike shows the manual workflow doesn't stick: revisit Option C with the cache-semantics fix scoped in from the start, not bolted on after.~~ Moot — spike confirmed Option B.
 4. ~~Once `score_test` exists and has scored a handful of real generated tests, revisit `decisions/index.md:159`'s "Verification Requirement" entity question.~~ Done 2026-07-29 — resolved by [ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md): deferred, mutation-kill rate is the V1 sub-component precision signal. See `BRAINSTORM-verification-requirement.md`.
@@ -142,16 +142,16 @@ Weighted by: fit with the deterministic-first/validated-before-fact philosophy, 
 ## Spike result (resolves the decisive uncertainty, decided 2026-07-29)
 
 **Target slug:** `component/backend-storage-blob-utils`
-**Repo:** frida (2840 entities, compiled 2026-07-29 with LLM+embeddings)
+**Repo:** repo-a (2840 entities, compiled 2026-07-29 with LLM+embeddings)
 
 **Brief given to the subagent — exactly:**
 1. The raw `test_plan` JSON output for `component/backend-storage-blob-utils` (18 citable slugs across 6 recommendations: 13 api-kind claims-routes targets + 5 symbols-kind component targets).
-2. Target repo path: `C:\WORK\frida`.
-3. One instruction: "Write one pytest test file in `C:\WORK\frida\backend\tests\` covering the gap this `test_plan` output names. Give it a `kc-covers:` header naming the exact entity slugs you are testing."
+2. Target repo path: `C:\WORK\repo-a`.
+3. One instruction: "Write one pytest test file in `C:\WORK\repo-a\backend\tests\` covering the gap this `test_plan` output names. Give it a `kc-covers:` header naming the exact entity slugs you are testing."
 
 No `kc-covers` spec, no DCA-3301 reference, no header format example — deliberately zero hand-holding.
 
-**File produced:** `C:\WORK\frida\backend\tests\test_blob_utils_cache_claims_routes.py`
+**File produced:** `C:\WORK\repo-a\backend\tests\test_blob_utils_cache_claims_routes.py`
 
 **`kc validate-test` result (first pass, unedited):**
 ```
@@ -189,32 +189,32 @@ This is kept in the record rather than deleted, as the clearest demonstration of
 
 ## Ceiling analysis: `test_claims.py` (pre-existing, not part of either spike)
 
-Before rerunning spike 2 fairly, the file `test_claims.py` (already present in `frida-testing/playwright/tests/api/`, written independently of this exercise) was checked against the same gap:
+Before rerunning spike 2 fairly, the file `test_claims.py` (already present in `repo-c-testing/playwright/tests/api/`, written independently of this exercise) was checked against the same gap:
 
 ```
-kc validate-test tests/api/test_claims.py --for-entity component/backend-storage-blob-utils --dir frida
+kc validate-test tests/api/test_claims.py --for-entity component/backend-storage-blob-utils --dir repo-a
 precision: 100.0%   recall: 72.2% (13/18)   SCORE: 86.1%
 ```
 
 This is not a shortfall — it is the **mathematical maximum** achievable by any test confined to one access mode against this gap. `component/backend-storage-blob-utils`'s `test_plan` names 18 citable targets: 13 `api`-kind (HTTP-reachable claims routes) and 5 `symbols`-kind (internal Python functions — `blob_utils.write_bytes`, `document_cache.get_doc_object`, etc.). A black-box API/e2e test can reach the 13 API targets and can **never** reach the 5 symbols-kind ones — they require white-box unit-level import, structurally impossible from outside the process. 72.2% recall is "done," not "14% short." `kc validate-test`'s output doesn't currently say this — it just reports a number that looks incomplete.
 
-## Spike 1b: raw-JSON agent, same gap, `frida-testing` repo (2026-07-29)
+## Spike 1b: raw-JSON agent, same gap, `repo-c-testing` repo (2026-07-29)
 
-To get a fair same-repo comparison (spike 1 wrote a unit test in `frida` itself; the original spike 2 wrote in the separate `frida-testing` repo — two variables changing at once), a raw-JSON agent (zero tool access, same methodology as spike 1) was asked to close the same gap, this time in `frida-testing/playwright`.
+To get a fair same-repo comparison (spike 1 wrote a unit test in `repo-a` itself; the original spike 2 wrote in the separate `repo-c-testing` repo — two variables changing at once), a raw-JSON agent (zero tool access, same methodology as spike 1) was asked to close the same gap, this time in `repo-c-testing/playwright`.
 
 **Result: it wrote nothing, correctly.** It found `test_claims.py` already claims all 13 API-reachable targets, confirmed (via grep across `tests/api/`) that none of the 5 symbols-kind targets have any HTTP surface in this test suite, and concluded there was no genuine, non-duplicate gap left to fill — the ceiling above was already claimed. It declined to fabricate a duplicate test rather than force output.
 
 ## Redo 1: dead-code target, both access methods (2026-07-29)
 
-To test a **genuinely fresh** gap (not already claimed anywhere), the frontend component `component/frontend-src-components-coveragequestions` (`CoverageQuestions.tsx`) was selected: uncovered in frida's own compiled knowledge, unclaimed by any of the 76 slugs already declared across 30 `kc-covers` headers in `frida-testing`.
+To test a **genuinely fresh** gap (not already claimed anywhere), the frontend component `component/frontend-src-components-coveragequestions` (`CoverageQuestions.tsx`) was selected: uncovered in repo-a's own compiled knowledge, unclaimed by any of the 76 slugs already declared across 30 `kc-covers` headers in `repo-c-testing`.
 
-Both a raw-JSON agent and a tool-driven agent (using a proxy script mirroring `test_plan`/`get_entity`/`search_knowledge` — see note below) were asked to write a Playwright UI test for it. **Both independently reached the identical conclusion: the component is dead code.** Neither wrote a file. Both found the same evidence — a repo-wide grep found zero imports/JSX usage of `CoverageQuestions` outside its own file, and frida's own `internal-docs/data-testid-conventions.md` explicitly documents it as dead code flagged for removal. The real, live "Coverage Analysis" panel users see is rendered by a completely different file (`CoverageAnalysis.tsx`).
+Both a raw-JSON agent and a tool-driven agent (using a proxy script mirroring `test_plan`/`get_entity`/`search_knowledge` — see note below) were asked to write a Playwright UI test for it. **Both independently reached the identical conclusion: the component is dead code.** Neither wrote a file. Both found the same evidence — a repo-wide grep found zero imports/JSX usage of `CoverageQuestions` outside its own file, and repo-a's own `internal-docs/data-testid-conventions.md` explicitly documents it as dead code flagged for removal. The real, live "Coverage Analysis" panel users see is rendered by a completely different file (`CoverageAnalysis.tsx`).
 
-**Finding:** `test_plan` presented this as a normal, actionable coverage gap. It is technically correct (`covered: false` is true) but structurally misleading — the correct remedy is deletion, not a test, and nothing in the compiled knowledge or `test_plan`'s output flags that the target is unreachable. Both agents only caught this by independently reading source and internal docs; the compiler didn't tell them. (Actionable, out of scope for this repo: `CoverageQuestions.tsx` should be deleted or wired in, per frida's own docs.)
+**Finding:** `test_plan` presented this as a normal, actionable coverage gap. It is technically correct (`covered: false` is true) but structurally misleading — the correct remedy is deletion, not a test, and nothing in the compiled knowledge or `test_plan`'s output flags that the target is unreachable. Both agents only caught this by independently reading source and internal docs; the compiler didn't tell them. (Actionable, out of scope for this repo: `CoverageQuestions.tsx` should be deleted or wired in, per repo-a's own docs.)
 
 ## Redo 2: live target, matched vs. mismatched strategy (2026-07-29)
 
-A second fresh, genuinely live target was selected: `component/frontend-src-components-decision` (`Decision.tsx`), confirmed rendered at `AnalysisPanel.tsx:69` (one of four analysis panels shown for a claim), uncovered in frida and unclaimed in `frida-testing`.
+A second fresh, genuinely live target was selected: `component/frontend-src-components-decision` (`Decision.tsx`), confirmed rendered at `AnalysisPanel.tsx:69` (one of four analysis panels shown for a claim), uncovered in repo-a and unclaimed in `repo-c-testing`.
 
 **First pass — same variable-confound problem as before:** a raw-JSON agent (spike 1 v2) and a tool-driven agent (spike 2 v2) were given the same target but left free to choose their own test strategy:
 
@@ -236,7 +236,7 @@ Both scores were independently reproduced via `kc validate-test`, not self-repor
 
 **Finding: when test strategy is held constant, information-access method made no difference.** Spike 2B matched spike 1 v2 exactly (100.0%, both independently reproduced). The 75%/100% gap between the original spike 1 v2 and spike 2 was never about MCP vs. raw JSON — it was entirely downstream of spike 2 independently choosing a narrower, more expensive test scope (a real backend round-trip) and correctly declining to over-claim against that narrower scope. That's a legitimate engineering trade-off, not a quality difference caused by how the agent got its information.
 
-*Methodology note:* the `frida_kc` MCP server wasn't connected in the authoring session, so "tool-driven" runs used a small proxy script calling the exact same `queries.py` functions `kc serve`'s MCP tools call (`test_plan`, `get_entity`, `search_knowledge`), invoked turn-by-turn via Bash rather than as native MCP tool calls. This preserves the actual variable under test (self-directed exploration vs. handed-a-JSON-blob) even though the transport differs from a live MCP connection.
+*Methodology note:* the `repo_a_kc` MCP server wasn't connected in the authoring session, so "tool-driven" runs used a small proxy script calling the exact same `queries.py` functions `kc serve`'s MCP tools call (`test_plan`, `get_entity`, `search_knowledge`), invoked turn-by-turn via Bash rather than as native MCP tool calls. This preserves the actual variable under test (self-directed exploration vs. handed-a-JSON-blob) even though the transport differs from a live MCP connection.
 
 ## Consolidated findings across the full spike record
 

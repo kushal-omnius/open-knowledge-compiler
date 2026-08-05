@@ -1,4 +1,4 @@
-# Knowledge Compiler
+# Open Knowledge Compiler
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
@@ -6,6 +6,12 @@ Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, te
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
+
+## Why OKF
+
+The wiki this project compiles isn't a bespoke format — it's an [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) (Open Knowledge Format) bundle: plain Markdown with YAML frontmatter, readable by any editor and by any OKF-aware agent, with no proprietary SDK or vendor lock-in. OKF is deliberately minimal — the only universal requirement is a `type` field — and it explicitly separates *producers* (things that write knowledge) from *consumers* (things that read it), so tooling on either side can be swapped independently.
+
+Hand-maintained OKF bundles (an Obsidian vault, a `docs/` folder someone remembers to update) drift the moment nobody's looking. Open Knowledge Compiler is a **producer**: it compiles a conformant, always-current OKF bundle directly from your Git history, PRs, and code — no one has to remember to update it, because it's regenerated on every merge. See [docs/okf-conformance.md](docs/okf-conformance.md) for exactly how the emitted bundle maps to the spec, and `kc validate-okf` to check any bundle against it.
 
 ## Prerequisites
 
@@ -120,11 +126,13 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | `kc compile --full -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
 | `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
+| `kc compile --emit-only` | Re-render the wiki from already-compiled Knowledge IR only — no Collect/Extract/Normalize, no new compile run. The cheap OKF-spec-version rollout path ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md)) |
 | `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
 | `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
 | `kc validate-test <file> --for-entity <slug>` | Score a generated test's `kc-covers:` header against compiled knowledge; exits 1 if header missing or any slug doesn't exist ([ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md)) |
+| `kc validate-okf` | Check the emitted wiki bundle against OKF conformance rules ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md), [docs/okf-conformance.md](docs/okf-conformance.md)) |
 | `kc serve` | Read-only MCP server (stdio) over the knowledge base — never compiles (`pip install -e .[serve]`) |
 
 ## Configuration

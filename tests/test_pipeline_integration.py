@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 
 import pytest
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from knowledge_compiler.storage import db as kcdb
@@ -120,6 +120,31 @@ def test_source_change_produces_precise_delta(compiled_repo):
     assert third.changed >= 1          # billing.rules component (symbols changed) + its page owner hash
     assert third.removed == 0
     assert third.dirty >= 1
+
+
+def test_emit_only_reruns_emission_without_new_compile_run(compiled_repo):
+    """ADR-013: emit-only re-renders the wiki from durable Knowledge IR without
+    a new compile_runs row — the cheap OKF-spec-version rollout path."""
+    from knowledge_compiler.compiler.run import emit_only
+    from knowledge_compiler.storage.schema import CompileRun, Repository
+
+    repo, slug, first = compiled_repo
+    with Session(kcdb.make_engine()) as session:
+        repo_id = session.execute(select(Repository.id).where(Repository.slug == slug)).scalar_one()
+        run_count_before = session.execute(
+            select(func.count()).select_from(CompileRun).where(CompileRun.repo_id == repo_id)
+        ).scalar_one()
+
+    summary = emit_only(repo)
+    assert summary.compile_run_id == first.compile_run_id  # reuses last succeeded run's identity
+    assert summary.entities == first.entities
+    assert summary.wiki_pages_written > 0
+
+    with Session(kcdb.make_engine()) as session:
+        run_count_after = session.execute(
+            select(func.count()).select_from(CompileRun).where(CompileRun.repo_id == repo_id)
+        ).scalar_one()
+    assert run_count_after == run_count_before  # no new compile_runs row
 
 
 def test_two_repos_in_one_database_stay_isolated(tmp_path: Path):

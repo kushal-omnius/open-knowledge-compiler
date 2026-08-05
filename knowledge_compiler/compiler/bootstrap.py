@@ -37,8 +37,8 @@ push = true
 [llm]
 # Semantic layer (ADR-008). Explicit opt-in. The deterministic compiler is fully
 # functional without it. Credentials come from the environment, never this file:
-#   provider = "anthropic" -> ANTHROPIC_API_KEY, pip install knowledge-compiler[llm]
-#   provider = "openai"    -> OPENAI_API_KEY,    pip install knowledge-compiler[llm-openai]
+#   provider = "anthropic" -> ANTHROPIC_API_KEY, pip install open-knowledge-compiler[llm]
+#   provider = "openai"    -> OPENAI_API_KEY,    pip install open-knowledge-compiler[llm-openai]
 enabled = false
 provider = "anthropic"
 # model = "claude-opus-4-8"   # per-provider default applies when omitted

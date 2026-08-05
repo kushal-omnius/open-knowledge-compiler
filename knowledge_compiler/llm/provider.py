@@ -24,9 +24,9 @@ class AnthropicProvider:
     def __init__(self, model_id: str = DEFAULT_MODEL) -> None:
         try:
             import anthropic
-        except ImportError as exc:  # dependency is optional: pip install knowledge-compiler[llm]
+        except ImportError as exc:  # dependency is optional: pip install open-knowledge-compiler[llm]
             raise LLMProviderError(
-                "anthropic SDK not installed — pip install 'knowledge-compiler[llm]'") from exc
+                "anthropic SDK not installed — pip install 'open-knowledge-compiler[llm]'") from exc
         self.model_id = model_id
         self._anthropic = anthropic
         self._client = anthropic.Anthropic()
@@ -55,7 +55,7 @@ class OpenAIProvider:
     """Alternative LLMProvider: OpenAI structured outputs (strict json_schema).
 
     Credentials: OPENAI_API_KEY from the environment (SDK default resolution).
-    Requires `pip install 'knowledge-compiler[llm-openai]'`.
+    Requires `pip install 'open-knowledge-compiler[llm-openai]'`.
     """
 
     DEFAULT_MODEL = "gpt-4o"
@@ -65,7 +65,7 @@ class OpenAIProvider:
             import openai
         except ImportError as exc:
             raise LLMProviderError(
-                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+                "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
         self.model_id = model_id
         self._openai = openai
         try:
@@ -107,7 +107,7 @@ class AzureOpenAIProvider(OpenAIProvider):
             import openai
         except ImportError as exc:
             raise LLMProviderError(
-                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+                "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
 
         def env(*names: str) -> str | None:
             for n in names:
@@ -139,7 +139,7 @@ class CloudflareProvider(OpenAIProvider):
     forced function/tool call instead — the confirmed-supported mechanism.
 
     Env (never config files): CF_ACCOUNT_ID, CF_API_TOKEN.
-    Requires `pip install 'knowledge-compiler[llm-openai]'` (same openai SDK,
+    Requires `pip install 'open-knowledge-compiler[llm-openai]'` (same openai SDK,
     pointed at Cloudflare's base URL)."""
 
     DEFAULT_MODEL = "@cf/google/gemma-4-26b-a4b-it"
@@ -152,7 +152,7 @@ class CloudflareProvider(OpenAIProvider):
             import openai
         except ImportError as exc:
             raise LLMProviderError(
-                "openai SDK not installed — pip install 'knowledge-compiler[llm-openai]'") from exc
+                "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
 
         account_id = os.environ.get("CF_ACCOUNT_ID")
         api_token = os.environ.get("CF_API_TOKEN")

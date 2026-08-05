@@ -51,6 +51,11 @@ def init_cmd(slug: str, forge_ref: str, default_branch: str, target_dir: str) ->
 @main.command("compile")
 @click.option("--full", is_flag=True, help="Bootstrap / escape-hatch full compilation.")
 @click.option("--pr", type=int, default=None, help="Incremental compilation of one merged PR.")
+@click.option("--emit-only", is_flag=True,
+              help="Re-render the wiki bundle from already-compiled Knowledge IR only — "
+                   "no Collect/Extract/Normalize, no new compile_runs row. For rolling out "
+                   "an OKF-spec-version bump cheaply across previously compiled repos "
+                   "(ADR-013). Requires at least one prior successful compile.")
 @click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
               show_default=True, help="Repository directory (contains kc.toml).")
 @click.option("--no-llm", is_flag=True,
@@ -58,16 +63,22 @@ def init_cmd(slug: str, forge_ref: str, default_branch: str, target_dir: str) ->
                    "(pipeline.md §6.1). LLM-derived entities are never removed by such runs.")
 @click.option("--verbose", "-v", is_flag=True,
               help="Print each added/changed/removed/moved entity slug in the summary.")
-def compile_cmd(full: bool, pr: int | None, repo_dir: str, no_llm: bool, verbose: bool) -> None:
+def compile_cmd(full: bool, pr: int | None, emit_only: bool, repo_dir: str, no_llm: bool,
+                verbose: bool) -> None:
     """Compile the repository (pipeline.md §3)."""
-    if full == (pr is not None):
+    if emit_only:
+        if full or pr is not None:
+            raise click.UsageError("--emit-only cannot be combined with --full or --pr")
+    elif full == (pr is not None):
         raise click.UsageError("exactly one of --full or --pr is required")
     from pathlib import Path
 
-    from knowledge_compiler.compiler.run import CompileError, compile_full, compile_pr
+    from knowledge_compiler.compiler.run import CompileError, compile_full, compile_pr, emit_only as run_emit_only
 
     try:
-        if full:
+        if emit_only:
+            _echo_summary(run_emit_only(Path(repo_dir)), verbose)
+        elif full:
             _echo_summary(compile_full(Path(repo_dir), no_llm=no_llm, progress=_progress), verbose)
         else:
             summaries = compile_pr(Path(repo_dir), _gateway(Path(repo_dir)), expect_pr=pr,
@@ -296,6 +307,46 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
         ctx.exit(1)
 
 
+@main.command("validate-okf")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+def validate_okf_cmd(repo_dir: str) -> None:
+    """Check the emitted wiki bundle against OKF conformance rules (ADR-013).
+
+    Never compiles — reads whatever the last `kc compile` wrote to the wiki
+    output directory, same posture as `kc validate-test`.
+    """
+    from pathlib import Path
+
+    from knowledge_compiler.compiler.run import CompileError, read_config
+    from knowledge_compiler.wiki.okf_conformance import check_bundle
+
+    try:
+        config = read_config(Path(repo_dir))
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    wiki_dir = Path(repo_dir) / config.get("wiki", {}).get("output_dir", "kc-wiki")
+    if not wiki_dir.is_dir():
+        raise click.ClickException(
+            f"no wiki bundle at {wiki_dir} — run `kc compile --full` first")
+
+    report = check_bundle(wiki_dir)
+    click.echo(f"okf spec version: {report.okf_spec_version}")
+    click.echo(f"files checked:    {report.files_checked}")
+    click.echo()
+    if report.conformant:
+        click.echo(f"CONFORMANT — {wiki_dir} satisfies OKF v{report.okf_spec_version}")
+        return
+
+    click.echo(f"{len(report.issues)} conformance issue(s):")
+    for issue in report.issues:
+        click.echo(f"  [{issue.rule}] {issue.file}: {issue.detail}")
+    click.echo()
+    click.echo("NOT CONFORMANT")
+    raise click.exceptions.Exit(1)
+
+
 @main.command("serve")
 @click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
               show_default=True, help="Repository directory (contains kc.toml).")
@@ -308,5 +359,5 @@ def serve_cmd(repo_dir: str) -> None:
         from knowledge_compiler.mcp.server import serve
     except ImportError as exc:
         raise click.ClickException(
-            "mcp SDK not installed — pip install 'knowledge-compiler[serve]'") from exc
+            "mcp SDK not installed — pip install 'open-knowledge-compiler[serve]'") from exc
     serve(Path(repo_dir))

@@ -77,7 +77,7 @@ reusable by a future `kc query` CLI:
 | `coverage_for(component_slug)` | `covers` edges |
 | `knowledge_stats()` | counts + last compile (incl. degraded flag) |
 
-Install: `pip install 'knowledge-compiler[serve]'`. Register with an agent, e.g.
+Install: `pip install 'open-knowledge-compiler[serve]'`. Register with an agent, e.g.
 Claude Code: `claude mcp add kc -- kc serve --dir <repo>`.
 
 ## 6. Open items

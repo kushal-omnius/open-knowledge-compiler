@@ -100,6 +100,14 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Depended on by:** —
 - **Related documents:** `BRAINSTORM-verification-requirement.md`, `BRAINSTORM-test-generation-eval.md`, `BRAINSTORM-test-generation-mechanism.md` (full spike record)
 
+### [ADR-013 — Open-Source Release + OKF Spec-Version Conformance and Migration](ADR-013-open-source-okf-conformance.md)
+
+- **Status:** Proposed
+- **Summary:** Open-sourcing Knowledge Compiler as `open-knowledge-compiler` positions it as a reference OKF producer; since the OKF spec is external and independently versioned (discovered mid-review: the authoritative spec had already moved to v0.2, exposing real conformance bugs against KC's v0.1-era emitter), track `OKF_SPEC_VERSION` explicitly (extending ir.md §5's `fact_vocabulary_version`/`knowledge_model_version` pattern) and handle all future spec migrations as Emit-stage-only re-renders against durable Knowledge IR — never a data migration. Database-less compilation, raised in the same discussion, is explicitly parked out of scope (`BRAINSTORM-db-less-compile-mode.md`).
+- **Dependencies:** ADR-001 (durable store invariant), ADR-003 (delta log — `log.md`'s date-grouped history), ADR-004 (slug stability assumed by re-render-not-recompile), ADR-009 (Fact IR/Knowledge IR boundary enabling Emit-only reruns), ADR-010 (wiki as disposable, wholesale-regenerated build artifact — the property this ADR's migration story depends on)
+- **Depended on by:** —
+- **Related documents:** `docs/okf-conformance.md` (new, tracked separately), `data-model.md` (`compile_runs.okf_spec_version`), `ir.md` §5, `BRAINSTORM-db-less-compile-mode.md`
+
 ## Dependency graph
 
 Arrows point from an ADR to what it depends on. ADR-001 and ADR-007 are the two foundations; no cycles.
@@ -131,9 +139,14 @@ graph TD
     ADR011 --> ADR004
     ADR012["ADR-012 Defer VerificationRequirement"] --> ADR009
     ADR012 --> ADR008
+    ADR013["ADR-013 OKF Conformance + Migration (Proposed)"] --> ADR001
+    ADR013 --> ADR003
+    ADR013 --> ADR004
+    ADR013 --> ADR009
+    ADR013 --> ADR010
 ```
 
-ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. All are immutable per the process in [README.md](README.md) — changes require a superseding ADR.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013 remains Proposed pending review.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 

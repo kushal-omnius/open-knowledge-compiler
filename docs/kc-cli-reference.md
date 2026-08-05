@@ -35,16 +35,17 @@ kc init --slug my-service --forge-ref github.com/acme/my-service --dir /path/to/
 
 ### `kc compile`
 
-Compile the repository. Exactly one of `--full` or `--pr` is required.
+Compile the repository. Exactly one of `--full`, `--pr`, or `--emit-only` is required.
 
 ```bash
-kc compile (--full | --pr <number>) [--dir <path>] [--no-llm]
+kc compile (--full | --pr <number> | --emit-only) [--dir <path>] [--no-llm]
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--full` | Bootstrap / escape-hatch. Always re-runs the full pipeline against HEAD. No up-to-date check — use this for first-time compilation or to force a clean pass. LLM and embedding caches make repeated runs cheap for unchanged files. |
 | `--pr <N>` | Incremental compilation of one merged PR. Idempotent: skipped if PR N already has a `succeeded` row in `compile_runs`. |
+| `--emit-only` | Re-render the wiki bundle from already-compiled Knowledge IR only — no Collect/Extract/Normalize, no new `compile_runs` row. Requires at least one prior successful compile. The cheap OKF-spec-version rollout path ([ADR-013](decisions/ADR-013-open-source-okf-conformance.md)): a spec bump is an emitter code change plus a re-render, never a data migration. Cannot be combined with `--full` or `--pr`. |
 | `--no-llm` | Skip LLM extraction — deterministic pass only. Run is marked `degraded`. LLM-derived entities (features, business rules, risks) are never removed by degraded runs. |
 | `--dir` | Repository directory containing `kc.toml` (default: `.`). |
 
@@ -52,6 +53,7 @@ kc compile (--full | --pr <number>) [--dir <path>] [--no-llm]
 kc compile --full                     # first compile or forced full pass
 kc compile --full --no-llm            # fast re-index without LLM calls
 kc compile --pr 142                   # compile one PR incrementally
+kc compile --emit-only                # re-render the wiki only, no new compile
 ```
 
 **Progress** is streamed to stderr (`[llm]` and `[embed]` lines with counts) so long-running stages are no longer silent.
@@ -214,6 +216,50 @@ See [CLAUDE.md](../CLAUDE.md) for the `kc-covers:` header format and slug-sourci
 
 ---
 
+### `kc validate-okf`
+
+Check the emitted wiki bundle against OKF conformance rules. **Never compiles** — reads whatever the last `kc compile` wrote to the wiki output directory, same posture as `kc validate-test`.
+
+```bash
+kc validate-okf [--dir <path>]
+```
+
+| Option | Required | Description |
+|--------|----------|--------------|
+| `--dir` | no | Repository directory whose `kc.toml` locates the wiki output (default: `.`). |
+
+```bash
+kc validate-okf --dir /path/to/my-service
+```
+
+Example output (conformant):
+```
+okf spec version: 0.2
+files checked:    247
+
+CONFORMANT — kc-wiki satisfies OKF v0.2
+```
+
+Example output (issues found):
+```
+okf spec version: 0.2
+files checked:    247
+
+2 conformance issue(s):
+  [missing-type] component/legacy-module.md: frontmatter has no non-empty 'type' field (SPEC.md §11 rule 2)
+  [index.md-frontmatter] index.md: index.md may carry only 'okf_version' in frontmatter, found: ['title'] (SPEC.md §8)
+
+NOT CONFORMANT
+```
+
+Checks (per [SPEC.md §11](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)): every non-reserved `.md` file has parseable frontmatter with a non-empty `type`; `index.md` carries no frontmatter beyond an optional `okf_version`; `log.md` carries no frontmatter at all. See [docs/okf-conformance.md](okf-conformance.md) for the full spec-to-emitter mapping and [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) for the version-tracking/migration design.
+
+**Exit codes:**
+- `0` — bundle is conformant
+- `1` — one or more conformance issues found
+
+---
+
 ### `kc serve`
 
 Start a read-only MCP server over the compiled knowledge base (stdio transport). **Never compiles** — state updates come from CI-triggered `kc compile`.
@@ -222,7 +268,7 @@ Start a read-only MCP server over the compiled knowledge base (stdio transport).
 kc serve [--dir <path>]
 ```
 
-Requires: `pip install 'knowledge-compiler[serve]'`
+Requires: `pip install 'open-knowledge-compiler[serve]'`
 
 ```bash
 kc serve                              # serve the repo in the current directory

@@ -1,6 +1,7 @@
 """Wiki emitter tests: OKF conformance, cross-links, dirty-only regeneration,
 byte-determinism. Rendering is pure — tested without a database."""
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,9 @@ pytest.importorskip("tree_sitter_python")
 
 from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer  # noqa: E402
 
-CTX = WikiContext(repo_slug="repo-a", compile_run_id=7, commit_sha="abc123def456")
+FINISHED_AT = datetime(2026, 8, 5, 14, 31, 43, tzinfo=timezone.utc)
+CTX = WikiContext(repo_slug="repo-a", compile_run_id=7, commit_sha="abc123def456",
+                 finished_at=FINISHED_AT)
 
 
 @pytest.fixture()
@@ -43,7 +46,8 @@ def emit_all(state, tmp_path: Path, dirty=None) -> list[Path]:
     return WikiEmitter(tmp_path).emit(state.entities, state.relationships,
                                       dirty if dirty is not None else set(),
                                       [RunDelta(7, "abc123def456",
-                                                (("added", "component/billing", "component"),))],
+                                                (("added", "component/billing", "component"),),
+                                                finished_at=FINISHED_AT)],
                                       CTX)
 
 
@@ -52,6 +56,7 @@ def test_pages_written_at_slug_paths(state, tmp_path):
     assert (tmp_path / "component" / "billing-rules.md").is_file()
     assert (tmp_path / "api" / "get-discounts.md").is_file()
     assert (tmp_path / "index.md").is_file()
+    assert (tmp_path / "log.md").is_file()
     assert (tmp_path / "recent-changes.md").is_file()
 
 
@@ -61,10 +66,43 @@ def test_okf_frontmatter(state, tmp_path):
     assert text.startswith("---\n")
     head = text.split("---", 2)[1]
     for line in ("type: component", "slug: component/billing-rules", "repo: repo-a",
-                 "compile_run: 7", "generated: true"):
+                 "compile_run: 7", "by: process:knowledge-compiler/",
+                 "at: 2026-08-05T14:31:43+00:00"):
         assert line in head
-    assert "sources:" in head and "- billing/rules.py" in head
+    assert "files:" in head and "- billing/rules.py" in head
     assert "do not edit" in text  # ADR-010 hand-edit warning
+
+
+def test_index_has_no_general_frontmatter(state, tmp_path):
+    """OKF v0.2 §8: index.md is a reserved filename — no frontmatter except the
+    optional bundle-root okf_version."""
+    emit_all(state, tmp_path)
+    text = (tmp_path / "index.md").read_text(encoding="utf-8")
+    assert text.startswith("---\n")
+    head = text.split("---", 2)[1].strip()
+    assert head.startswith("okf_version:")
+    for forbidden in ("type: index", "compile_run:", "commit:", "title:"):
+        assert forbidden not in head
+
+
+def test_log_md_has_no_frontmatter_and_is_date_grouped(state, tmp_path):
+    """OKF v0.2 §9: log.md is a reserved filename — no frontmatter, date-grouped
+    ISO 8601 headings, prose entries."""
+    emit_all(state, tmp_path)
+    text = (tmp_path / "log.md").read_text(encoding="utf-8")
+    assert not text.startswith("---")
+    assert "## 2026-08-05" in text
+    assert "**Creation** `component/billing` (component)" in text
+
+
+def test_recent_changes_scoped_to_last_compile(state, tmp_path):
+    """recent-changes.md is a KC-specific convenience view (not a reserved OKF
+    filename) — frontmatter is fine, scope is just the latest compile."""
+    emit_all(state, tmp_path)
+    text = (tmp_path / "recent-changes.md").read_text(encoding="utf-8")
+    assert text.startswith("---\n")
+    assert "Compile 7" in text
+    assert "[log.md](log.md)" in text
 
 
 def test_cross_links_are_relative_and_resolve(state, tmp_path):
