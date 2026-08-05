@@ -1,3 +1,5 @@
+![Open Knowledge Compiler](docs/banner.jpg)
+
 # Open Knowledge Compiler
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
