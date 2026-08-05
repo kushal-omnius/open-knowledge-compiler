@@ -2,12 +2,32 @@
 
 # Open Knowledge Compiler
 
+[![CI](https://github.com/kushal-omnius/open-knowledge-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/kushal-omnius/open-knowledge-compiler/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
 **Status:** Architecture v1.0 frozen · V1 pipeline + milestone 3 implemented (deterministic compiler for Python + TypeScript, incremental compilation with reconcile + verify, OKF wiki with loop-safe branch publishing, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Dogfooded on two real team repos (`kc verify`-clean); next: enable enrichment on them and wire up incremental `--pr` compilation in CI.
 
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
+
+## Table of contents
+
+- [Why OKF](#why-okf)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Analyze a repository](#analyze-a-repository)
+- [Run modes](#run-modes)
+- [Configuration](#configuration)
+- [Semantic layer (LLM extraction)](#semantic-layer-llm-extraction-optional)
+- [MCP server (local)](#mcp-server-local)
+- [Retrieval and semantic search](#retrieval-and-semantic-search-optional)
+- [Cross-repo workflows](#cross-repo-workflows)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Why OKF
 
@@ -148,7 +168,7 @@ All external configuration lives in env vars and `kc.toml` (written by `kc init`
 - `kc.toml [llm]` — opt-in semantic layer (ADR-008): business rules, features, risks
 - `kc.toml [embeddings]` — opt-in semantic search vectors (ADR-005); without them `kc serve` search is keyword-only (fully functional)
 
-## Semantic layer (LLM extraction)(optional)
+## Semantic layer (LLM extraction) (optional)
 
   - Extracts meaning from code → Feature, BusinessRule, Risk entities
   - Runs at compile time
@@ -233,7 +253,7 @@ On Windows, replace `/bin/kc` with `\\Scripts\\kc.exe`.
 
 `search_knowledge`, `get_entity`, `impact_plan`, `test_plan`, `resolve_dependency` ([ADR-011](docs/decisions/ADR-011-cross-repo-dependency-resolution.md)), `list_entities`, `recent_changes`, `which_pr_introduced`, `coverage_for`, `knowledge_stats` — see [docs/kc-cli-reference.md](docs/kc-cli-reference.md) for full parameter and return-value documentation.
 
-## Retrieval: semantic search (embeddings + pgvector)(optional)
+## Retrieval and semantic search (optional)
 
  - Without embeddings, `kc serve` search runs keyword-only (Postgres FTS) — fully functional.
  - Enable embeddings to add semantic matching fused with keyword results via reciprocal-rank fusion.
@@ -290,3 +310,11 @@ See [docs/cross-repo-workflows.md](docs/cross-repo-workflows.md) for the full se
 pytest                             # full suite (integration tests skip without Postgres)
 pytest tests/test_normalize.py     # only the identity-cascade suite
 ```
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, testing conventions, and PR expectations. This project follows a [Code of Conduct](CODE_OF_CONDUCT.md). Found a security issue? See [SECURITY.md](SECURITY.md) for how to report it responsibly.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE).
