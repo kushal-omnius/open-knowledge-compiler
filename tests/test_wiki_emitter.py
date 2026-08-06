@@ -44,7 +44,7 @@ def state():
 
 def emit_all(state, tmp_path: Path, dirty=None) -> list[Path]:
     return WikiEmitter(tmp_path).emit(state.entities, state.relationships,
-                                      dirty if dirty is not None else set(),
+                                      dirty,
                                       [RunDelta(7, "abc123def456",
                                                 (("added", "component/billing", "component"),),
                                                 finished_at=FINISHED_AT)],
@@ -95,6 +95,22 @@ def test_log_md_has_no_frontmatter_and_is_date_grouped(state, tmp_path):
     assert "**Creation** `component/billing` (component)" in text
 
 
+def test_log_md_lists_multiple_changes_as_separate_bullets(state, tmp_path):
+    """Regression: multiple change entries within one compile run must render
+    as distinct Markdown list items, not bare consecutive lines — the latter
+    collapses into one run-on paragraph under standard Markdown rendering."""
+    recent = [RunDelta(7, "abc123def456",
+                       (("added", "component/billing", "component"),
+                        ("changed", "component/billing-rules", "component"),
+                        ("removed", "feature/legacy-discount", "feature")),
+                       finished_at=FINISHED_AT)]
+    WikiEmitter(tmp_path).emit(state.entities, state.relationships, None, recent, CTX)
+    text = (tmp_path / "log.md").read_text(encoding="utf-8")
+    assert "- **Creation** `component/billing` (component)" in text
+    assert "- **Update** `component/billing-rules` (component)" in text
+    assert "- **Deprecation** `feature/legacy-discount` (feature)" in text
+
+
 def test_recent_changes_scoped_to_last_compile(state, tmp_path):
     """recent-changes.md is a KC-specific convenience view (not a reserved OKF
     filename) — frontmatter is fine, scope is just the latest compile."""
@@ -131,6 +147,36 @@ def test_dirty_only_regeneration(state, tmp_path):
     emit_all(state, tmp_path, dirty={"component/billing-rules"})
     assert rules_page.read_text(encoding="utf-8") != "STALE"   # dirty: regenerated
     assert api_page.read_text(encoding="utf-8") == "STALE"     # clean: untouched
+
+
+def test_empty_dirty_set_skips_every_page(state, tmp_path):
+    """Regression: a genuinely empty dirty set (a real no-op compile, per
+    compute_diff) must skip every page, not render everything. This is
+    distinct from dirty=None ('no filter' — used by --emit-only), which
+    must still force a full rerender below."""
+    emit_all(state, tmp_path)  # bootstrap: everything
+    rules_page = tmp_path / "component" / "billing-rules.md"
+    api_page = tmp_path / "api" / "get-discounts.md"
+    rules_page.write_text("STALE", encoding="utf-8")
+    api_page.write_text("STALE", encoding="utf-8")
+
+    emit_all(state, tmp_path, dirty=set())
+    assert rules_page.read_text(encoding="utf-8") == "STALE"   # nothing dirty: untouched
+    assert api_page.read_text(encoding="utf-8") == "STALE"     # nothing dirty: untouched
+
+
+def test_none_dirty_forces_full_rerender(state, tmp_path):
+    """dirty=None means 'no filter' (--emit-only's spec-version rollout path,
+    ADR-013) — every page rerenders even though nothing is actually dirty."""
+    emit_all(state, tmp_path)  # bootstrap: everything
+    rules_page = tmp_path / "component" / "billing-rules.md"
+    api_page = tmp_path / "api" / "get-discounts.md"
+    rules_page.write_text("STALE", encoding="utf-8")
+    api_page.write_text("STALE", encoding="utf-8")
+
+    emit_all(state, tmp_path, dirty=None)
+    assert rules_page.read_text(encoding="utf-8") != "STALE"   # forced rerender
+    assert api_page.read_text(encoding="utf-8") != "STALE"     # forced rerender
 
 
 def test_emission_is_byte_deterministic(state, tmp_path):

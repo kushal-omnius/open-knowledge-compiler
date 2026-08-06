@@ -17,7 +17,19 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- Wiki emission: `dirty` was overloaded — `--emit-only` passed `set()` to mean
+  "no filter, render everything," but a genuine zero-change compile also
+  produces an empty set to mean "nothing is dirty." Both were treated
+  identically, so a no-op compile silently re-rendered and republished the
+  entire wiki (every page's `generated: at:` timestamp changes even when
+  content doesn't). Now `dirty: set[str] | None`, with `None` meaning "no
+  filter" and an empty set meaning "nothing dirty."
+- `log.md`: multiple change entries within one compile run rendered as bare
+  consecutive lines with no list marker, which Markdown collapses into one
+  run-on paragraph. Now rendered as `-`-prefixed list items, matching
+  `recent-changes.md`'s existing style.
 
 ## [1.0.0] — 2026-08-06
 
