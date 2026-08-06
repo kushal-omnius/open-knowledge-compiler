@@ -87,7 +87,7 @@ class WikiEmitter:
         self.output_dir = output_dir
 
     def emit(self, entities: list[Entity], relationships: list[Relationship],
-             dirty: set[str], recent: list[RunDelta], ctx: WikiContext) -> list[Path]:
+             dirty: set[str] | None, recent: list[RunDelta], ctx: WikiContext) -> list[Path]:
         state = _State()
         for e in entities:
             state.by_slug[e.slug] = e
@@ -101,7 +101,7 @@ class WikiEmitter:
             owner = state.by_slug.get(page.payload["owner_slug"])
             if owner is None:
                 continue  # dangling page: owner removed this compile; page follows next diff
-            if dirty and owner.slug not in dirty and page.slug not in dirty:
+            if dirty is not None and owner.slug not in dirty and page.slug not in dirty:
                 continue  # clean page: not regenerated (delta-driven emission)
             written.append(self._write(page_path(owner.slug),
                                        self._render_page(owner, state, ctx)))
@@ -257,7 +257,7 @@ class WikiEmitter:
                 continue
             for op, slug, entity_type in run.changes:
                 label = _OP_LOG_LABEL.get(op, f"**{op.title()}**")
-                lines.append(f"{label} `{slug}` ({entity_type}) — compile run "
+                lines.append(f"- {label} `{slug}` ({entity_type}) — compile run "
                             f"{run.compile_run_id} (`{run.commit_sha[:12]}`).")
             lines.append("")
         return "\n".join(lines).rstrip() + "\n"

@@ -44,7 +44,7 @@ def state():
 
 def emit_all(state, tmp_path: Path, dirty=None) -> list[Path]:
     return WikiEmitter(tmp_path).emit(state.entities, state.relationships,
-                                      dirty if dirty is not None else set(),
+                                      dirty,
                                       [RunDelta(7, "abc123def456",
                                                 (("added", "component/billing", "component"),),
                                                 finished_at=FINISHED_AT)],

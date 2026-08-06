@@ -164,7 +164,7 @@ def emit_only(repo_dir: Path) -> CompileSummary:
 
         state = load_current_state(session, repo.id, ctx["repo_slug"])
         wiki_pages_written = _emit_wiki(session, ctx["repo_slug"], last_run,
-                                        ctx["wiki_dir"], dirty=set())
+                                        ctx["wiki_dir"], dirty=None)
         summary = CompileSummary(
             repo_slug=ctx["repo_slug"], compile_run_id=last_run.id,
             commit_sha=last_run.commit_sha, entities=len(state.entities),
@@ -476,7 +476,7 @@ def _publisher_config(config: dict):
 
 
 def _emit_wiki(session: Session, repo_slug: str, run: CompileRun, wiki_dir: Path,
-               dirty: set[str]) -> int:
+               dirty: set[str] | None) -> int:
     from knowledge_compiler.storage.schema import DeltaChangeRow
     from knowledge_compiler.wiki.emitter import RunDelta, WikiContext, WikiEmitter
 
