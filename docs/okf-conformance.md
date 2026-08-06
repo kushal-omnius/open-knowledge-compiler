@@ -99,3 +99,5 @@ Per ADR-013: a breaking OKF spec bump is handled as an emitter code change plus 
 - The `Attested Computation` concept type (v0.2 §"Attested Computation") — a plausible future mapping for KC's mutation-kill-rate signal, entirely unexplored.
 
 None of these are conformance violations — OKF v0.2 requires only `type`; everything else is optional, and consumers must not reject a bundle for their absence.
+
+**Architectural note, not a gap:** `wiki/emitter.py` (what shape output takes) and `wiki/okf_conformance.py` (what shape is required) currently encode the same structural facts — reserved-filename frontmatter restrictions, required concept-page fields — independently, with nothing structurally preventing the two from drifting apart over time. [ADR-014](decisions/ADR-014-shared-okf-rules-file.md) (Proposed, **not implemented**) records a design to unify both behind one shared declarative rules file, so a future spec-version bump is a data diff reviewed once, not two independent code edits kept in sync by hand.

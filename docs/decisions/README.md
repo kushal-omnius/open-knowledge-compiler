@@ -30,5 +30,8 @@ This directory records the significant architectural decisions of the Knowledge 
 | [ADR-011](ADR-011-cross-repo-dependency-resolution.md) | Cross-repo dependency resolution: query-time config map | Accepted |
 | [ADR-012](ADR-012-defer-verification-requirement-entity.md) | Defer VerificationRequirement entity; mutation-kill is the V1 signal | Accepted |
 | [ADR-013](ADR-013-open-source-okf-conformance.md) | Open-source release as `open-knowledge-compiler` + OKF spec-version conformance and migration | Proposed |
+| [ADR-014](ADR-014-shared-okf-rules-file.md) | Shared declarative OKF rules file (emitter + validator) | Proposed — not implemented |
+| [ADR-015](ADR-015-javascript-language-analyzer.md) | JavaScript language analyzer support | Proposed — not implemented |
+| [ADR-016](ADR-016-java-language-analyzer.md) | Java language analyzer support | Proposed — not implemented |
 
 See [index.md](index.md) for summaries, dependencies, the dependency graph, and the list of unresolved decisions deferred to future design documents.
