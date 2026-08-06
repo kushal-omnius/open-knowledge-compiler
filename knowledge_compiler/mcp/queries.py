@@ -15,6 +15,24 @@ from knowledge_compiler.storage.schema import (
 )
 
 
+def _is_test_component(payload: dict) -> bool:
+    """A component consisting entirely of test file(s) is not itself something
+    that needs test coverage — recommending a test-of-a-test is nonsensical.
+    Mirrors the naming heuristics python_analyzer/typescript_analyzer already
+    use to decide whether a *file* is a test file (they don't tag the
+    resulting component_observed fact with is_test, so this is re-derived
+    from `files` here rather than duplicating extractor internals)."""
+    files = payload.get("files") or []
+    if not files:
+        return False
+    return all(
+        name.startswith("test_") or name.endswith("_test.py")
+        or ".test." in name or ".spec." in name
+        for f in files
+        for name in (f.rsplit("/", 1)[-1],)
+    )
+
+
 def resolve_repo(session: Session, slug: str) -> Repository:
     repo = session.execute(select(Repository).where(Repository.slug == slug)).scalar_one_or_none()
     if repo is None:
@@ -191,8 +209,13 @@ def impact_plan(session: Session, repo_id: int, slug: str,
     )).scalars().all()
     affected = sorted({(r.relation_type, id_to_slug[r.from_entity_id]) for r in incoming})
 
-    coverage_targets = sorted({s for _rel, s in affected if s.startswith("component/")}
-                              | ({slug} if entity["entity_type"] == "component" else set()))
+    candidate_targets = ({s for _rel, s in affected if s.startswith("component/")}
+                         | ({slug} if entity["entity_type"] == "component" else set()))
+    candidate_rows = session.execute(select(EntityRow).where(
+        EntityRow.repo_id == repo_id, EntityRow.slug.in_(candidate_targets))).scalars().all() \
+        if candidate_targets else []
+    test_component_slugs = {r.slug for r in candidate_rows if _is_test_component(r.payload)}
+    coverage_targets = sorted(candidate_targets - test_component_slugs)
     coverage = {t: coverage_for(session, repo_id, t) for t in coverage_targets}
 
     return {
