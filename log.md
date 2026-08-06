@@ -4,6 +4,8 @@
 
 ## 2026-08-06
 
+No knowledge changes — compile run 1803 (`8759e999effc`).
+
 No knowledge changes — compile run 1802 (`8759e999effc`).
 
 **Deprecation** `feature/expose-package-and-ir-layer-version-metadata` (feature) — compile run 1801 (`26639e24e198`).
@@ -296,5 +298,3 @@ No knowledge changes — compile run 1779 (`14d5668b6003`).
 **Creation** `wiki-page/risk-error-handling-in-commands` (wiki_page) — compile run 1285 (`47529ea7a4cc`).
 **Update** `wiki-page/risk-error-handling-with-compile-errors` (wiki_page) — compile run 1285 (`47529ea7a4cc`).
 **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 1285 (`47529ea7a4cc`).
-
-No knowledge changes — compile run 1284 (`47529ea7a4cc`).
