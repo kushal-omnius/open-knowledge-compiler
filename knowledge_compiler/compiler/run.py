@@ -23,6 +23,7 @@ from knowledge_compiler.collectors.git import GitCollector
 from knowledge_compiler.collectors.jira import build_jira_gateway
 from knowledge_compiler.compiler.diff import CompileScope, compute_diff
 from knowledge_compiler.compiler.normalize import Thresholds, normalize
+from knowledge_compiler.extractors.javascript_analyzer import JavaScriptAnalyzer
 from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer
 from knowledge_compiler.extractors.typescript_analyzer import TypeScriptAnalyzer
 
@@ -32,7 +33,7 @@ def _extract(artifacts: list[Artifact]) -> list[Fact]:
     artifacts (each filters to its own extensions). Analyzer routing by extension
     is configuration-grade, not architecture (ADR-006)."""
     facts: list[Fact] = []
-    for analyzer in (PythonAnalyzer(), TypeScriptAnalyzer()):
+    for analyzer in (PythonAnalyzer(), TypeScriptAnalyzer(), JavaScriptAnalyzer()):
         facts.extend(analyzer.analyze(artifacts))
     return facts
 from knowledge_compiler.ir import Artifact, Extraction, Fact, content_hash

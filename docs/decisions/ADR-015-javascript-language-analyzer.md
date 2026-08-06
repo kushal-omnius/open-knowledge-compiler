@@ -2,7 +2,14 @@
 
 ## Status
 
-Proposed — **not implemented**.
+Accepted — **implemented** (2026-08-06).
+
+`knowledge_compiler/extractors/javascript_analyzer.py` — Option A: dedicated
+`JavaScriptAnalyzer` via `tree-sitter-javascript`, parallel to `TypeScriptAnalyzer`.
+Wired into `compiler/run.py`'s `_extract()`. 16 tests in
+`tests/test_javascript_analyzer.py`. Open questions from the ADR resolved at
+implementation time: no shared helper code with TS (kept fully independent per Option
+A's rationale); ESM and CJS both extracted; JSX supported natively by the grammar.
 
 ## Date
 
