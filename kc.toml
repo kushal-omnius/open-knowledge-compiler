@@ -12,7 +12,7 @@ output_dir = "kc-wiki"
 
 [publisher]
 # Ship the wiki to a dedicated branch (ADR-010: knowledge/wiki). Explicit opt-in.
-enabled = false
+enabled = true
 branch = "knowledge/wiki"
 remote = "origin"
 push = true
