@@ -4,6 +4,8 @@
 
 ## 2026-08-06
 
+No knowledge changes — compile run 1802 (`8759e999effc`).
+
 **Deprecation** `feature/expose-package-and-ir-layer-version-metadata` (feature) — compile run 1801 (`26639e24e198`).
 **Deprecation** `wiki-page/feature-expose-package-and-ir-layer-version-metadata` (wiki_page) — compile run 1801 (`26639e24e198`).
 
@@ -296,10 +298,3 @@ No knowledge changes — compile run 1779 (`14d5668b6003`).
 **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 1285 (`47529ea7a4cc`).
 
 No knowledge changes — compile run 1284 (`47529ea7a4cc`).
-
-## 2026-08-02
-
-**Update** `feature/delta-driven-embedding-updates-with-retry-semantics` (feature) — compile run 1278 (`c45580ed7114`).
-**Update** `risk/no-validation-of-embedder-output-length` (risk) — compile run 1278 (`c45580ed7114`).
-**Update** `wiki-page/feature-delta-driven-embedding-updates-with-retry-semantics` (wiki_page) — compile run 1278 (`c45580ed7114`).
-**Update** `wiki-page/risk-no-validation-of-embedder-output-length` (wiki_page) — compile run 1278 (`c45580ed7114`).

@@ -8,9 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 1801 — `26639e24e198`
+## Compile 1802 — `8759e999effc`
 
-- **removed** [feature/expose-package-and-ir-layer-version-metadata](feature/expose-package-and-ir-layer-version-metadata.md)
-- **removed** `wiki-page/feature-expose-package-and-ir-layer-version-metadata`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
