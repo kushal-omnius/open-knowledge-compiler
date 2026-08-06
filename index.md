@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 1803 · Commit: `8759e999effc`
+Repo: `knowledge-compiler` · Compile run: 1804 · Commit: `3dc1298695ac`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -76,7 +76,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (86)
+## Features (87)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
@@ -101,6 +101,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Embedding Providers](feature/embedding-providers.md)
 - [Vector Extension Creation](feature/embeddings-schema-migration.md)
 - [Embedding Storage](feature/embeddings-store-per-entity-semantic-vectors.md)
+- [Emit Wiki Pages](feature/emit-wiki-pages.md)
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Get Entity Details](feature/entity-query-tools.md)
 - [Entity Storage and Searchability](feature/entity-relationship-graph-and-provenance-storage.md)
@@ -132,7 +133,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [LLMProvider Protocol](feature/llmprovider-protocol.md)
 - [Embed Functionality](feature/openai-embeddings-via-sdk.md)
 - [Advisory Locking Mechanism](feature/per-repository-advisory-lock-context-manager.md)
-- [Reconcile Merged Pull Requests](feature/pr-reconciliation.md)
+- [Reconcile Merged PRs](feature/pr-reconciliation.md)
 - [Prompt Builder](feature/prompt-rendering-for-semantic-extraction.md)
 - [Provenance Tracking](feature/provenance-tracking.md)
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
@@ -162,7 +163,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Validate OKF Command](feature/validate-okf-command.md)
 - [Validate Test Command](feature/validate-test-command.md)
 - [Verify Command](feature/verify-command.md)
-- [Verify Compilation Integrity](feature/verify-shadow-compile.md)
+- [Verify Compilation State](feature/verify-shadow-compile.md)
 - [Write Configuration File](feature/write-configuration-file.md)
 
 ## Business Rules (8)
@@ -176,9 +177,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unique Constraint on Entities](business-rule/unique-constraint-on-entities.md)
 - [Unique Constraints on Relationships](business-rule/unique-constraints-on-relationships.md)
 
-## Risks (51)
+## Risks (52)
 
 - [Conformance Check Risk in Validate OKF Command](risk/conformance-check-risk-in-validate-okf-command.md)
+- [Dangling Pages Risk](risk/dangling-pages-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
@@ -187,17 +189,18 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Data Loss Risk](risk/destructive-column-replacement.md)
 - [Missing Publication Directory](risk/destructive-force-push.md)
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
+- [Empty Merge PR Handling](risk/empty-merge-pr-handling.md)
 - [Error Handling for Missing Entities](risk/error-handling-for-missing-entities.md)
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
 - [Escape Hatch Compilation Flags Validation](risk/error-handling-in-commands.md)
 - [Error Handling for Repository Initialization](risk/error-handling-with-compile-errors.md)
 - [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
-- [SQL Transaction Failure](risk/incomplete-error-handling.md)
+- [Rollback Risks in Compile Process](risk/incomplete-error-handling.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [Subprocess Call Failure](risk/limited-binary-detection-window.md)
 - [Uncaught API Errors](risk/malformed-model-output-causes-unhandled-json-error.md)
-- [Missing Configuration File Handling](risk/missing-configuration-validation.md)
+- [Missing Configuration File Error Handling](risk/missing-configuration-validation.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
 - [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
@@ -227,5 +230,4 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Entity Retrieval Failure](risk/unbounded-input-handling-2.md)
 - [Unbounded Input in Search](risk/unbounded-input-in-search.md)
 - [Configuration File Write Failure](risk/unconditional-file-overwrite.md)
-- [Uncontrolled LLM Errors](risk/uncontrolled-llm-errors.md)
 - [Validation Failure](risk/validation-failure.md)

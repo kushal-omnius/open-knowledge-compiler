@@ -8,8 +8,29 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 1803 — `8759e999effc`
+## Compile 1804 — `3dc1298695ac`
 
-No knowledge changes.
+- **changed** [component/tests-test-wiki-emitter](component/tests-test-wiki-emitter.md)
+- **added** [feature/emit-wiki-pages](feature/emit-wiki-pages.md)
+- **changed** [feature/full-compile](feature/full-compile.md)
+- **changed** [feature/generate-index-and-recent-changes-pages](feature/generate-index-and-recent-changes-pages.md)
+- **changed** [feature/pr-reconciliation](feature/pr-reconciliation.md)
+- **changed** [feature/verify-shadow-compile](feature/verify-shadow-compile.md)
+- **added** [risk/dangling-pages-risk](risk/dangling-pages-risk.md)
+- **added** [risk/empty-merge-pr-handling](risk/empty-merge-pr-handling.md)
+- **changed** [risk/incomplete-error-handling](risk/incomplete-error-handling.md)
+- **changed** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
+- **removed** [risk/uncontrolled-llm-errors](risk/uncontrolled-llm-errors.md)
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page`
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets`
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender`
+- **added** `wiki-page/feature-emit-wiki-pages`
+- **changed** `wiki-page/feature-pr-reconciliation`
+- **changed** `wiki-page/feature-verify-shadow-compile`
+- **added** `wiki-page/risk-dangling-pages-risk`
+- **added** `wiki-page/risk-empty-merge-pr-handling`
+- **changed** `wiki-page/risk-incomplete-error-handling`
+- **changed** `wiki-page/risk-missing-configuration-validation`
+- **removed** `wiki-page/risk-uncontrolled-llm-errors`
 
 Full chronological history: [log.md](log.md).
