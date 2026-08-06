@@ -13,6 +13,7 @@ Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, te
 - Design: [docs/vision.md](docs/vision.md) · [docs/architecture.md](docs/architecture.md) · [docs/decisions/index.md](docs/decisions/index.md)
 - Contracts: [docs/ir.md](docs/ir.md) · [docs/data-model.md](docs/data-model.md) · [docs/pipeline.md](docs/pipeline.md) · [docs/normalize.md](docs/normalize.md) · [docs/retrieval.md](docs/retrieval.md)
 - Releases: [CHANGELOG.md](CHANGELOG.md) · multi-repo setup: [docs/cross-repo-workflows.md](docs/cross-repo-workflows.md)
+- **Example:** this repo compiling itself — [live wiki](../../tree/knowledge/wiki) (63 components, plus real business rules/features/risks from the LLM semantic layer)
 
 ## Table of contents
 
