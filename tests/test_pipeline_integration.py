@@ -173,3 +173,25 @@ def test_two_repos_in_one_database_stay_isolated(tmp_path: Path):
     # same-named project entities coexist because every table carries repo_id (ADR-001)
     assert any(s.startswith("project/") for s in a_slugs)
     assert any(s.startswith("project/") for s in b_slugs)
+
+
+def test_test_plan_never_recommends_testing_a_test_file(compiled_repo):
+    """A component consisting of a test file (tests/test_rules.py) inevitably
+    has no test coverage of its own — that's not a real gap, and test_plan
+    must not recommend writing a test against the test functions themselves."""
+    from knowledge_compiler.mcp import queries
+    from knowledge_compiler.storage.schema import Repository
+
+    _, slug, _ = compiled_repo
+    with Session(kcdb.make_engine()) as session:
+        repo_id = session.execute(select(Repository.id).where(Repository.slug == slug)).scalar_one()
+
+        plan = queries.impact_plan(session, repo_id, "component/billing-rules")
+        assert "component/tests-test-rules" in {s for _rel, s in
+                                                 ((a["relation"], a["slug"]) for a in plan["affected"])}
+        assert "component/tests-test-rules" not in plan["coverage_gaps"]
+        assert "component/tests-test-rules" not in plan["coverage_detail"]
+
+        tp = queries.test_plan(session, repo_id, "component/billing-rules")
+        assert not any(rec["component"] == "component/tests-test-rules"
+                       for rec in tp["test_recommendations"])
