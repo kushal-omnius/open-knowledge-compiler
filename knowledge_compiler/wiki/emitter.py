@@ -97,19 +97,44 @@ class WikiEmitter:
 
         written: list[Path] = []
         pages = [e for e in entities if e.entity_type == "wiki_page"]
+        live_owner_slugs: set[str] = set()
         for page in sorted(pages, key=lambda e: e.slug):
             owner = state.by_slug.get(page.payload["owner_slug"])
             if owner is None:
                 continue  # dangling page: owner removed this compile; page follows next diff
+            live_owner_slugs.add(owner.slug)
             if dirty is not None and owner.slug not in dirty and page.slug not in dirty:
                 continue  # clean page: not regenerated (delta-driven emission)
             written.append(self._write(page_path(owner.slug),
                                        self._render_page(owner, state, ctx)))
 
+        self._prune_orphaned_pages(live_owner_slugs)
+
         written.append(self._write("index.md", self._render_index(state, ctx)))
         written.append(self._write("log.md", self._render_log(recent)))
         written.append(self._write("recent-changes.md", self._render_recent_changes(recent)))
         return written
+
+    _RESERVED_FILENAMES = ("index.md", "log.md", "recent-changes.md")
+
+    def _prune_orphaned_pages(self, live_owner_slugs: set[str]) -> None:
+        """Delete on-disk pages whose owning entity no longer exists. Emission
+        is otherwise additive-only (dirty-only rewrites, ir.md), so a removed
+        entity's page would otherwise sit on disk forever, frozen at whatever
+        content it had when last written — never regenerated (the owner-is-None
+        skip above), never deleted. Runs unconditionally, independent of the
+        dirty filter: it must catch both a removal from *this* compile and any
+        orphan already stranded by a prior compile, and is self-healing once
+        deployed regardless of --full/--pr/--emit-only."""
+        if not self.output_dir.is_dir():
+            return
+        for existing in self.output_dir.rglob("*.md"):
+            rel = existing.relative_to(self.output_dir).as_posix()
+            if rel in self._RESERVED_FILENAMES:
+                continue
+            slug = rel[:-len(".md")]
+            if slug not in live_owner_slugs:
+                existing.unlink()
 
     # -- rendering ------------------------------------------------------------------
 
