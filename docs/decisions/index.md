@@ -118,11 +118,11 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 
 ### [ADR-015 — JavaScript Language Analyzer Support](ADR-015-javascript-language-analyzer.md)
 
-- **Status:** Proposed — **not implemented**
-- **Summary:** Plain JavaScript (`.js`/`.jsx`/`.mjs`/`.cjs`) is currently invisible to the compiler — no analyzer claims those extensions, so mixed JS/TS repositories silently lose coverage for their JS portions. Proposes a dedicated `JavaScriptAnalyzer` via `tree-sitter-javascript`, structurally parallel to the existing per-language analyzers (ADR-006's pattern), emitting the same Fact IR shapes without deviation. Rejects reusing the TypeScript analyzer for JS files (coupling risk between two conceptually distinct languages) in favor of a clean, independent module.
+- **Status:** Accepted — **implemented 2026-08-06**
+- **Summary:** Plain JavaScript (`.js`/`.jsx`/`.mjs`/`.cjs`) was previously invisible to the compiler — no analyzer claimed those extensions, so mixed JS/TS repositories silently lost coverage for their JS portions. Implemented as `JavaScriptAnalyzer` (`knowledge_compiler/extractors/javascript_analyzer.py`) via `tree-sitter-javascript`, structurally parallel to the existing per-language analyzers (ADR-006's pattern), emitting the same Fact IR shapes without deviation — including both ESM (`import`) and CommonJS (`require()`, including bare/chained calls and `exports.x =`/`module.exports.x =`/`module.exports = {...}` assignment forms) dependency and symbol extraction, Express/Fastify route detection, and Jest test-case detection (including `describe()`-nested and `.skip`/`.only` variants). Rejected reusing the TypeScript analyzer for JS files (coupling risk between two conceptually distinct languages) in favor of a clean, independent module. Wired into `compiler/run.py`'s `_extract()`; 23 tests in `tests/test_javascript_analyzer.py`.
 - **Dependencies:** ADR-006 (language-analyzer backbone and per-language plugin pattern this extends)
 - **Depended on by:** —
-- **Related documents:** `knowledge_compiler/extractors/python_analyzer.py`, `typescript_analyzer.py` (the pattern this mirrors)
+- **Related documents:** `knowledge_compiler/extractors/python_analyzer.py`, `typescript_analyzer.py` (the pattern this mirrors), `javascript_analyzer.py` (implementation)
 
 ### [ADR-016 — Java Language Analyzer Support](ADR-016-java-language-analyzer.md)
 
@@ -130,7 +130,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Summary:** Java is a new language family for KC — Maven/Gradle build ecosystem, and critically, Spring-style annotation-driven route wiring that has a meaningfully lower deterministic-detection ceiling than Python/JS's explicit call-site route registration. Proposes a `JavaAnalyzer` via `tree-sitter-java` scoped to structural extraction only first (components, symbols, JUnit test coverage) — explicitly deferring Spring/JAX-RS API/route detection to a later phase gated on real dogfood evidence, rather than shipping an annotation-matching heuristic that would overclaim the reliability ADR-006's determinism invariant requires.
 - **Dependencies:** ADR-006 (determinism invariant this ADR must honor honestly for a harder case than Python/TS), ADR-014 (the "don't build for unverified need" discipline this ADR's scoping follows)
 - **Depended on by:** —
-- **Related documents:** [ADR-015](ADR-015-javascript-language-analyzer.md) (sibling unimplemented language-support ADR, same discipline)
+- **Related documents:** [ADR-015](ADR-015-javascript-language-analyzer.md) (sibling language-support ADR, same discipline; implemented, unlike this one)
 
 ## Dependency graph
 
@@ -170,12 +170,12 @@ graph TD
     ADR013 --> ADR010
     ADR014["ADR-014 Shared OKF Rules File (Proposed, unimplemented)"] --> ADR013
     ADR014 --> ADR007
-    ADR015["ADR-015 JavaScript Analyzer (Proposed, unimplemented)"] --> ADR006
+    ADR015["ADR-015 JavaScript Analyzer ✓"] --> ADR006
     ADR016["ADR-016 Java Analyzer (Proposed, unimplemented)"] --> ADR006
     ADR016 --> ADR014
 ```
 
-ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording unimplemented designs for JavaScript and Java language-analyzer support respectively. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013 through ADR-016 remain Proposed pending review.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording designs for JavaScript and Java language-analyzer support respectively; ADR-015 was implemented the same day and its status moved to Accepted, while ADR-016 (Java) remains Proposed and unimplemented. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013, ADR-014, and ADR-016 remain Proposed pending review.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 

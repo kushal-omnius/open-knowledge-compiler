@@ -21,6 +21,8 @@
 
 To be explicit about the language split: **the compiler is implemented in Python only; the repositories it analyzes are Python and TypeScript** (the vision's committed V1 target languages). These are compatible — target-language parsing uses tree-sitter (§8), which runs in-process in Python for any grammar. No Node.js runtime is required.
 
+*Post-freeze addition:* a third target language, plain JavaScript (`.js`/`.jsx`/`.mjs`/`.cjs`), was added 2026-08-06 via [ADR-015](decisions/ADR-015-javascript-language-analyzer.md) — same tree-sitter backbone, same in-process/no-Node.js invariant, no change to this section's frozen V1 commitment.
+
 ---
 
 ## 2. Undecided assumptions
@@ -175,6 +177,8 @@ pgvector is effectively forced by the Postgres-only constraint, but it should st
 | **tree-sitter backbone** (recommended) | One parsing runtime (Python bindings, prebuilt grammar wheels) for Python *and* TypeScript; uniform plugin interface; no Node.js. Cons: syntax-level only — no type inference, no import resolution out of the box. |
 | Native tooling per language (`ast` for Python, TS compiler API for TypeScript) | Pros: richer semantic info. Cons: TS compiler API requires a Node runtime — breaks the Python-only, single-executable constraints; two completely different toolchains. |
 
+*Post-freeze:* JavaScript (`tree-sitter-javascript`) was added as a third analyzer under this same backbone via [ADR-015](decisions/ADR-015-javascript-language-analyzer.md) — the tree-sitter choice's "adding language N = adding a grammar wheel + an analyzer plugin, nothing else changes" claim (ADR-006) held in practice.
+
 **Why:** tree-sitter is the only option satisfying the constraints, and syntax-level extraction (symbols, signatures, routes-by-pattern, test structure) covers the deterministic column of the vision's extraction table. The interface allows **per-language enrichment**: the Python analyzer may additionally use stdlib `ast`/`importlib` for import graphs; a TS analyzer may later shell out to `tsc` *as an optional enrichment plugin* — never as a core dependency.
 
 Analyzer plugin contract: given a file set, produce facts (components, symbols, API surfaces, test mappings) in the canonical model. Everything downstream is language-agnostic, which is precisely the vision's "second language stress test" (success criterion 5).
@@ -252,7 +256,7 @@ MCP tools are read-only views over compiled knowledge (retrieval + entity/delta 
 
 ## 15. Architecture Decision Records
 
-ADR-001 through ADR-012 are written and **Accepted**; ADR-013 is **Proposed** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
+ADR-001 through ADR-012 and ADR-015 are **Accepted**; ADR-013, ADR-014, and ADR-016 are **Proposed** — see [decisions/index.md](decisions/index.md) for summaries, dependencies, and the dependency graph:
 
 - [ADR-001](decisions/ADR-001-postgresql.md) — PostgreSQL as the single knowledge store
 - [ADR-002](decisions/ADR-002-ci-trigger.md) — CI-invoked CLI trigger, reconcile-first
@@ -267,5 +271,8 @@ ADR-001 through ADR-012 are written and **Accepted**; ADR-013 is **Proposed** �
 - [ADR-011](decisions/ADR-011-cross-repo-dependency-resolution.md) — Cross-repo dependency resolution: query-time config map (added 2026-07-20 during dogfood)
 - [ADR-012](decisions/ADR-012-defer-verification-requirement-entity.md) — Defer VerificationRequirement entity; mutation-kill rate is the V1 sub-component precision signal (added 2026-07-29)
 - [ADR-013](decisions/ADR-013-open-source-okf-conformance.md) — Open-source release as `open-knowledge-compiler` + OKF spec-version conformance and migration (Proposed 2026-08-05)
+- [ADR-014](decisions/ADR-014-shared-okf-rules-file.md) — Shared declarative OKF rules file unifying the emitter and `kc validate-okf` (Proposed 2026-08-06, not implemented)
+- [ADR-015](decisions/ADR-015-javascript-language-analyzer.md) — JavaScript language analyzer (`.js`/`.jsx`/`.mjs`/`.cjs` via `tree-sitter-javascript`) (Accepted, implemented 2026-08-06)
+- [ADR-016](decisions/ADR-016-java-language-analyzer.md) — Java language analyzer, structural extraction only; Spring/JAX-RS route detection explicitly deferred (Proposed 2026-08-06, not implemented)
 
 Decisions still unresolved are listed in [decisions/index.md](decisions/index.md) with the future design document responsible for each.

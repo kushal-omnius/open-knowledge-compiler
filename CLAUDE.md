@@ -77,7 +77,7 @@ re-run if it doesn't — don't hand back a test with an unvalidated header.
 ## Intended Tech Stack
 
 - **Implementation language:** Python only (the compiler itself)
-- **Target languages analyzed:** Python and TypeScript (V1) — parsed via tree-sitter in-process, no Node.js runtime
+- **Target languages analyzed:** Python and TypeScript (V1 commitment, vision.md) plus JavaScript (added post-freeze, ADR-015) — parsed via tree-sitter in-process, no Node.js runtime
 - **Build system:** `pyproject.toml`
 - **Storage:** PostgreSQL
 - **AI agent interface:** MCP (Model Context Protocol)

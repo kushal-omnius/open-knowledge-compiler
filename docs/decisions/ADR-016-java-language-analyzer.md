@@ -128,7 +128,7 @@ Revisit when someone picks this up for implementation (the open questions above 
 ## References
 
 - [ADR-006](ADR-006-language-analyzers.md) — the language-analyzer backbone and determinism invariant this ADR must honor honestly, not just nominally
-- [ADR-015](ADR-015-javascript-language-analyzer.md) — a sibling unimplemented language-support ADR recorded the same day, same discipline (structural-first, avoid overclaiming heuristic reliability)
+- [ADR-015](ADR-015-javascript-language-analyzer.md) — a sibling language-support ADR recorded the same day, same discipline (structural-first, avoid overclaiming heuristic reliability); implemented 2026-08-06, unlike this ADR
 - [ADR-014](ADR-014-shared-okf-rules-file.md) — the "don't build for unverified need" discipline this ADR's Option B follows
 
 ## Self-Review

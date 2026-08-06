@@ -73,15 +73,15 @@ Leave `.js`/`.jsx` unclaimed, as today, and state plainly that plain JavaScript 
 
 ## Decision
 
-**Not yet decided for implementation — this ADR records Option A as the recommended design, Proposed status, explicitly unbuilt.** A dedicated `JavaScriptAnalyzer` via `tree-sitter-javascript`, structurally parallel to the existing per-language analyzers, is preferred over Option B (coupling risk without a strong offsetting benefit) and over Option C (which leaves a real, already-identified gap unaddressed). Implementation is gated on someone actually picking this up — no code exists.
+**Implemented as Option A.** A dedicated `JavaScriptAnalyzer` via `tree-sitter-javascript`, structurally parallel to the existing per-language analyzers, was preferred over Option B (coupling risk without a strong offsetting benefit) and over Option C (which would have left a real, already-identified gap unaddressed).
 
-## Architectural Invariants (if implemented)
+## Architectural Invariants
 
-- `JavaScriptAnalyzer` emits only Fact IR shapes the existing schema already defines (ir.md §2) — no new fact types invented for JS specifically unless a genuine gap is found during implementation.
+- `JavaScriptAnalyzer` emits only Fact IR shapes the existing schema already defines (ir.md §2) — no new fact types were needed.
 - No Node.js runtime dependency is introduced — parsing stays in-process via tree-sitter, per ADR-006.
 - API/route detection for JS remains a heuristic, `code_pattern`-sourced signal (as it already is for Python) — never claimed as more deterministic than the underlying pattern-matching actually is.
 
-## Consequences (if implemented)
+## Consequences
 
 ### Positive
 
@@ -91,9 +91,9 @@ Leave `.js`/`.jsx` unclaimed, as today, and state plainly that plain JavaScript 
 ### Negative
 
 - One more grammar dependency to track for upstream tree-sitter grammar updates (the same maintenance category ADR-006 already accepts for Python and TypeScript).
-- Framework-heuristic quality (Express/Fastify route detection) is unproven without a real dogfood JS repository — risk of false negatives (missed routes) or false positives (misidentified patterns) is unquantified until tested against real code.
+- Framework-heuristic quality (Express/Fastify route detection) remains regex-on-raw-text, the same design already accepted for Python/TypeScript — false positives from comments/string literals resembling route calls are a known, un-fixed limitation shared across all three analyzers (surfaced by post-implementation adversarial review, not fixed as out-of-scope for this ADR).
 
-## Failure Modes (if implemented)
+## Failure Modes
 
 | Failure | Effect | Handling |
 |---|---|---|
@@ -104,15 +104,15 @@ Leave `.js`/`.jsx` unclaimed, as today, and state plainly that plain JavaScript 
 ## Assumptions
 
 - `tree-sitter-javascript` remains a maintained, available package for the Python bindings KC already uses.
-- Fact IR's existing shapes are sufficient for JS extraction — no genuine new fact type is needed (unverified until implementation is attempted).
+- Fact IR's existing shapes are sufficient for JS extraction — confirmed at implementation time; no new fact type was needed.
 
-## Open Questions
+## Open Questions (resolved at implementation)
 
-- Whether to share helper code between `TypeScriptAnalyzer` and `JavaScriptAnalyzer` for syntax the two languages have identical AST shapes for, versus keeping them fully independent per Option A's stated rationale.
-- Module-system ambiguity (CommonJS `require()` vs. ESM `import`) and its effect on dependency-observed fact extraction — not analyzed here, a real implementation-time question.
-- Whether JSX handling needs anything beyond what `tree-sitter-javascript` already provides out of the box.
+- Shared helper code between `TypeScriptAnalyzer` and `JavaScriptAnalyzer`: kept fully independent, per Option A's stated rationale — no shared module.
+- Module-system ambiguity (CommonJS `require()` vs. ESM `import`): both are extracted as `dependency_observed` facts. `require()` detection is a full-tree scan (not limited to variable-declarator RHS), so bare calls (`require('./x');`), chained calls (`require('dotenv').config()`), and assignment RHS (`module.exports = require('./y')`) are all found — this full-tree-scan approach was itself a fix applied after an adversarial-review pass found the original declarator-only implementation silently dropped these common CJS shapes.
+- JSX handling: no extra work needed — `tree-sitter-javascript` parses JSX natively.
 
-## Impact (if implemented)
+## Impact
 
 Affected code:
 
@@ -122,27 +122,29 @@ Affected code:
 
 Affected documents:
 
-- `docs/architecture.md` §8 (language analyzers), §13 (module layout)
-- `docs/ir.md` (if any new fact-type need is discovered during implementation — unlikely per current assumptions, but unverified)
+- `docs/architecture.md` §1 (language split), §8 (language analyzers) — post-freeze additive notes
+- `docs/decisions/index.md`, `docs/decisions/README.md` — status updated to Accepted
 
 ## Alternatives Rejected
 
-Not rejected — **not yet decided**. Options B and C are recorded with honest tradeoffs; this ADR recommends Option A without committing the project to building it.
+Options B (extend `TypeScriptAnalyzer` to also claim `.js`/`.jsx`) and C (no JavaScript support) were rejected in favor of Option A, for the reasons given in Considered Options above.
 
 ## Future Reconsideration
 
-Revisit when someone picks this up for implementation (the open questions above need answers first), or if a concrete dogfood repository with significant plain-JavaScript content makes the gap this ADR describes actively costly rather than theoretical.
+Revisit if dogfood evidence on a real JS-heavy repository shows the Express/Fastify route heuristic's false-positive/negative rate (regex-on-raw-text, shared design with the TS/Python analyzers) is unacceptable, or if a genuinely new JS-specific fact-extraction need surfaces.
 
 ## References
 
 - [ADR-006](ADR-006-language-analyzers.md) — the language-analyzer backbone and per-language plugin pattern this ADR extends
-- `knowledge_compiler/extractors/python_analyzer.py`, `typescript_analyzer.py` — the existing analyzer pattern this proposes mirroring
-- `docs/ir.md` §2 — Fact IR shapes a `JavaScriptAnalyzer` would need to emit without deviation
+- `knowledge_compiler/extractors/python_analyzer.py`, `typescript_analyzer.py` — the existing analyzer pattern this mirrors
+- `knowledge_compiler/extractors/javascript_analyzer.py` — the implementation
+- `tests/test_javascript_analyzer.py` — 23 tests, including regression coverage for the describe()-nesting, `.skip`/`.only`, bare-`require()`, and CJS-`exports`-assignment gaps found by post-implementation adversarial review
+- `docs/ir.md` §2 — Fact IR shapes `JavaScriptAnalyzer` emits without deviation
 
 ## Self-Review
 
 - **Truly architectural?** Marginally — it's mostly an application of an already-decided pattern (ADR-006) to a new language, recorded as its own ADR because the user requested it be tracked explicitly rather than folded silently into ADR-006's existing scope.
-- **Already made?** No — explicitly unimplemented; no code exists.
-- **Reversible?** Fully — nothing has been built.
-- **Dependent future documents:** `docs/architecture.md`, `docs/ir.md` (conditionally).
-- **Exposes unresolved decisions:** shared-helper-code question, module-system ambiguity, JSX handling specifics — all listed as open questions above.
+- **Already made?** Yes — implemented 2026-08-06.
+- **Reversible?** Fully — a single new file (`javascript_analyzer.py`) plus one line in `compiler/run.py`'s `_extract()`; removing both fully reverts.
+- **Dependent future documents:** `docs/architecture.md` (updated with post-freeze additive notes), `docs/ir.md` (no change needed — no new fact types).
+- **Exposes unresolved decisions:** none remaining — all open questions were resolved at implementation time (see above).

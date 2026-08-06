@@ -168,6 +168,87 @@ def test_python_files_are_not_claimed():
     assert facts == []
 
 
+def test_describe_wrapped_tests_are_found():
+    src = """\
+describe('suite', () => {
+  test('nested one', () => {});
+  it('nested two', () => {});
+});
+"""
+    facts = facts_for("src/pure_describe.test.js", src)
+    cases = {f.payload["node_id"] for f in by_type(facts, "test_case_observed")}
+    assert cases == {"src/pure_describe.test.js::nested one",
+                     "src/pure_describe.test.js::nested two"}
+
+
+def test_nested_describe_blocks_are_found():
+    src = """\
+describe('outer', () => {
+  describe('inner', () => {
+    test('deep', () => {});
+  });
+});
+"""
+    facts = facts_for("src/nested_describe.test.js", src)
+    cases = {f.payload["node_id"] for f in by_type(facts, "test_case_observed")}
+    assert cases == {"src/nested_describe.test.js::deep"}
+
+
+def test_skip_and_only_variants_are_found():
+    src = """\
+test.skip('skipped', () => {});
+it.only('focused', () => {});
+"""
+    facts = facts_for("src/variants.test.js", src)
+    cases = {f.payload["node_id"] for f in by_type(facts, "test_case_observed")}
+    assert cases == {"src/variants.test.js::skipped", "src/variants.test.js::focused"}
+
+
+def test_bare_require_call_is_a_dependency():
+    src = """\
+require('dotenv').config();
+require('./bootstrap');
+"""
+    facts = facts_for("src/entry.js", src)
+    deps = {f.payload["to_path"] for f in by_type(facts, "dependency_observed")}
+    assert "dotenv" in deps
+    assert "src.bootstrap" in deps
+
+
+def test_module_exports_assignment_is_a_dependency():
+    facts = facts_for("src/index2.js", "module.exports = require('./thing');\n")
+    deps = {f.payload["to_path"] for f in by_type(facts, "dependency_observed")}
+    assert "src.thing" in deps
+
+
+def test_cjs_exports_dot_name_assignment_produces_symbol():
+    src = """\
+exports.foo = function(req, res) { return 1; };
+module.exports.bar = function() { return 2; };
+"""
+    facts = facts_for("src/cjs.js", src)
+    symbols = {f.payload["symbol_path"]: f.payload["kind"]
+               for f in by_type(facts, "symbol_observed")}
+    assert symbols["src.cjs.foo"] == "function"
+    assert symbols["src.cjs.bar"] == "function"
+
+
+def test_module_exports_object_literal_produces_symbols():
+    src = """\
+module.exports = {
+  baz: function() { return 3; },
+  qux() { return 4; },
+  arrowed: () => { return 5; }
+};
+"""
+    facts = facts_for("src/cjs_obj.js", src)
+    symbols = {f.payload["symbol_path"]: f.payload["kind"]
+               for f in by_type(facts, "symbol_observed")}
+    assert symbols["src.cjs_obj.baz"] == "function"
+    assert symbols["src.cjs_obj.qux"] == "method"
+    assert symbols["src.cjs_obj.arrowed"] == "function"
+
+
 def test_downstream_normalize():
     """JS facts flow through the shared Normalize with the same entity/relationship
     outcomes — downstream is unaware that JavaScript exists (mirrors TS criterion 5)."""
