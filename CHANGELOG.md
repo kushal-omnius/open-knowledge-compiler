@@ -30,6 +30,12 @@ so it works even where a raw `git push` of a tag ref is restricted).
   consecutive lines with no list marker, which Markdown collapses into one
   run-on paragraph. Now rendered as `-`-prefixed list items, matching
   `recent-changes.md`'s existing style.
+- Wiki emission was additive-only: a removed entity's page was skipped (never
+  regenerated) but also never deleted, so it survived on disk — and in the
+  published `knowledge/wiki` branch — indefinitely at a stale, pre-migration
+  frontmatter shape. `WikiEmitter.emit` now prunes any on-disk page whose
+  owner is no longer current, on every emit, self-healing for orphans already
+  stranded by prior compiles.
 
 ## [1.0.0] — 2026-08-06
 

@@ -179,6 +179,34 @@ def test_none_dirty_forces_full_rerender(state, tmp_path):
     assert api_page.read_text(encoding="utf-8") != "STALE"     # forced rerender
 
 
+def test_orphaned_page_pruned_when_owner_removed(state, tmp_path):
+    """Regression: emission is otherwise dirty-only/additive (ir.md) — without
+    explicit pruning, a removed entity's page survives on disk forever, frozen
+    at whatever content it had when last written (e.g. a pre-migration
+    frontmatter shape), since it's never regenerated (owner-is-None skip) and
+    was never deleted either."""
+    emit_all(state, tmp_path)  # bootstrap: everything, including component/billing-rules
+    rules_page = tmp_path / "component" / "billing-rules.md"
+    api_page = tmp_path / "api" / "get-discounts.md"
+    assert rules_page.is_file()
+    assert api_page.is_file()
+
+    remaining_entities = [e for e in state.entities
+                          if e.slug != "component/billing-rules"
+                          and e.payload.get("owner_slug") != "component/billing-rules"]
+    remaining_relationships = [r for r in state.relationships
+                               if r.from_slug != "component/billing-rules"
+                               and r.to_slug != "component/billing-rules"]
+    WikiEmitter(tmp_path).emit(
+        remaining_entities, remaining_relationships, None,
+        [RunDelta(8, "def456abc789",
+                  (("removed", "component/billing-rules", "component"),),
+                  finished_at=FINISHED_AT)],
+        CTX)
+    assert not rules_page.is_file()   # orphan: pruned
+    assert api_page.is_file()         # still current: untouched
+
+
 def test_emission_is_byte_deterministic(state, tmp_path):
     dir_a, dir_b = tmp_path / "a", tmp_path / "b"
     emit_all(state, dir_a)
