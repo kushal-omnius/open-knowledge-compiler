@@ -106,12 +106,28 @@ ADR-012's own revisit trigger.
 - Report both tiers separately. **Do not merge them into one score** — citation
   precision/recall answers "did it aim correctly," mutation-kill answers "did it
   verify anything." Collapsing them hides exactly the pathology being hunted.
+  The full before/after model is Appendix A.
+
+**Granularity correction (ADR-012's second trigger).** ADR-012 records a second,
+easier-to-fire revisit trigger alongside the ≥80%/≤40% statistical pattern:
+
+> any concrete case where a component clears the mutation-kill bar in aggregate
+> but a specific, known-important condition within it is demonstrably never
+> exercised by any test
+
+and states the underlying mismatch directly — mutation-kill is measured at
+*component* granularity while the gap is *sub-component*. A single documented
+case fires this trigger, so it is likely to fire before the statistical pattern
+does. **Phase 1 must therefore scope mutants to the obligation/condition anchor
+span from the start, not to the component.** Building Phase 1 at component
+granularity would reproduce the exact blind spot ADR-012 warned about and would
+make the Phase 2 A/B unmeasurable.
 
 **Exit criteria:** the declared-coverage / mutation-kill pair is computed for
 every existing `kc-covers`-tagged test in the repoC Playwright suite (~30
-headers, 76 slugs per the spike record). If the pattern is ≥80%/≤40%, ADR-012's
-revisit trigger has fired *with evidence*, and Phase 2 is justified rather than
-assumed.
+headers, 76 slugs per the spike record). If the pattern is ≥80%/≤40% — or if a
+single concrete sub-component miss is documented — ADR-012's revisit trigger has
+fired *with evidence*, and Phase 2 is justified rather than assumed.
 
 **Risk:** mutation testing on a Playwright/e2e suite is slow and may be
 impractical per-run; if so, scope it to unit/integration tests and treat e2e
@@ -297,10 +313,155 @@ Recorded to prevent re-litigation:
 4. **Determinism regressions**: every Normalize change re-runs the §9
    checklist and `kc verify` must stay clean across all dogfood repos.
 
-## First three concrete steps
+## Priority build list
 
-1. Instrument Phase 1's two-tier report and run it over the existing repoC
-   suite — get the declared-coverage / mutation-kill pair on real tests.
-2. Hand-label ~30 obligations on repoA and measure correlation (risk 1).
-3. Only then write ADR-018 and start template v2 — with the baseline in hand,
-   so the A/B in Phase 2's exit criteria has something to compare against.
+Ordered by dependency, then by leverage. `B5` and `B4` are **kill gates** — do
+not start tier 2 before both have answered. Effort is solo-maintainer days.
+
+### Tier 0 — Instrument before building (no new extraction required)
+
+| ID | Item | Files | Dep | Eff |
+|---|---|---|---|---|
+| B1 | Anchor-scoped mutmut harness: scope `only_mutate` to an anchor span, not a module | `.github/workflows/mutation-test.yaml`, new `validation/mutation.py` | — | 2 d |
+| B2 | Two-tier report shape: split targeting/verification, add `score_version`, product composite | `validation.py`, `cli.py` | — | 1 d |
+| B3 | Assertion-presence check (test-body AST; no obligations needed) | `validation.py` | B2 | 1 d |
+| B4 | **GATE —** baseline run over repoC's ~30 `kc-covers` tests; record the declared-coverage / mutation-kill pair | — | B1–B3 | 1 d |
+| B5 | **GATE —** hand-label ~30 existing repoA rules: "does this test meaningfully verify it?"; correlate with B1's kill rate | — | B1 | 2–3 d |
+
+`B5` is the highest-value item in the entire plan and needs **no new code** —
+repoA's 50 business rules already exist as prose. It answers the question every
+later phase assumes: *is anchor-scoped mutation-kill actually a proxy for
+"meaningful"?* If correlation is weak, the objective function is wrong and
+tiers 2–5 are built on sand. Stop and rethink rather than proceeding.
+
+### Tier 1 — Cheap wins unlocked by the new report
+
+| ID | Item | Files | Dep | Eff |
+|---|---|---|---|---|
+| B6 | Tag existing targets `observable_via` (api-kind→`api`, symbols-kind→`symbol`); recall denominator → reachable subset | `queries.py`, `validation.py` | B2 | 1 d |
+| B7 | Dead-code/reachability flag on gaps (import-graph only; provisional until B16) | `queries.py` | — | 1 d |
+
+`B6` retires the known 86.1%-ceiling artefact immediately — the number stops
+needing a footnote. Both items ship value before any ADR is written.
+
+### Tier 2 — Obligations (ADR-018)
+
+| ID | Item | Files | Dep | Eff |
+|---|---|---|---|---|
+| B8 | ADR-018, superseding ADR-012 (do not amend ADR-012) | `docs/decisions/` | B4, B5 | 1 d |
+| B9 | Template v2: `Obligation` schema + prompt; bump `TEMPLATE_VERSION` | `llm/templates.py` | B8 | 2 d |
+| B10 | Deterministic literal cross-check against anchored source | `extractors/llm_extractor.py` | B9 | 2–3 d |
+| B11 | Obligations into `business_rule` payload; re-run §9 determinism checklist | `compiler/normalize.py` | B9 | 2 d |
+| B12 | `test_verifies_observed` — parse `kc-covers:` at Extract time | `ir.py`, `extractors/*` | — | 2 d |
+| B13 | `verifies` edge (`test_coverage → business_rule`); register in ir.md §3.3 | `normalize.py`, `docs/ir.md` | B12 | 1 d |
+| B14 | Obligation coverage in `coverage_for` | `queries.py` | B13 | 1 d |
+| B15 | `target_kind: "business_rule"` in `test_plan`; rule branch in `citable_targets_for` | `queries.py`, `validation.py` | B14 | 2 d |
+| B16 | Ranking: risk `affects` · `DeltaChangeRow` churn · fan-in · `observable_via` | `queries.py` | B15 | 2 d |
+| B17 | Boundary-literal check (`concrete_values` present in test body) | `validation.py` | B9, B3 | 1 d |
+| B18 | **A/B —** rule-targeted vs component-targeted tests, mutation-kill as dependent variable | — | B15, B17 | 2 d |
+
+### Tier 3 — The `calls` edge (ADR-019)
+
+| ID | Item | Files | Dep | Eff |
+|---|---|---|---|---|
+| B19 | ADR-019: `calls` edge + URL-keyed cross-repo join (records the ADR-011 gap) | `docs/decisions/` | — | 1 d |
+| B20 | `http_call_observed` fact: `fetch`/`axios`/generated clients via tree-sitter | `ir.py`, `extractors/typescript_analyzer.py`, `javascript_analyzer.py` | B19 | 4–5 d |
+| B21 | `calls` resolution through `normalize_route()`; ambiguous URLs stay unresolved | `normalize.py` | B20 | 2 d |
+| B22 | Resolution-rate reporting (first-class honesty number) | `cli.py`, `queries.py` | B21 | 1 d |
+| B23 | `impact_plan` traverses `calls` | `queries.py` | B21 | 1 d |
+| B24 | Cross-repo URL join (repoC↔repoA); supersedes B7's provisional reachability | `queries.py` | B21 | 2 d |
+
+### Tier 4 — Screens and selectors (ADR-020)
+
+| ID | Item | Dep | Eff |
+|---|---|---|---|
+| B25 | ADR-020 — owns the language-analyzer → **framework**-analyzer scope decision | B19 | 1 d |
+| B26 | `selector_observed` (`data-testid`/roles from JSX) — highest value per unit effort | B25 | 3 d |
+| B27 | `screen_observed` (React Router / Next.js routing) | B25 | 3–4 d |
+
+### Tier 5 — Journeys (ADR-021)
+
+| ID | Item | Dep | Eff |
+|---|---|---|---|
+| B28 | ADR-021 + deterministic journey-derivation pass (LLM names only) | B23, B27 | 5 d |
+| B29 | Seed/validate from Playwright specs + Jira stories; agreement = correctness check | B28 | 4 d |
+| B30 | Metric: obligations reachable in a journey but never verified end-to-end | B29 | 2 d |
+
+### Ordering rationale
+
+- **Tier 0 is not optional and not deferrable.** Every later claim is measured
+  against B4's baseline; without it there is no way to tell whether any of this
+  worked.
+- **B5 before B8.** Validate the metric before designing a schema around it.
+- **B6/B7 early** — they cost 2 days total and retire two known artefacts that
+  currently make the tool's output confusing to read.
+- **Tier 2 is the value floor.** If bandwidth collapses after it, the result is
+  a coherent shipped improvement, not a half-built journey model.
+- **B20 is the single riskiest item** (dynamic URL construction). Its
+  resolution rate gates whether tiers 4–5 are worth starting at all.
+
+## Appendix A — Scoring model, before and after
+
+**Today** (`validation.py`): the file is read, but the AST is parsed *only* to
+extract the module docstring (`:105-107`). The test body is never inspected and
+nothing is executed.
+
+```python
+precision = |claimed ∩ citable| / |claimed|
+recall    = |claimed ∩ citable| / |citable|
+score_pct = ((precision + recall) / 2) * existence_penalty * 100
+```
+
+This answers exactly one question — *did the agent cite what `test_plan`
+recommended?* It is structurally incapable of detecting whether the test
+asserts anything.
+
+**After** — three independent signals, deliberately not collapsed:
+
+| Tier | Question | Cost | Source |
+|---|---|---|---|
+| Targeting | Did it aim at the right things? | cheap, static | today's P/R, denominator fixed (B6) |
+| Verification | Did it actually verify them? | expensive | boundary literals (B17) + anchor-scoped mutants (B1) |
+| Obligation coverage | What fraction of rules are verified at all? | cheap, query | `verifies` edges (B13) |
+
+**Worked example — ADR-012's own motivating case** (`ADR-012:14`): a test
+claiming `component/billing-rules` that calls `apply_discount(5)` and never
+exercises the 20% cap.
+
+| | Today | After |
+|---|---|---|
+| Targeting | **100%** | 100% (correctly aimed) |
+| Boundary literals | not checked | **FAIL** — no `20`/`0.2` in test |
+| Mutation-kill (cap branch) | not run at validate-test time | **0%** |
+| Obligation coverage | not representable | **0/1** |
+| Verdict | *passes* | *flagged* |
+
+ADR-012 accepted this as a consequence of deferral: "the cap-boundary miss can
+score 100% declared-coverage and 0% mutation-kill; the feedback loop closes at
+CI, not at `validate-test` time." The change in one line: **that failure moves
+from undetectable-until-CI to detectable at `validate-test` time, at the
+granularity of the condition itself.**
+
+**Composite must be a product, not an average.** Today P and R are averaged.
+Averaging *targeting* with *verification* would reintroduce the pathology — a
+perfectly-cited test asserting nothing would score ~50% and read as mediocre
+rather than broken:
+
+```
+score = targeting × verification      # verification = 0  ⟹  score = 0
+```
+
+Average hides; product punishes. That choice is what makes the score
+un-gameable by citation alone.
+
+**Two operational decisions:**
+
+1. **Do not gate on the behavioral tier initially.** Keep exit-1 for the two
+   objective conditions it has today (missing header, nonexistent slug) and
+   ship mutation-kill as reporting-only until B4's baselines exist. Gating on
+   an unbaselined metric blocks every test in the repo on day one, and matches
+   the eval brainstorm's existing "no hard gate yet" stance.
+2. **Stamp `score_version`.** The spike record's numbers (100.0%, 86.1%, 27.8%)
+   are computed under the current formula and become non-comparable once the
+   denominator and composite change — the same class of error the retracted
+   spike-2 entry is kept in the record to prevent.
