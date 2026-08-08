@@ -21,6 +21,7 @@ from knowledge_compiler import (
 from knowledge_compiler.collectors.forge import ForgeGateway, MergedPR
 from knowledge_compiler.collectors.git import GitCollector
 from knowledge_compiler.collectors.jira import build_jira_gateway
+from knowledge_compiler.collectors.mutation import read_mutation_scores
 from knowledge_compiler.compiler.diff import CompileScope, compute_diff
 from knowledge_compiler.compiler.normalize import Thresholds, normalize
 from knowledge_compiler.extractors.javascript_analyzer import JavaScriptAnalyzer
@@ -45,6 +46,8 @@ _FORGE_EXTRACTION = Extraction(method="deterministic", extractor="forge-collecto
                                extractor_version="0.1")
 _JIRA_EXTRACTION = Extraction(method="deterministic", extractor="jira-collector",
                               extractor_version="0.1")
+_MUTATION_EXTRACTION = Extraction(method="deterministic", extractor="mutation-collector",
+                                  extractor_version="0.1")
 
 
 class CompileError(Exception):
@@ -276,6 +279,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
             extra_facts += _jira_facts(ctx, issue_keys, pr.number)
+        extra_facts += _mutation_facts(ctx)
+        extra_facts += _journey_facts(ctx)
         session.add_all(ArtifactRow(repo_id=repo.id, compile_run_id=run.id,
                                     artifact_type=a.artifact_type, source_ref=a.source_ref,
                                     content_hash=a.content_hash, content=a.content)
@@ -443,6 +448,47 @@ def _pr_facts(pr: MergedPR) -> list[Fact]:
     return facts
 
 
+def _mutation_facts(ctx: dict) -> list[Fact]:
+    """Item 2 of the QA-agent-grounding backlog: opt-in, deterministic — reads
+    whatever a mutation-testing CI job already produced (collectors/mutation.py),
+    never runs mutation testing itself. Applies uniformly to full and PR
+    compiles alike: mutation scores describe the repo's current test suite,
+    not a PR's file diff, so they aren't scope-limited the way PR facts are."""
+    section = ctx["config"].get("mutation", {})
+    if not section.get("enabled", False):
+        return []
+    scores = read_mutation_scores(ctx["repo_dir"], section.get("scores_file", "mutation-scores.json"))
+    facts = []
+    for module, stats in sorted(scores.items()):
+        payload = {"module": module, **stats}
+        facts.append(Fact(fact_type="mutation_score_observed", payload=payload,
+                          artifact_refs=(f"mutation-scores:{module}",),
+                          extraction=_MUTATION_EXTRACTION, content_hash=content_hash(payload)))
+    return facts
+
+
+_JOURNEY_EXTRACTION = Extraction(method="deterministic", extractor="journey-config",
+                                 extractor_version="0.1")
+
+
+def _journey_facts(ctx: dict) -> list[Fact]:
+    """User journeys (ADR-017, items 3+4): V1 scope is deterministic-only,
+    declared directly in kc.toml `[[journeys]]` — each names an ordered list
+    of already-compiled entity slugs (component/api/business_rule) the
+    journey traverses. Unresolvable step slugs are dropped (not failed) by
+    Normalize, same DP8 "visible, never silently merge" discipline as the
+    external-dependency precedent — a config typo shouldn't fail the whole
+    compile, but it should be visible (a compile warning), not silent."""
+    journeys = ctx["config"].get("journeys", [])
+    facts = []
+    for j in journeys:
+        payload = {"name": j["name"], "steps": list(j.get("steps", []))}
+        facts.append(Fact(fact_type="user_journey_observed", payload=payload,
+                          artifact_refs=(f"kc.toml:journeys:{j['name']}",),
+                          extraction=_JOURNEY_EXTRACTION, content_hash=content_hash(payload)))
+    return facts
+
+
 def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
     if not issue_keys:
         return []
@@ -489,12 +535,13 @@ def _emit_wiki(session: Session, repo_slug: str, run: CompileRun, wiki_dir: Path
     recent = []
     for r in recent_runs:
         changes = session.execute(
-            select(DeltaChangeRow.op, DeltaChangeRow.slug, DeltaChangeRow.entity_type)
+            select(DeltaChangeRow.op, DeltaChangeRow.slug, DeltaChangeRow.entity_type,
+                  DeltaChangeRow.change_summary)
             .where(DeltaChangeRow.compile_run_id == r.id)
             .order_by(DeltaChangeRow.slug)).all()
         recent.append(RunDelta(compile_run_id=r.id, commit_sha=r.commit_sha,
                                finished_at=r.finished_at,
-                               changes=tuple((op, slug, et) for op, slug, et in changes)))
+                               changes=tuple((op, slug, et, cs) for op, slug, et, cs in changes)))
 
     emitter = WikiEmitter(wiki_dir)
     ctx = WikiContext(repo_slug=repo_slug, compile_run_id=run.id, commit_sha=run.commit_sha,

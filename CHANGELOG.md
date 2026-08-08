@@ -17,6 +17,43 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+QA-agent test-grounding improvements (backlog items 1, 2, 5, 6, 7, 3, 4; items
+8–10 explicitly deferred, see [ADR-019](docs/decisions/ADR-019-test-flakiness-signal.md)/[ADR-020](docs/decisions/ADR-020-escaped-defect-trust-score.md)):
+
+- `test_plan`'s `api`/`symbols` recommendations now inline a `context` field
+  (governing business rules, features, and risks linked to the target
+  component via a new `linked_context` query) — an agent no longer needs a
+  separate `get_entity` round-trip to see *why* a component needs a test.
+- `coverage_for`/`test_plan` gain a `stale` flag: a test is stale if the
+  component(s) it covers changed more recently than the test itself was last
+  touched, computed at query time from the existing entity envelope's
+  `last_compile_run_id` — no schema change ([ADR-018](docs/decisions/ADR-018-stale-test-detection.md)).
+- New opt-in `[mutation]` config section + `collectors/mutation.py`: attaches
+  a CI job's already-produced mutation-kill-rate summary to matching
+  Component entities. `coverage_for`/`test_plan` surface `low_mutation_kill`
+  when declared coverage exists but the kill rate is ≤40% (ADR-012's named
+  trigger). KC never executes the target repo's tests itself.
+- New `user_journey` entity type + `traverses` relationship (deterministic
+  V1 scope, [ADR-017](docs/decisions/ADR-017-user-journey-entity.md)):
+  declare an ordered, end-to-end step list via `kc.toml [[journeys]]`.
+  `test_plan` gains a `journey` target kind, `journey_coverage` an MCP tool,
+  distinguishing "every step individually covered" from "the whole chain is
+  proven by one test." LLM-candidate and E2E-header/Jira-epic extraction
+  sources are explicitly deferred, not built.
+- Wiki: entity pages gain a bounded "Recent history" section (last 5
+  changes, with a pointer to `log.md` for the full chronological record)
+  so an agent reading one page sees what changed recently without a
+  separate `recent_changes` call.
+- Frozen vocabulary counts (`tests/test_smoke.py`) updated to 11 entity
+  types / 12 relationship types — additive, non-breaking per ir.md §5, same
+  precedent as ADR-011/012/015.
+
+See [docs/decisions/index.md](docs/decisions/index.md) (ADR-017 through
+ADR-020) for the full design rationale, including the two rejected/deferred
+signals (test flakiness, escaped-defect trust score) not built in this round.
+
 ### Fixed
 
 - Wiki emission: `dirty` was overloaded — `--emit-only` passed `set()` to mean

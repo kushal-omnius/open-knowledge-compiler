@@ -103,6 +103,8 @@ Emitted by language analyzers and deterministic extractors:
 | `pr_observed` | number, title, body, merged_at, commit shas, linked issue keys | PR collector |
 | `jira_observed` | issue key, summary, status, acceptance criteria, links | Jira collector |
 | `doc_section_observed` | doc path, section heading, content ref — consumed as context input by LLM extractors and as provenance for candidates; produces no entity directly (§4.1) | README/doc collector |
+| `mutation_score_observed` | dotted module path, killed/survived/timeout counts | `[mutation]` collector (opt-in, ADR-012's named trigger — reads a CI-produced JSON summary, never executes the target repo's tests itself) |
+| `user_journey_observed` | name, ordered step slugs (`kc.toml` `[[journeys]]`, additive per ADR-017) | `[[journeys]]` config (deterministic-only V1 scope; LLM-candidate and E2E-header/Jira-epic extraction sources from ADR-017's Option A are explicitly deferred, not built) |
 
 ### 2.4 LLM candidate facts
 
@@ -127,7 +129,7 @@ Candidates propose *content only*. Whether a candidate becomes a new entity or a
 | Field | Meaning |
 |---|---|
 | `slug` | Stable identity (ADR-004); also the wiki filename/anchor |
-| `entity_type` | One of the ten canonical types |
+| `entity_type` | One of the ten canonical types plus `user_journey` (ADR-017, additive) |
 | `repo_id` | Multi-repo scoping ([ADR-001](decisions/ADR-001-postgresql.md) invariant) |
 | `name` | Human-readable display name (may change without identity change) |
 | `payload` | Type-specific content |
@@ -150,6 +152,7 @@ Identity classes per ADR-004's categorization:
 | Business Rule | LLM-derived | match-then-mint cascade |
 | Risk | LLM-derived | match-then-mint cascade |
 | Wiki Page | derived | owning entity slug + page type |
+| User Journey | deterministic (V1 scope) | `kc.toml` `[[journeys]]` name, slugified (ADR-017 — LLM-derived identity class deferred along with the LLM-candidate extraction source) |
 
 **API key note:** the natural key is *always* method + normalized route — route parameters are positional, with names elided (`GET /users/{}`), so `/users/{id}` and `/users/{user_id}` are the same API. OpenAPI `operationId` is an **alias attribute**, never identity: adding operationIds to an existing spec must not churn API identity. API kinds beyond HTTP (GraphQL, gRPC, CLI) are a future vocabulary extension, not an abstraction to build now.
 
@@ -174,6 +177,7 @@ Relationships are explicit, typed, and compiled — never inferred at query time
 | `affects` | Risk → Component \| Feature |
 | `motivates` | Jira Story → Feature \| Pull Request |
 | `documents` | Wiki Page → any entity |
+| `traverses` | User Journey → API \| Component \| Business Rule \| Feature \| Risk (ADR-017, additive) |
 
 Relationship additions are non-breaking (they extend the vocabulary like fact types); changing the semantics of an existing relationship is breaking (§5).
 
@@ -210,6 +214,8 @@ delta = {
 | `feature_candidate` | Feature via identity cascade (+ `implemented_by`, `exposes`) |
 | `business_rule_candidate` | Business Rule via cascade (+ `governs`, `verified_by`) |
 | `risk_candidate` | Risk via cascade (+ `affects`) |
+| `mutation_score_observed` | Merged into the matching Component's payload (`mutation_kill_rate`, `mutation_sample`); silently skipped if the module doesn't resolve to a compiled Component (ADR-012's named trigger, surfaced in `test_plan`/`coverage_for`) |
+| `user_journey_observed` | User Journey via direct slug mint (deterministic V1 scope, ADR-017) (+ `traverses` to each resolved step; unresolvable steps are dropped with a compile warning, not a hard failure) |
 | — (derived) | Wiki Page entities are derived **by Normalize** deterministically from the entity set (identity = owning entity slug + page type); Emit only renders them. Producing them anywhere else would violate the §1 invariant that only Normalize produces Knowledge IR |
 
 Aggregation is many-facts-to-one-entity; the entity's provenance records every contributing fact (ADR-009: granularity preserved).

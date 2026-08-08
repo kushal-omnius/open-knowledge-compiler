@@ -284,12 +284,14 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 | `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`, `jira_story`. |
 | `get_entity(slug)` | Full detail for one entity: payload, source anchors, relationships, provenance. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
 | `impact_plan(slug)` | One-hop impact analysis for a changed entity: what's affected in this repo, which affected components have test-coverage gaps, and what it reaches across repos. |
-| `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Use to drive test generation before writing tests. |
+| `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Each `api`/`symbols` recommendation now inlines a `context` field (governing business rules, features, and risks linked to that component — item 1/6 of the QA-agent-grounding backlog, no extra round-trip needed). Also returns `stale_retest` recommendations (a test exists but the component changed since the test was last touched — ADR-018), `low_mutation_kill` recommendations (declared coverage exists but the mutation-kill rate is ≤40%, ADR-012's named trigger, carries a `mutation_kill_rate` field), and `journey` recommendations (every step of a `kc.toml`-declared `[[journeys]]` end-to-end journey is individually covered, but no single test proves the whole chain — ADR-017). Use to drive test generation before writing tests. |
 | `resolve_dependency(coordinate)` | Resolve an external import/package coordinate to another repo compiled into the same database, via `kc.toml [dependencies]` (query-time only — [ADR-011](../docs/decisions/ADR-011-cross-repo-dependency-resolution.md)). |
 | `list_entities(entity_type, limit?)` | List all entities of one type. |
 | `recent_changes(runs?)` | Knowledge deltas of the N most recent compiles: what was added, changed, removed, or moved. |
 | `which_pr_introduced(slug)` | Which PR (or bootstrap compile) first added this entity. |
-| `coverage_for(component_slug)` | Which tests cover this component. |
+| `coverage_for(component_slug)` | Which tests cover this component. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). |
+| `linked_context(component_slug)` | The business rules, features, and risks that govern/are-implemented-by/affect this component — the same context `test_plan` inlines, exposed standalone for direct lookups. |
+| `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. |
 | `knowledge_stats()` | Entity counts by type and last successful compile metadata. |
 
 ---
@@ -327,6 +329,10 @@ kc serve                              # add to MCP config in Claude Code / agent
 ```bash
 # 1. Ask what tests are needed
 #    (via MCP: test_plan("component/billing-rules"))
+#    Each recommendation now carries inline governing-rule/feature/risk
+#    context (no separate get_entity round-trip needed), and the plan
+#    surfaces stale-retest, low-mutation-kill, and journey-gap
+#    recommendations alongside plain coverage gaps.
 
 # 2. Write the test with kc-covers: header
 #    (external coding agent)
@@ -392,4 +398,20 @@ enabled = false
 [dependencies]
 # Cross-repo: map import prefixes to other compiled repo slugs (ADR-011)
 # repoB = "repoB"
+
+[mutation]
+# Attach mutation-kill-rate stats (from a CI job's already-produced JSON
+# summary) to matching Component entities. KC never executes the target
+# repo's tests itself. Explicit opt-in (ADR-012's named trigger, surfaced in
+# test_plan/coverage_for).
+enabled = false
+scores_file = "mutation-scores.json"
+
+# Deterministic-only V1 (ADR-017): declare an ordered, end-to-end step list
+# of already-compiled entity slugs. No [[journeys]] table means no journeys
+# are compiled — fully optional, additive.
+# [[journeys]]
+# name = "Apply coupon at checkout"
+# steps = ["api/post-cart-add-item", "api/post-cart-apply-coupon",
+#          "api/post-checkout-submit"]
 ```

@@ -38,7 +38,9 @@ def test_fact_ir_is_identity_free():
 
 
 def test_vocabulary_matches_ir_spec():
-    # ir.md §3.2 lists exactly ten entity types; §3.3 exactly eleven relations.
-    assert len(ir.ENTITY_TYPES) == 10
-    assert len(ir.RELATION_TYPES) == 11
+    # ir.md §3.2: ten types frozen at v1.0 + user_journey (ADR-017, additive
+    # per ir.md §5 — non-breaking new entity kind, same precedent as ADR-011).
+    # §3.3: eleven relations frozen at v1.0 + traverses (ADR-017, additive).
+    assert len(ir.ENTITY_TYPES) == 11
+    assert len(ir.RELATION_TYPES) == 12
     assert ir.LLM_DERIVED_TYPES <= ir.ENTITY_TYPES

@@ -67,6 +67,31 @@ provider = "openai"
 # compiles produce no jira_story entities. Credentials from the environment,
 # never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.
 enabled = false
+
+[mutation]
+# Mutation-kill-rate collector (item 2 of the QA-agent-grounding backlog):
+# reads a JSON summary a mutation-testing CI job already produced (e.g. the
+# existing mutation-test.yaml workflow) and attaches kill-rate stats to
+# matching Component entities, surfaced inline in `test_plan` so an agent can
+# see when high declared-coverage co-occurs with low mutation-kill (ADR-012's
+# named trigger condition), not just after the fact in a separate CI artifact.
+# KC never executes the target repo's code itself — this only ingests a
+# summary another process already produced. Explicit opt-in.
+enabled = false
+scores_file = "mutation-scores.json"
+# File shape: {{"<dotted.module.path>": {{"killed": N, "survived": N, "timeout": N}}}}
+
+# User journeys (ADR-017, items 3+4 of the QA-agent-grounding backlog):
+# deterministic-only in V1 — declare an ordered, end-to-end step list of
+# already-compiled entity slugs (component/api/business_rule/feature/risk).
+# `test_plan`/`kc validate-test` can then see when every step is individually
+# covered but no single test exercises the whole chain. No [[journeys]] table
+# means no journeys are compiled — fully optional, additive.
+# Example:
+# [[journeys]]
+# name = "Apply coupon at checkout"
+# steps = ["api/post-cart-add-item", "api/post-cart-apply-coupon",
+#          "api/post-checkout-submit"]
 """
 
 

@@ -61,7 +61,7 @@ Facts are **per-compile staging**, not durable knowledge (ADR-009). See §4 for 
 |---|---|
 | `id` PK (surrogate), `repo_id` | |
 | `slug` | unique per `(repo_id)`; ADR-004 dedup suffixes applied at insert |
-| `entity_type` | the ten canonical types |
+| `entity_type` | the ten canonical types plus `user_journey` (ADR-017, additive) |
 | `name` | display name; may change without identity change |
 | `payload` JSONB | per-type schema (ir.md §3.2) |
 | `content_hash` | payload-only (dirty rule additionally consults relationship changes — ir.md §3.4) |
@@ -71,7 +71,11 @@ Facts are **per-compile staging**, not durable knowledge (ADR-009). See §4 for 
 
 ### `relationships`
 
-`(repo_id, from_entity_id, relation_type, to_entity_id)` unique; `relation_type` from ir.md §3.3. No payload in V1 (attributes on relationships are a breaking vocabulary change per ir.md §5).
+`(repo_id, from_entity_id, relation_type, to_entity_id)` unique; `relation_type` from ir.md §3.3, now including `traverses` (User Journey → step entity, ADR-017, additive). No payload in V1 (attributes on relationships are a breaking vocabulary change per ir.md §5).
+
+**Stale-test detection (ADR-018, additive, no schema change):** `coverage_for`/`test_plan` compare a Test Coverage row's own `last_compile_run_id` against the `last_compile_run_id` of the component(s) it `covers`; if the component changed more recently than the test was last touched, the test is flagged `stale`. Pure read-time computation over the existing entity envelope — no new table or column.
+
+**Mutation-kill rate (ADR-012's named trigger, additive):** `mutation_kill_rate`/`mutation_sample` are opt-in payload fields on Component rows, populated from a `[mutation]`-configured scores file (`_mutation_scores`, pipeline.md §3.3); no new table.
 
 ### `provenance`
 

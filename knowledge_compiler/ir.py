@@ -17,6 +17,13 @@ from pydantic import BaseModel, ConfigDict
 ENTITY_TYPES = frozenset({
     "project", "component", "api", "test_coverage", "pull_request",
     "jira_story", "feature", "business_rule", "risk", "wiki_page",
+    # user_journey (ADR-017, item 3 of the QA-agent-grounding backlog): an
+    # ordered, end-to-end sequence of already-compiled entity slugs. V1 scope
+    # is deterministic-only, declared in kc.toml `[[journeys]]` — LLM-candidate
+    # extraction from Feature narratives and deterministic mining of existing
+    # hand-written E2E test headers are explicitly deferred future work
+    # (ADR-017's Option A extraction-source list), not attempted here.
+    "user_journey",
 })
 
 # LLM-derived types go through the match-then-mint cascade (ADR-004).
@@ -25,13 +32,14 @@ LLM_DERIVED_TYPES = frozenset({"feature", "business_rule", "risk"})
 RELATION_TYPES = frozenset({
     "implemented_by", "exposes", "governs", "verified_by", "covers",
     "defined_in", "depends_on", "contains", "affects", "motivates", "documents",
+    "traverses",  # user_journey -> each step entity (ADR-017); order lives in payload, not here
 })
 
 DETERMINISTIC_FACT_TYPES = frozenset({
     "component_observed", "symbol_observed", "dependency_observed",
     "api_endpoint_observed", "test_case_observed", "test_target_observed",
     "source_change_observed", "pr_observed", "jira_observed",
-    "doc_section_observed",
+    "doc_section_observed", "mutation_score_observed", "user_journey_observed",
 })
 
 LLM_CANDIDATE_FACT_TYPES = frozenset({
