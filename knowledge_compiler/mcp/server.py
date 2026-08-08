@@ -91,10 +91,43 @@ def build_server(repo_dir: Path):
         """Deterministic test recommendations for a changed entity: everything
         impact_plan returns, plus concrete targets (APIs or symbols) to write
         tests against for each coverage gap. Names what needs a test; writing
-        it stays a separate, later step."""
+        it stays a separate, later step.
+
+        Each 'api'/'symbols' recommendation inlines a 'context' field (the
+        governing business rules, features, and risks linked to that
+        component — see linked_context) so no separate lookup is needed.
+        Also returns three additional recommendation kinds, each tagged via
+        'target_kind': 'stale_retest' (a test exists but the component
+        changed more recently than the test was last touched, ADR-018),
+        'low_mutation_kill' (declared coverage exists but the mutation-kill
+        rate is <=40%, carries a 'mutation_kill_rate' field, ADR-012's named
+        trigger — only populated when the repo's kc.toml [mutation] section
+        is enabled), and 'journey' (every step of a kc.toml-declared
+        [[journeys]] end-to-end journey is individually covered, but no
+        single test proves the whole chain — ADR-017; only populated when
+        the repo declares [[journeys]])."""
         with repo_session() as (session, repo_id):
             return (queries.test_plan(session, repo_id, slug, dep_map=dep_map)
                     or {"error": f"no entity '{slug}'"})
+
+    @mcp.tool()
+    def linked_context(component_slug: str) -> dict:
+        """The business rules, features, and risks that govern / are
+        implemented by / affect this component (slug form:
+        component/<path-slug>) — the same context test_plan inlines into
+        its recommendations, exposed standalone for a direct lookup."""
+        with repo_session() as (session, repo_id):
+            return queries.linked_context(session, repo_id, component_slug)
+
+    @mcp.tool()
+    def journey_coverage(journey_slug: str) -> dict:
+        """Whether a kc.toml-declared [[journeys]] end-to-end journey
+        (slug form: user_journey/<name-slug>) is covered end-to-end by a
+        single test that exercises every step's component, versus each step
+        only being covered individually (ADR-017)."""
+        with repo_session() as (session, repo_id):
+            return (queries.journey_coverage(session, repo_id, journey_slug)
+                    or {"error": f"no journey '{journey_slug}'"})
 
     @mcp.tool()
     def resolve_dependency(coordinate: str) -> dict:
@@ -128,7 +161,11 @@ def build_server(repo_dir: Path):
 
     @mcp.tool()
     def coverage_for(component_slug: str) -> dict:
-        """Which tests cover this component (slug form: component/<path-slug>)."""
+        """Which tests cover this component (slug form: component/<path-slug>).
+        Each test also reports 'stale' (true if the component changed more
+        recently than the test's own last_compile_run_id, ADR-018 — zero
+        schema change) and, when kc.toml's [mutation] section is enabled,
+        'mutation_kill_rate'/'low_mutation_kill' (ADR-012's <=40% trigger)."""
         with repo_session() as (session, repo_id):
             return (queries.coverage_for(session, repo_id, component_slug)
                     or {"error": f"no component '{component_slug}'"})

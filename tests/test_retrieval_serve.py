@@ -197,4 +197,5 @@ def test_mcp_server_builds_and_registers_tools(compiled):
     server = build_server(repo)
     tools = {t.name for t in anyio.run(server.list_tools)}
     assert {"search_knowledge", "get_entity", "list_entities", "recent_changes",
-            "which_pr_introduced", "coverage_for", "knowledge_stats"} <= tools
+            "which_pr_introduced", "coverage_for", "knowledge_stats",
+            "linked_context", "journey_coverage"} <= tools
