@@ -48,3 +48,12 @@ provider = "azure-openai"
 # compiles produce no jira_story entities. Credentials from the environment,
 # never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.
 enabled = false
+# source = "rest"        # default; live Atlassian REST API. Only backend
+                          # usable from an unattended CI compile (ADR-002).
+# source = "file"        # alternate: read cache_file below instead of the
+                          # live API (ADR-021) -- e.g. for an interactive
+                          # compile where an agent has its own Jira access
+                          # (an Atlassian MCP connector) but no API token is
+                          # configured. KC never talks to that access path
+                          # directly; the agent pre-fetches the cache itself.
+# cache_file = "jira-cache.json"   # resolved relative to this repo's directory

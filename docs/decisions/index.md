@@ -164,6 +164,14 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Depended on by:** —
 - **Related documents:** `BRAINSTORM-test-generation-eval.md` (Option E, the rejected alternative this is cheaper than)
 
+### [ADR-021 — Jira Gateway Source Abstraction](ADR-021-jira-gateway-source-abstraction.md)
+
+- **Status:** Accepted
+- **Summary:** The Jira collector gains a second gateway, `FileJiraGateway`, selected by a new `[jira] source = "rest" | "file"` config key (defaulting to `"rest"` for backward compatibility with every pre-existing `kc.toml`). `"file"` reads a pre-fetched JSON cache instead of calling the live API — for an agent-driven interactive compile where the agent already has its own Jira access (e.g. an Atlassian MCP connector) but the repo has no Jira API token configured. Explicitly interactive-only: the file backend can never back the CI-triggered path (ADR-002), since there is no non-interactive credential behind the access pattern it exists to use. An unrecognized `source` value fails loud at gateway-construction time.
+- **Dependencies:** ADR-002 (the unattended-compile invariant this backend cannot satisfy), ADR-007 (plugin-seam/fail-loud precedent the `source` selector follows)
+- **Depended on by:** —
+- **Related documents:** `knowledge_compiler/collectors/jira.py` (`JiraGateway`, `AtlassianJiraGateway`, `FileJiraGateway`, `build_jira_gateway`), `docs/pipeline.md` §3.1
+
 ## Dependency graph
 
 Arrows point from an ADR to what it depends on. ADR-001 and ADR-007 are the two foundations; no cycles.
@@ -218,9 +226,11 @@ graph TD
     ADR020 --> ADR012
     ADR020 --> ADR018
     ADR020 --> ADR019
+    ADR021["ADR-021 Jira Gateway Source Abstraction ✓"] --> ADR002
+    ADR021 --> ADR007
 ```
 
-ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording designs for JavaScript and Java language-analyzer support respectively; ADR-015 was implemented the same day and its status moved to Accepted, while ADR-016 (Java) remains Proposed and unimplemented. ADR-017 through ADR-020 were proposed 2026-08-08, recording a QA-agent-test-grounding backlog surfaced by thinking through what a QA agent needs beyond declared-coverage percentages; ADR-017 (UserJourney) and ADR-018 (stale-test detection) were implemented the same day (ADR-017 with its extraction scope deliberately reduced from the proposed hybrid design to a deterministic-only `kc.toml`-declared slice — see its Status section) and their statuses moved to Accepted, while ADR-019 (test flakiness) and ADR-020 (escaped-defect trust score) remain Proposed and unimplemented, explicitly out of scope for that PR. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013, ADR-014, ADR-016, ADR-019, and ADR-020 remain Proposed pending review.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording designs for JavaScript and Java language-analyzer support respectively; ADR-015 was implemented the same day and its status moved to Accepted, while ADR-016 (Java) remains Proposed and unimplemented. ADR-017 through ADR-020 were proposed 2026-08-08, recording a QA-agent-test-grounding backlog surfaced by thinking through what a QA agent needs beyond declared-coverage percentages; ADR-017 (UserJourney) and ADR-018 (stale-test detection) were implemented the same day (ADR-017 with its extraction scope deliberately reduced from the proposed hybrid design to a deterministic-only `kc.toml`-declared slice — see its Status section) and their statuses moved to Accepted, while ADR-019 (test flakiness) and ADR-020 (escaped-defect trust score) remain Proposed and unimplemented, explicitly out of scope for that PR. ADR-021 was added 2026-08-09, recording the Jira collector's second gateway backend (a pre-fetched file cache, for agent-driven compiles with Jira access but no configured API token) surfaced by working through how an agent could actually get Jira data into KC without a token; implemented the same day, status Accepted. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013, ADR-014, ADR-016, ADR-019, and ADR-020 remain Proposed pending review.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 

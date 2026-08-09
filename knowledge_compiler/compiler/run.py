@@ -185,7 +185,7 @@ def verify(repo_dir: Path) -> VerifyReport:
     with _locked_session(repo_dir) as (session, repo, ctx):
         collector = GitCollector(ctx["repo_dir"])
         artifacts = collector.collect_full()
-        facts = _extract(artifacts)
+        facts = _extract(artifacts) + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
         candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))
@@ -495,7 +495,7 @@ def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
     jira_cfg = ctx["config"].get("jira", {})
     if not jira_cfg.get("enabled", False):
         return []
-    gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg)
+    gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg, ctx["repo_dir"])
     if gateway is None:
         return []
     facts = []

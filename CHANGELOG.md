@@ -54,6 +54,24 @@ See [docs/decisions/index.md](docs/decisions/index.md) (ADR-017 through
 ADR-020) for the full design rationale, including the two rejected/deferred
 signals (test flakiness, escaped-defect trust score) not built in this round.
 
+Jira collector: second gateway backend, `[jira] source = "rest" | "file"`
+([ADR-021](docs/decisions/ADR-021-jira-gateway-source-abstraction.md)):
+
+- `source = "file"` (`FileJiraGateway`) reads a pre-fetched JSON cache
+  instead of calling the live API — for an agent-driven interactive compile
+  where the agent already has its own Jira access (e.g. an Atlassian MCP
+  connector) but the repo has no Jira API token configured. `cache_file` is
+  resolved relative to the repo directory, matching `[wiki] output_dir` and
+  `[mutation] scores_file`'s existing precedent — not the process's current
+  working directory, which the documented `kc compile --dir /path/to/repo`
+  usage need not match. Defaults to `source = "rest"` (the existing
+  live-API gateway) when the key is absent, so every pre-existing
+  `kc.toml` keeps working unchanged. An unrecognized `source` value fails
+  loud (`JiraError`) at gateway-construction time. Interactive-only by
+  design — never usable from the CI-triggered path (ADR-002), since
+  there's no non-interactive credential behind the access pattern it
+  exists to serve.
+
 ### Fixed
 
 - Wiki emission: `dirty` was overloaded — `--emit-only` passed `set()` to mean
@@ -73,6 +91,14 @@ signals (test flakiness, escaped-defect trust score) not built in this round.
   frontmatter shape. `WikiEmitter.emit` now prunes any on-disk page whose
   owner is no longer current, on every emit, self-healing for orphans already
   stranded by prior compiles.
+- `kc verify`'s shadow compile (`compiler/run.py`) called only `_extract`,
+  omitting `_journey_facts`/`_mutation_facts` — the `kc.toml`-sourced facts
+  the real compile path appends — causing every `user_journey` entity and
+  mutation score to appear as a spurious divergence whenever `[[journeys]]`
+  or `[mutation]` was configured (frida dogfood finding, 2026-08-09). Fixed
+  by including both calls in the shadow compile; the invariant (the shadow
+  compile must include every fact source the real compile uses) is now
+  documented in `pipeline.md` §7.
 
 ## [1.0.0] — 2026-08-06
 

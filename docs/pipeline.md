@@ -35,7 +35,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 
 - **Reads:** the repository at the compiled commit; forge/Jira APIs. Scope per run mode (§5).
 - **Produces:** `artifacts` rows (typed, content-hashed).
-- **Owns:** PR↔commit linkage via **forge API association, never commit parentage** — squash/rebase merges rewrite history, so the PR's file diff and metadata come from the forge, making merge strategy irrelevant to scope (resolves the ADR-002 open item). PR↔Jira linkage is **issue-key extraction from the PR title/body** (regex, e.g. `DCA-1234`) *(additive clarification)* — not a forge-API-reported link — since neither GitHub's REST PR payload nor a generic forge API reliably exposes structured issue links; the Jira collector then fetches exactly those keys (`collectors/jira.py`).
+- **Owns:** PR↔commit linkage via **forge API association, never commit parentage** — squash/rebase merges rewrite history, so the PR's file diff and metadata come from the forge, making merge strategy irrelevant to scope (resolves the ADR-002 open item). PR↔Jira linkage is **issue-key extraction from the PR title/body** (regex, e.g. `DCA-1234`) *(additive clarification)* — not a forge-API-reported link — since neither GitHub's REST PR payload nor a generic forge API reliably exposes structured issue links; the Jira collector then fetches exactly those keys (`collectors/jira.py`), via one of two `[jira] source` backends — `"rest"` (default, live API, the only one usable from an unattended CI compile) or `"file"` (a pre-fetched JSON cache, for interactive compiles where an agent has its own Jira access but no API token is configured — ADR-021).
 - **Failure:** a collector that cannot reach its source fails the compile loudly (ADR-007 — never silently compile with a subset of configured collectors).
 
 ### 3.2 Extract
@@ -136,6 +136,8 @@ When the per-run LLM budget cap (`kc.toml`, ADR-008) is reached mid-Extract, the
 ## 7. `kc verify`
 
 Runs Collect + Extract + Normalize as a **shadow full compile** (no Persist, no Emit), then matches the shadow entity set against current state using the ADR-004 cascade itself — never slug equality (ADR-004's reproducibility statement). Reports: entities the incremental history missed / fabricated / mismatched, with match-rate metrics (feeding ADR-004's threshold tuning). Nonzero divergence → nonzero exit; the remedy is a real `kc compile --full` (slug-preserving) into the database.
+
+The shadow compile must include **all fact sources the real compile uses** — not only git-artifact-extracted facts but also kc.toml-sourced facts (`_journey_facts`, `_mutation_facts`). Omitting these causes spurious divergence for any `[[journeys]]` or `[mutation]` configuration (dogfood finding, 2026-08-09: fixed in `compiler/run.py`).
 
 ## 8. Open items
 
