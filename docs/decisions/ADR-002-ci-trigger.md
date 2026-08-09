@@ -161,6 +161,20 @@ Affected compiler stages:
 - **Polling daemon (C)** — reconciliation packaged as an always-on process; strictly dominated.
 - **Server-side hooks (D)** — unavailable on hosted forges; wrong event granularity (pushes, not PRs).
 
+## Addendum — Commit-fill reconcile (2026-08-09)
+
+**Problem:** reconcile was PR-centric; direct pushes to the default branch, squash commits with no PR, and repos without a PR workflow were silently skipped.
+
+**Resolution (Option C from BRAINSTORM-commit-reconcile.md):** reconcile now runs two passes per invocation, merged by timestamp:
+1. PR-based pass (unchanged): `ForgeGateway.list_merged_prs` — produces `scope='pr'` runs with full `pr_observed`/Jira metadata.
+2. Commit-fill pass: `ForgeGateway.list_commits` — any commit whose SHA is not already covered by Pass 1 produces a `scope='commit'` run; Jira keys extracted from commit messages.
+
+**Watermark change:** unified to `max(COALESCE(commit_timestamp, merged_at))` across both `pr` and `commit` scoped succeeded runs. The `commit_timestamp` column (migration 0006) stores the committer timestamp for `scope='commit'` runs; `merged_at` remains the watermark field for `scope='pr'` runs.
+
+**Idempotence:** PR runs checked via `(repo_id, pr_number)`; commit runs checked via `(repo_id, commit_sha, scope='commit')`.
+
+**Unchanged invariants:** merge-order processing, advisory lock, atomic Persist commit, exactly-once semantics, and degraded-mode behaviour all hold without modification. PR metadata (`pr_observed`, Jira linkage) is preserved exactly where it exists.
+
 ## Future Reconsideration
 
 Revisit if a hosted/multi-tenant offering emerges (webhooks become the natural front door for a service that already runs 24/7 — B's costs are then sunk), or if dogfood evidence shows CI-dependency staleness is a recurring pain that scheduled reconciliation doesn't adequately bound.

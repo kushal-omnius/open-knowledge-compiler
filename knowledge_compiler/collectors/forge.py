@@ -36,10 +36,27 @@ class MergedPR:
     files: tuple[PRFile, ...] = ()
 
 
+@dataclass(frozen=True)
+class CommitInfo:
+    """A commit on the default branch not necessarily associated with a PR.
+    Used by the commit-fill pass in reconcile (BRAINSTORM-commit-reconcile.md Option C):
+    direct pushes, squash commits, and repos without a PR workflow."""
+    sha: str
+    timestamp: datetime
+    message: str
+    files: tuple[str, ...]  # paths present after the commit (added + modified; not removed)
+
+
 @runtime_checkable
 class ForgeGateway(Protocol):
     def list_merged_prs(self, base_branch: str, since: datetime | None) -> list[MergedPR]:
         """Merged PRs into base_branch after `since`, ascending by merged_at."""
+        ...
+
+    def list_commits(self, base_branch: str, since: datetime | None) -> list[CommitInfo]:
+        """Commits on base_branch after `since`, ascending by timestamp.
+        Returns [] if the forge does not support commit listing — callers must
+        handle an empty list gracefully (commit-fill pass is best-effort)."""
         ...
 
 
@@ -104,13 +121,47 @@ class GitHubGateway:
                                 old_path=f.get("previous_filename")))
         return tuple(files)
 
+    def list_commits(self, base_branch: str, since: datetime | None) -> list[CommitInfo]:
+        """Commits on base_branch after `since`.
+        GitHub returns newest-first from /commits; we reverse to ascending order."""
+        commits: list[CommitInfo] = []
+        page = 1
+        since_str = since.isoformat().replace("+00:00", "Z") if since else None
+        while page <= 10:
+            qs = f"sha={base_branch}&per_page=100&page={page}"
+            if since_str:
+                qs += f"&since={since_str}"
+            data = self._get(f"/repos/{self.owner}/{self.repo}/commits?{qs}")
+            if not data:
+                break
+            for item in data:
+                sha = item["sha"]
+                ts_str = item["commit"]["committer"]["date"]
+                timestamp = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                message = item["commit"]["message"]
+                # fetch changed files for this commit
+                detail = self._get(f"/repos/{self.owner}/{self.repo}/commits/{sha}")
+                files = tuple(
+                    f["filename"] for f in (detail.get("files") or [])
+                    if f.get("status") != "removed"
+                )
+                commits.append(CommitInfo(sha=sha, timestamp=timestamp,
+                                          message=message, files=files))
+            page += 1
+        return sorted(commits, key=lambda c: (c.timestamp, c.sha))
+
 
 @dataclass
 class FakeForge:
     """In-memory gateway for tests and offline development."""
 
     prs: list[MergedPR] = field(default_factory=list)
+    commits: list[CommitInfo] = field(default_factory=list)
 
     def list_merged_prs(self, base_branch: str, since: datetime | None) -> list[MergedPR]:
         hits = [p for p in self.prs if since is None or p.merged_at > since]
         return sorted(hits, key=lambda p: (p.merged_at, p.number))
+
+    def list_commits(self, base_branch: str, since: datetime | None) -> list[CommitInfo]:
+        hits = [c for c in self.commits if since is None or c.timestamp > since]
+        return sorted(hits, key=lambda c: (c.timestamp, c.sha))

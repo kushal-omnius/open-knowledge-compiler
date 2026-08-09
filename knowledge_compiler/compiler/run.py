@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from knowledge_compiler import (
     FACT_VOCABULARY_VERSION, KNOWLEDGE_MODEL_VERSION, OKF_SPEC_VERSION,
 )
-from knowledge_compiler.collectors.forge import ForgeGateway, MergedPR
+from knowledge_compiler.collectors.forge import CommitInfo, ForgeGateway, MergedPR
 from knowledge_compiler.collectors.git import GitCollector
 from knowledge_compiler.collectors.jira import build_jira_gateway
 from knowledge_compiler.collectors.mutation import read_mutation_scores
@@ -103,26 +103,60 @@ def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
 def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = None,
               no_llm: bool = False, llm_provider=None, embedder=None,
               jira_gateway=None, progress=None) -> list[CompileSummary]:
-    """Process merged PRs after the watermark, in merge order, exactly once
-    (pipeline.md §4). Every trigger heals prior gaps; `expect_pr` asserts the
-    triggering PR was covered (already-processed => clean no-op).
+    """Process merged PRs (and direct commits) after the watermark, in timestamp
+    order, exactly once (pipeline.md §4).
+
+    Two-pass strategy (BRAINSTORM-commit-reconcile.md Option C):
+    - Pass 1: merged PRs via ForgeGateway.list_merged_prs (unchanged)
+    - Pass 2: commits on default branch via ForgeGateway.list_commits; any
+      commit whose SHA is already covered by a PR is skipped (dedup by SHA)
+    Both streams are merged by timestamp and processed in order.
+
+    `expect_pr` asserts the triggering PR was covered (already-processed => no-op).
     progress: see compile_full."""
     with _locked_session(repo_dir) as (session, repo, ctx):
         ctx.update(no_llm=no_llm, llm_provider=llm_provider, embedder=embedder,
                    jira_gateway=jira_gateway, progress=progress)
-        watermark = session.execute(
-            select(func.max(CompileRun.merged_at)).where(
-                CompileRun.repo_id == repo.id, CompileRun.status == "succeeded",
-                CompileRun.merged_at.is_not(None))).scalar_one_or_none()
 
+        # Unified watermark: max timestamp across PR-based and commit-based runs.
+        watermark = session.execute(
+            select(func.max(func.coalesce(CompileRun.commit_timestamp,
+                                          CompileRun.merged_at))).where(
+                CompileRun.repo_id == repo.id, CompileRun.status == "succeeded",
+                func.coalesce(CompileRun.commit_timestamp,
+                              CompileRun.merged_at).is_not(None))
+        ).scalar_one_or_none()
+
+        # Pass 1: PR-based (existing path)
         prs = gateway.list_merged_prs(ctx["default_branch"], watermark)
+        pr_shas = {pr.merge_commit_sha for pr in prs}
+
+        # Pass 2: direct commits not already covered by any PR in this reconcile window
+        raw_commits = gateway.list_commits(ctx["default_branch"], watermark)
+        direct_commits = [c for c in raw_commits if c.sha not in pr_shas]
+
+        # Merge both streams by timestamp (ties: PRs before commits for determinism)
+        items: list[tuple] = (
+            [(pr.merged_at, 0, "pr", pr) for pr in prs] +
+            [(c.timestamp, 1, "commit", c) for c in direct_commits]
+        )
+        items.sort(key=lambda x: (x[0], x[1]))
+
         summaries: list[CompileSummary] = []
         covered = expect_pr is None or _already_succeeded(session, repo.id, expect_pr)
-        for pr in prs:
-            if _already_succeeded(session, repo.id, pr.number):
-                continue  # idempotence (ADR-002)
-            summaries.append(_compile_one(session, repo, ctx, pr=pr))
-            covered = covered or pr.number == expect_pr
+        for _, _, kind, item in items:
+            if kind == "pr":
+                pr = item
+                if _already_succeeded(session, repo.id, pr.number):
+                    continue  # idempotence (ADR-002)
+                summaries.append(_compile_one(session, repo, ctx, pr=pr))
+                covered = covered or pr.number == expect_pr
+            else:
+                commit = item
+                if _commit_already_succeeded(session, repo.id, commit.sha):
+                    continue  # idempotence for direct commits
+                summaries.append(_compile_one(session, repo, ctx, pr=None, commit=commit))
+
         if not covered:
             raise CompileError(
                 f"PR #{expect_pr} was not found among merged PRs after the watermark — "
@@ -211,6 +245,16 @@ def _already_succeeded(session: Session, repo_id: int, pr_number: int) -> bool:
     ).scalar_one_or_none() is not None
 
 
+def _commit_already_succeeded(session: Session, repo_id: int, commit_sha: str) -> bool:
+    """Idempotence check for direct-commit (scope='commit') runs."""
+    return session.execute(
+        select(CompileRun.id).where(CompileRun.repo_id == repo_id,
+                                    CompileRun.commit_sha == commit_sha,
+                                    CompileRun.scope == "commit",
+                                    CompileRun.status == "succeeded").limit(1)
+    ).scalar_one_or_none() is not None
+
+
 # --- shared machinery --------------------------------------------------------------
 
 
@@ -244,22 +288,35 @@ def _locked_session(repo_dir: Path):
 
 
 def _compile_one(session: Session, repo: Repository, ctx: dict,
-                 pr: MergedPR | None) -> CompileSummary:
+                 pr: MergedPR | None, commit: CommitInfo | None = None) -> CompileSummary:
+    """Compile one change unit. Modes:
+    - pr=None, commit=None  → full compile
+    - pr is not None        → PR-incremental (existing path)
+    - commit is not None    → direct-commit incremental (no PR metadata)
+    """
     collector = GitCollector(ctx["repo_dir"])
 
-    if pr is None:
+    if pr is None and commit is None:
         commit_sha = collector.head_commit()
         in_scope: frozenset[str] = frozenset()
         full = True
-    else:
+        scope_label = "full"
+    elif pr is not None:
         commit_sha = pr.merge_commit_sha
         full = False
         in_scope = frozenset({f.path for f in pr.files}
                              | {f.old_path for f in pr.files if f.old_path})
+        scope_label = "pr"
+    else:
+        commit_sha = commit.sha
+        full = False
+        in_scope = frozenset(commit.files)
+        scope_label = "commit"
 
-    run = CompileRun(repo_id=repo.id, scope="full" if pr is None else "pr",
+    run = CompileRun(repo_id=repo.id, scope=scope_label,
                      pr_number=pr.number if pr else None,
                      merged_at=pr.merged_at if pr else None,
+                     commit_timestamp=commit.timestamp if commit else None,
                      commit_sha=commit_sha, status="running",
                      fact_vocabulary_version=FACT_VOCABULARY_VERSION,
                      knowledge_model_version=KNOWLEDGE_MODEL_VERSION,
@@ -269,16 +326,31 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
 
     try:
         # Collect -> staging commit 2
-        if pr is None:
+        if pr is None and commit is None:
             artifacts = collector.collect_full()
             extra_facts: list[Fact] = []
-        else:
+            # File-based Jira in full compile: load ALL cached issues as jira_observed
+            # facts so the Jira→Feature enrichment pass has something to match against.
+            # REST-based Jira is PR-scoped only (no PR = no issue keys to fetch from).
+            jira_cfg = ctx["config"].get("jira", {})
+            if jira_cfg.get("enabled") and jira_cfg.get("source") == "file":
+                all_keys = _file_jira_all_keys(ctx)
+                if all_keys:
+                    extra_facts += _jira_facts(ctx, all_keys, pr_number=None)
+        elif pr is not None:
             live_paths = [f.path for f in pr.files if f.change != "removed"]
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
             extra_facts = _pr_facts(pr)
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
             extra_facts += _jira_facts(ctx, issue_keys, pr.number)
+        else:
+            live_paths = list(commit.files)
+            artifacts = collector.collect_at_commit(commit_sha, live_paths)
+            extra_facts = []
+            issue_keys = sorted(set(_ISSUE_KEY.findall(commit.message)))
+            if issue_keys:
+                extra_facts += _jira_facts(ctx, issue_keys, pr_number=None)
         extra_facts += _mutation_facts(ctx)
         extra_facts += _journey_facts(ctx)
         session.add_all(ArtifactRow(repo_id=repo.id, compile_run_id=run.id,
@@ -290,7 +362,16 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         # Extract -> staging commit 3 (deterministic first and always — ADR-006)
         facts = _extract(artifacts) + extra_facts
         llm_ran, llm_warnings = _extract_semantic(session, ctx, artifacts, facts)
-        # degraded = the semantic layer is configured on but didn't run this compile
+
+        # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
+        # _extract_semantic so feature candidates are in `facts`. Load current
+        # state here once; pass it to normalize below to avoid a second DB round-trip.
+        current = load_current_state(session, repo.id, ctx["repo_slug"])
+        enrichment_facts = _jira_feature_enrichment_facts(ctx, session, facts, current)
+        facts.extend(enrichment_facts)
+        llm_ran = llm_ran or bool(enrichment_facts)
+
+        # degraded = the semantic layer is configured on but didn't run at all
         # (--no-llm or provider failure) — pipeline.md §6.1
         run.degraded = _llm_configured(ctx) and not llm_ran
         session.add_all(FactRow(repo_id=repo.id, compile_run_id=run.id, fact_type=f.fact_type,
@@ -304,7 +385,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         # Normalize + Diff (pure) -> Persist (THE atomic commit, ADR-003)
         families = frozenset({"deterministic"} | ({"llm"} if llm_ran else set()))
         scope = CompileScope(full=full, ran_families=families, in_scope_files=in_scope)
-        current = load_current_state(session, repo.id, ctx["repo_slug"])
+        # current already loaded above (before enrichment)
         candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         delta, dirty = compute_diff(candidate, current, scope)
         persist_compile(session, repo.id, run, candidate, delta)
@@ -489,7 +570,7 @@ def _journey_facts(ctx: dict) -> list[Fact]:
     return facts
 
 
-def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
+def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None) -> list[Fact]:
     if not issue_keys:
         return []
     jira_cfg = ctx["config"].get("jira", {})
@@ -507,6 +588,104 @@ def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
                           artifact_refs=(f"jira:{issue.key}",), extraction=_JIRA_EXTRACTION,
                           content_hash=content_hash(payload)))
     return facts
+
+
+def _file_jira_all_keys(ctx: dict) -> list[str]:
+    """Return all issue keys from the file-based Jira cache.
+
+    Used in full-compile mode so the Jira→Feature enrichment pass has
+    jira_observed facts to work against even when there's no PR to extract
+    keys from. Returns [] if source != 'file' or cache unreadable.
+    """
+    import json
+    jira_cfg = ctx["config"].get("jira", {})
+    cache_file = jira_cfg.get("cache_file", "jira-cache.json")
+    try:
+        data = json.loads((ctx["repo_dir"] / cache_file).read_text(encoding="utf-8"))
+        return sorted(data.keys())
+    except Exception:
+        return []
+
+
+def _jira_feature_enrichment_facts(ctx: dict, session: Session,
+                                    facts: list[Fact], current) -> list[Fact]:
+    """LLM-derived motivates edges: Jira Story → Feature (ir.md §3.3).
+
+    Reads jira_observed and feature_candidate facts (+ current-state feature
+    entities) and calls the LLM per-issue to match which compiled features a
+    Jira story motivated. Returns jira_feature_link_observed facts consumed by
+    Normalize._jira_stories() to populate payload["linked_feature_names"], which
+    _p5_relationships() resolves to motivates → Feature edges.
+
+    Skipped entirely when: LLM disabled, Jira disabled, no Jira facts, or no
+    feature facts. Provider/validation errors skip the affected issue (never
+    fail the compile — Jira enrichment is best-effort additive, not core)."""
+    if not _llm_enabled(ctx) or not ctx["config"].get("jira", {}).get("enabled", False):
+        return []
+
+    jira_facts = [f for f in facts if f.fact_type == "jira_observed"]
+    if not jira_facts:
+        return []
+
+    feature_candidates = {f.payload["name"]: f.payload.get("narrative", "")
+                          for f in facts if f.fact_type == "feature_candidate"}
+    current_features = {e.name: e.payload.get("narrative", "")
+                        for e in current.entities if e.entity_type == "feature"}
+    all_features: dict[str, str] = {**current_features, **feature_candidates}
+    if not all_features:
+        return []
+
+    from knowledge_compiler.llm.cache import LLMCache, cache_key
+    from knowledge_compiler.llm.provider import LLMProviderError, build_provider
+    from knowledge_compiler.llm.templates import (
+        JIRA_FEATURE_SCHEMA, JIRA_FEATURE_TEMPLATE_ID, JIRA_FEATURE_TEMPLATE_VERSION,
+        JiraFeatureMatchOut, build_jira_feature_prompt,
+    )
+
+    llm_cfg = ctx["config"].get("llm", {})
+    try:
+        provider = ctx.get("llm_provider") or build_provider(llm_cfg)
+        cache = LLMCache(session.get_bind())
+    except LLMProviderError:
+        return []
+
+    feature_set_hash = content_hash({"names": sorted(all_features)})
+    _ENRICH_EXTRACTION = Extraction(method="llm", extractor="jira-feature-match",
+                                    extractor_version="0.1",
+                                    model_id=provider.model_id,
+                                    template_version=JIRA_FEATURE_TEMPLATE_VERSION)
+    results: list[Fact] = []
+    for jf in sorted(jira_facts, key=lambda f: f.payload["key"]):
+        key = jf.payload["key"]
+        summary = jf.payload.get("summary", "")
+        description = jf.payload.get("description", "")
+        ck = cache_key(JIRA_FEATURE_TEMPLATE_ID, JIRA_FEATURE_TEMPLATE_VERSION,
+                       provider.model_id,
+                       content_hash({"k": key, "s": summary,
+                                     "d": description, "fh": feature_set_hash}))
+        cached = cache.get(ck)
+        if cached is not None:
+            try:
+                out = JiraFeatureMatchOut.model_validate(cached)
+            except Exception:
+                continue
+        else:
+            prompt = build_jira_feature_prompt(key, summary, description, all_features)
+            try:
+                raw = provider.complete(prompt, JIRA_FEATURE_SCHEMA)
+                out = JiraFeatureMatchOut.model_validate(raw)
+                cache.put(ck, JIRA_FEATURE_TEMPLATE_ID, JIRA_FEATURE_TEMPLATE_VERSION,
+                          provider.model_id, out.model_dump())
+            except Exception:
+                continue
+        matched = sorted({n for n in out.motivates if n in all_features})
+        if matched:
+            payload = {"jira_key": key, "feature_names": matched}
+            results.append(Fact(fact_type="jira_feature_link_observed", payload=payload,
+                                artifact_refs=(f"jira:{key}",),
+                                extraction=_ENRICH_EXTRACTION,
+                                content_hash=content_hash(payload)))
+    return results
 
 
 def _publisher_config(config: dict):

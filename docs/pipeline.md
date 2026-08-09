@@ -45,6 +45,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 - **Owns:** grammar pinning, parse-failure file skips (recorded as warnings, never compile failures — ADR-006); the LLM validation gate and budget accounting (ADR-008); mandatory anchors on candidates (ADR-004).
 - **Progress:** `[llm] i/n <file> --changed` is emitted to stderr for each file that required a real LLM call (cache miss). Cache hits are silent — the progress stream only reflects actual network work, so a mostly-cached run produces few or no lines.
 - **Records:** which extractor families ran over which scope — required by removal evidence (§5).
+- **Jira→Feature enrichment pass** (additive, opt-in): after the file-level semantic extraction pass, `_jira_feature_enrichment_facts` runs a per-issue LLM call matching each `jira_observed` fact to compiled feature candidates and current-state features. Produces `jira_feature_link_observed` facts (ir.md §2.3); cached via ADR-008; skipped entirely when LLM or Jira is disabled. Failures on individual issues are silently skipped — enrichment is best-effort additive, never load-bearing for the compile.
 
 ### 3.3 Normalize
 
@@ -88,20 +89,29 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 - **Owns:** entity→page mapping; embedding `pending` status on provider outage (degrade to FTS, backfill later — ADR-005).
 - **Failure:** emit failures never roll back Persist — compiled state is already committed and correct; emission is re-runnable from the delta (idempotent by content hash).
 
-## 4. Reconciliation algorithm (ADR-002, normative)
+## 4. Reconciliation algorithm (ADR-002, normative; extended by commit-fill)
 
 At the start of every incremental compile (and as `kc reconcile`):
 
-1. Under the advisory lock, read the watermark: `max(merged_at)` over `succeeded` runs for this repo.
-2. List PRs merged after the watermark from the forge API, ordered by `merged_at` (ties broken by PR number).
-3. For each listed PR not already recorded `succeeded` (idempotence), run the full stage sequence in order — **including the PR that triggered this run**, in its merge-order position.
-4. Each PR is its own compile run with its own atomic commit; a failure stops the sequence there (later PRs remain for the next reconcile — order is never violated by skipping ahead).
+1. Under the advisory lock, read the unified watermark: `max(COALESCE(commit_timestamp, merged_at))` over `succeeded` runs (scope ≠ `full`) for this repo.
+2. **Pass 1 — PR-based:** list PRs merged after the watermark from the forge API, ordered by `merged_at` (ties broken by PR number). Collect their merge-commit SHAs into a set.
+3. **Pass 2 — commit-fill:** list commits on the default branch after the watermark from the forge API. Drop any commit whose SHA is already in the PR-SHA set (it was processed by Pass 1). This covers direct pushes, squash-merge commits with no PR, and repos without a PR workflow.
+4. Merge both lists by timestamp (PR-before-commit for ties). For each item not already recorded `succeeded` (idempotence), run the full stage sequence in order.
+5. Each change unit is its own compile run with its own atomic commit (`scope = 'pr'` or `scope = 'commit'`); a failure stops the sequence there.
 
-Consequence: any single successful trigger heals an arbitrary backlog, in order, exactly once.
+**Change-unit semantics by scope:**
+
+| scope | commit SHA source | Jira key extraction | `pr_observed` fact | `commit_timestamp` |
+|---|---|---|---|---|
+| `pr` | `MergedPR.merge_commit_sha` | PR title + body | yes | NULL |
+| `commit` | `CommitInfo.sha` | commit message | no | `CommitInfo.timestamp` |
+| `full` | HEAD | N/A (no Jira in full compile) | no | NULL |
+
+Consequence: any single successful trigger heals an arbitrary backlog — including direct pushes — in order, exactly once.
 
 ## 5. Compile scope & removal evidence
 
-- **Collection scope:** `--full` = whole repo; `--pr` = the PR's forge-reported file diff + its PR/Jira metadata artifacts.
+- **Collection scope:** `--full` = whole repo; `--pr` = PR's forge-reported file diff + PR/Jira metadata; `--commit` (commit-fill) = commit diff files + Jira metadata from commit message.
 - **Removal evidence** (ir.md §4.2.1, extended with the extractor condition): Diff may emit `op: removed` only if the entity's evidence location was **in collection scope** *and* **the extractor family that produced it actually ran** over that scope this compile. The second condition matters for degraded runs: in a `--no-llm` compile, LLM-derived entities are never removed — the extractor that could re-observe them didn't run, so absence is not evidence (§6.1).
 - **PR and Jira entities are never removable** *(additive clarification, dogfood finding)*: they are records of events, not statements about current source — absence from any compile is never evidence against a merge that happened. Without this rule, a later PR touching the same files would delete an earlier PR's record via the file-scope check.
 - **Edges of removed entities are recorded in the delta** *(additive clarification)*: Diff synthesizes `relationship removed` rows for every edge touching a removed entity, matching what the database cascade deletes — otherwise the append-only delta log silently under-records history.
