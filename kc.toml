@@ -56,4 +56,4 @@ enabled = false
                           # (an Atlassian MCP connector) but no API token is
                           # configured. KC never talks to that access path
                           # directly; the agent pre-fetches the cache itself.
-# cache_file = "jira-cache.json"
+# cache_file = "jira-cache.json"   # resolved relative to this repo's directory

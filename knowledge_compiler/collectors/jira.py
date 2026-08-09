@@ -166,7 +166,7 @@ class FakeJira:
         return [self.issues[k] for k in sorted(set(keys)) if k in self.issues]
 
 
-def build_jira_gateway(jira_cfg: dict) -> JiraGateway | None:
+def build_jira_gateway(jira_cfg: dict, repo_dir: Path) -> JiraGateway | None:
     """Factory (ADR-007): explicit opt-in only. Returns None when disabled —
     callers must not construct a gateway for a repo that hasn't turned this on.
 
@@ -174,7 +174,13 @@ def build_jira_gateway(jira_cfg: dict) -> JiraGateway | None:
     existing `kc.toml` that predates this key) or "file". Any other value
     fails loud — a typo silently falling back to REST, or silently reading a
     stale file cache, would be a worse failure mode than an explicit error at
-    startup (ADR-007's fail-loud posture)."""
+    startup (ADR-007's fail-loud posture).
+
+    `cache_file` is resolved relative to `repo_dir`, matching every other
+    config-driven path in this codebase (`[wiki] output_dir`,
+    `[mutation] scores_file` via `read_mutation_scores`) — not the process's
+    current working directory, which need not be the repo at all (`kc compile
+    --dir /path/to/repo` is the documented normal usage)."""
     if not jira_cfg.get("enabled", False):
         return None
     source = jira_cfg.get("source", "rest")
@@ -182,5 +188,5 @@ def build_jira_gateway(jira_cfg: dict) -> JiraGateway | None:
         return AtlassianJiraGateway()
     if source == "file":
         cache_file = jira_cfg.get("cache_file", "jira-cache.json")
-        return FileJiraGateway(cache_path=Path(cache_file))
+        return FileJiraGateway(cache_path=repo_dir / cache_file)
     raise JiraError(f"[jira] source '{source}' is not recognized (expected 'rest' or 'file')")

@@ -92,8 +92,13 @@ source = "rest"              # default; live API via JIRA_BASE_URL/EMAIL/TOKEN
   before this ADR keeps working unchanged.
 - `source = "file"` reads `cache_file` (default `jira-cache.json`), a flat
   JSON object keyed by issue key, each value shaped like `JiraIssue` (all
-  fields but `key` optional). A key missing from the cache is silently
-  omitted — the same "absence is data, not an outage" contract
+  fields but `key` optional). **Resolved relative to the repo directory**
+  (`build_jira_gateway` now takes `repo_dir` explicitly), matching every
+  other config-driven path in this codebase (`[wiki] output_dir`,
+  `[mutation] scores_file` via `read_mutation_scores`) — not the process's
+  current working directory, which the documented `kc compile --dir
+  /path/to/repo` usage need not match. A key missing from the cache is
+  silently omitted — the same "absence is data, not an outage" contract
   `AtlassianJiraGateway` already has for a 404, not a new gap.
 - **Any other value fails loud** (`JiraError`) at gateway-construction time —
   a typo (`"flie"`) must never silently fall back to REST (a confusing
@@ -150,6 +155,7 @@ need was never issued to `kc`'s process in the first place.
 | Cache file exists but isn't valid JSON | `JiraError` | Fails loud, distinct message from the missing-file case |
 | A key isn't in the cache | Silently omitted from the result | Matches `AtlassianJiraGateway`'s existing 404 behavior — not a new contract |
 | `source` is an unrecognized string | `JiraError` at `build_jira_gateway` | Fails at construction, before any fetch is attempted |
+| `cache_file` resolved against CWD instead of `repo_dir` | Compile run from outside the repo dir (the documented `--dir` usage) fails with a confusing "unreadable" error even when the cache genuinely exists | Caught in review before merge; `build_jira_gateway` takes `repo_dir` explicitly and joins it, matching `[wiki] output_dir`/`[mutation] scores_file`'s existing precedent — regression-tested by changing CWD away from the repo dir mid-test |
 
 ## Assumptions
 
@@ -171,8 +177,10 @@ need was never issued to `kc`'s process in the first place.
 ## Impact
 
 Affected documents: `pipeline.md` §3.1, `CLAUDE.md`, `kc.toml`,
-`docs/kc-cli-reference.md`, `CHANGELOG.md`.
-Affected compiler stages: Collect only (`collectors/jira.py`) — no
+`docs/kc-cli-reference.md`, `compiler/bootstrap.py`'s `KC_TOML_TEMPLATE`
+(what `kc init` scaffolds into every new repo), `CHANGELOG.md`.
+Affected compiler stages: Collect only (`collectors/jira.py`,
+`compiler/run.py`'s `_jira_facts` call site) — no
 Extract/Normalize/Persist/Emit changes.
 
 ## Alternatives Rejected

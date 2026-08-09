@@ -495,7 +495,7 @@ def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int) -> list[Fact]:
     jira_cfg = ctx["config"].get("jira", {})
     if not jira_cfg.get("enabled", False):
         return []
-    gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg)
+    gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg, ctx["repo_dir"])
     if gateway is None:
         return []
     facts = []
