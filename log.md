@@ -2,6 +2,32 @@
 
 # Log
 
+## 2026-08-09
+
+- **Creation** `component/knowledge-compiler-collectors-mutation` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 1805 (`bb300401e600`).
+- **Creation** `component/tests-test-qa-grounding` (component) — compile run 1805 (`bb300401e600`).
+- **Update** `component/tests-test-wiki-emitter` (component) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-coverage-for-flags-fresh-test-as-not-stale` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-journey-entity-compiled-from-kc-toml` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-journey-gap-when-no-single-test-covers-every-step` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-journey-satisfied-when-one-test-covers-every-step` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-journey-step-unresolvable-slug-is-dropped-with-warning` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-linked-context-surfaces-business-rules-features-and-risks` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-mutation-scores-attach-to-matching-component-and-surface-in-coverage-for` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-mutation-scores-for-unobserved-module-are-silently-skipped` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-stale-test-detected-when-component-changes-without-its-test` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-test-plan-inlines-context-for-coverage-gaps` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-caps-and-points-to-log` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-is-bounded-and-entity-scoped` (test_coverage) — compile run 1805 (`bb300401e600`).
+- **Creation** `wiki-page/component-knowledge-compiler-collectors-mutation` (wiki_page) — compile run 1805 (`bb300401e600`).
+- **Creation** `wiki-page/component-tests-test-qa-grounding` (wiki_page) — compile run 1805 (`bb300401e600`).
+
 ## 2026-08-06
 
 - **Update** `component/tests-test-wiki-emitter` (component) — compile run 1804 (`3dc1298695ac`).
@@ -281,22 +307,3 @@ No knowledge changes — compile run 1779 (`14d5668b6003`).
 - **Creation** `wiki-page/component-tests-test-conftest-cleanup` (wiki_page) — compile run 1716 (`33b333666803`).
 - **Creation** `wiki-page/component-tests-test-javascript-analyzer` (wiki_page) — compile run 1716 (`33b333666803`).
 - **Creation** `wiki-page/component-tests-test-okf-conformance` (wiki_page) — compile run 1716 (`33b333666803`).
-
-## 2026-08-05
-
-- **Update** `component/knowledge-compiler-cli` (component) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `component/tests-test-pipeline-integration` (component) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `component/tests-test-wiki-emitter` (component) — compile run 1365 (`f4f91e0a7428`).
-- **Creation** `test-coverage/tests-test-pipeline-integration-py-test-emit-only-reruns-emission-without-new-compile-run` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-component-page-content` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-cross-links-are-relative-and-resolve` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-dirty-only-regeneration` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-emission-is-byte-deterministic` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-index-has-no-general-frontmatter` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-log-md-has-no-frontmatter-and-is-date-grouped` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-okf-frontmatter` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-pages-written-at-slug-paths` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-recent-changes-scoped-to-last-compile` (test_coverage) — compile run 1365 (`f4f91e0a7428`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-rel-link-helper` (test_coverage) — compile run 1365 (`f4f91e0a7428`).

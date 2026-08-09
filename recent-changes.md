@@ -8,29 +8,30 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 1804 — `3dc1298695ac`
+## Compile 1805 — `bb300401e600`
 
+- **added** [component/knowledge-compiler-collectors-mutation](component/knowledge-compiler-collectors-mutation.md)
+- **changed** [component/knowledge-compiler-compiler-normalize](component/knowledge-compiler-compiler-normalize.md)
+- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
+- **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
+- **changed** [component/knowledge-compiler-mcp-server](component/knowledge-compiler-mcp-server.md)
+- **changed** [component/knowledge-compiler-wiki-emitter](component/knowledge-compiler-wiki-emitter.md)
+- **added** [component/tests-test-qa-grounding](component/tests-test-qa-grounding.md)
 - **changed** [component/tests-test-wiki-emitter](component/tests-test-wiki-emitter.md)
-- **added** [feature/emit-wiki-pages](feature/emit-wiki-pages.md)
-- **changed** [feature/full-compile](feature/full-compile.md)
-- **changed** [feature/generate-index-and-recent-changes-pages](feature/generate-index-and-recent-changes-pages.md)
-- **changed** [feature/pr-reconciliation](feature/pr-reconciliation.md)
-- **changed** [feature/verify-shadow-compile](feature/verify-shadow-compile.md)
-- **added** [risk/dangling-pages-risk](risk/dangling-pages-risk.md)
-- **added** [risk/empty-merge-pr-handling](risk/empty-merge-pr-handling.md)
-- **changed** [risk/incomplete-error-handling](risk/incomplete-error-handling.md)
-- **changed** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
-- **removed** [risk/uncontrolled-llm-errors](risk/uncontrolled-llm-errors.md)
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page`
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets`
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender`
-- **added** `wiki-page/feature-emit-wiki-pages`
-- **changed** `wiki-page/feature-pr-reconciliation`
-- **changed** `wiki-page/feature-verify-shadow-compile`
-- **added** `wiki-page/risk-dangling-pages-risk`
-- **added** `wiki-page/risk-empty-merge-pr-handling`
-- **changed** `wiki-page/risk-incomplete-error-handling`
-- **changed** `wiki-page/risk-missing-configuration-validation`
-- **removed** `wiki-page/risk-uncontrolled-llm-errors`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-coverage-for-flags-fresh-test-as-not-stale`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-journey-entity-compiled-from-kc-toml`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-journey-gap-when-no-single-test-covers-every-step`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-journey-satisfied-when-one-test-covers-every-step`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-journey-step-unresolvable-slug-is-dropped-with-warning`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-linked-context-surfaces-business-rules-features-and-risks`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-mutation-scores-attach-to-matching-component-and-surface-in-coverage-for`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-mutation-scores-for-unobserved-module-are-silently-skipped`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-stale-test-detected-when-component-changes-without-its-test`
+- **added** `test-coverage/tests-test-qa-grounding-py-test-test-plan-inlines-context-for-coverage-gaps`
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed`
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-caps-and-points-to-log`
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-is-bounded-and-entity-scoped`
+- **added** `wiki-page/component-knowledge-compiler-collectors-mutation`
+- **added** `wiki-page/component-tests-test-qa-grounding`
 
 Full chronological history: [log.md](log.md).

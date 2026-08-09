@@ -6,11 +6,11 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 1804 · Commit: `3dc1298695ac`
+Repo: `knowledge-compiler` · Compile run: 1805 · Commit: `bb300401e600`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
-## Components (63)
+## Components (65)
 
 - [alembic.env](component/alembic-env.md)
 - [alembic.versions.0001_phase1_schema](component/alembic-versions-0001-phase1-schema.md)
@@ -24,6 +24,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [knowledge_compiler.collectors.forge](component/knowledge-compiler-collectors-forge.md)
 - [knowledge_compiler.collectors.git](component/knowledge-compiler-collectors-git.md)
 - [knowledge_compiler.collectors.jira](component/knowledge-compiler-collectors-jira.md)
+- [knowledge_compiler.collectors.mutation](component/knowledge-compiler-collectors-mutation.md)
 - [knowledge_compiler.compiler](component/knowledge-compiler-compiler.md)
 - [knowledge_compiler.compiler.bootstrap](component/knowledge-compiler-compiler-bootstrap.md)
 - [knowledge_compiler.compiler.diff](component/knowledge-compiler-compiler-diff.md)
@@ -68,6 +69,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_pipeline_integration](component/tests-test-pipeline-integration.md)
 - [tests.test_publisher](component/tests-test-publisher.md)
 - [tests.test_python_analyzer](component/tests-test-python-analyzer.md)
+- [tests.test_qa_grounding](component/tests-test-qa-grounding.md)
 - [tests.test_retrieval_serve](component/tests-test-retrieval-serve.md)
 - [tests.test_smoke](component/tests-test-smoke.md)
 - [tests.test_storage](component/tests-test-storage.md)
