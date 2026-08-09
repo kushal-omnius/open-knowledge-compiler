@@ -267,6 +267,7 @@ class WikiEmitter:
         ("in", "affects"): "Risks", ("out", "exposes"): "Exposes",
         ("in", "verified_by"): "Verifies", ("out", "verified_by"): "Verified by",
         ("out", "traverses"): "Traverses", ("in", "traverses"): "Part of journey",
+        ("in", "motivates"): "Motivated by Jira",
     }
 
     def _relations_section(self, owner: Entity, state: _State) -> list[str]:
@@ -282,6 +283,10 @@ class WikiEmitter:
                     continue
                 if other.entity_type in PAGE_OWNER_TYPES:
                     item = f"[{other.name}]({rel_link(owner.slug, other.slug)})"
+                elif other.entity_type == "jira_story":
+                    key = other.payload.get("key", other.slug)
+                    summary = other.payload.get("summary", "")
+                    item = f"**{key}** — {summary}" if summary else f"**{key}**"
                 else:
                     item = f"`{other.name}`"
                 groups.setdefault(label, []).append(item)
