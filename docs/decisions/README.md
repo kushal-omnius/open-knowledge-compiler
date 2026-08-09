@@ -33,5 +33,10 @@ This directory records the significant architectural decisions of the Knowledge 
 | [ADR-014](ADR-014-shared-okf-rules-file.md) | Shared declarative OKF rules file (emitter + validator) | Proposed — not implemented |
 | [ADR-015](ADR-015-javascript-language-analyzer.md) | JavaScript language analyzer support | Accepted |
 | [ADR-016](ADR-016-java-language-analyzer.md) | Java language analyzer support | Proposed — not implemented |
+| [ADR-017](ADR-017-user-journey-entity.md) | UserJourney entity for end-to-end test grounding | Accepted — scope reduced |
+| [ADR-018](ADR-018-stale-test-detection.md) | Stale-test detection via delta-log cross-reference | Accepted |
+| [ADR-019](ADR-019-test-flakiness-signal.md) | Test flakiness signal from CI run history | Proposed — not implemented |
+| [ADR-020](ADR-020-escaped-defect-trust-score.md) | Escaped-defect trust score | Proposed — not implemented |
+| [ADR-021](ADR-021-jira-gateway-source-abstraction.md) | Jira gateway source abstraction: `source = "rest" \| "file"` | Accepted |
 
 See [index.md](index.md) for summaries, dependencies, the dependency graph, and the list of unresolved decisions deferred to future design documents.

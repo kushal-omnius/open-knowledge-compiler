@@ -394,6 +394,9 @@ provider = "openai"             # openai | azure-openai
 
 [jira]
 enabled = false
+# source = "rest" | "file"      # default "rest" (ADR-021); "file" reads
+                                 # cache_file instead of the live API
+# cache_file = "jira-cache.json"
 
 [dependencies]
 # Cross-repo: map import prefixes to other compiled repo slugs (ADR-011)
