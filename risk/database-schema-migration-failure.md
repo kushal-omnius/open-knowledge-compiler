@@ -25,3 +25,7 @@ If the database schema migrations fail, the repository may not function correctl
 ## Affects
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

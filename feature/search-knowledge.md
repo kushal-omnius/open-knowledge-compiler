@@ -26,3 +26,7 @@ The search knowledge feature allows users to query the knowledge base to find re
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
 - [knowledge_compiler.retrieval.search](../component/knowledge-compiler-retrieval-search.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

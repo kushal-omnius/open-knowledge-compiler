@@ -25,3 +25,7 @@ FactRow provides a structure to store extracted facts associated with repositori
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Fact Storage' → 'Fact Storage System', `narrative`: 'The FactRow class serves as a staging area for facts extracted during the compilation process. It includes information about the associated compile run, the type of fact, and the extraction result, aiding in the analysis and tracking of facts in the system.' → "FactRow provides a structure to store extracted facts associated with repositories and compilation runs, enhancing the system's knowledge base with valuable data snapshots."

@@ -25,3 +25,7 @@ If the configuration file (kc.toml) fails to write, the repository may not have 
 ## Affects
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Configuration Management' → 'Operational', `description`: 'The KC_TOML_TEMPLATE string is hardcoded, which may result in configuration issues if changes are needed. There is no provision for dynamic updates or external configuration management.' → 'If the configuration file (kc.toml) fails to write, the repository may not have the necessary configuration settings to operate, resulting in potential errors when trying to access its features.', `name`: 'Hardcoded Configuration Template' → 'Configuration File Write Failure'

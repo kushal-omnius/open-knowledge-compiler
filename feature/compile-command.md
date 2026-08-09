@@ -25,3 +25,7 @@ The 'compile' command compiles a repository and handles various options for full
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: "The 'compile' command is responsible for processing the contents of a repository, creating, and updating the knowledge base based on the artifacts present. It supports both full and incremental compilation modes." → "The 'compile' command compiles a repository and handles various options for full or incremental compilations. It manages the workflow of compiling knowledge artifacts based on the repository's current state."

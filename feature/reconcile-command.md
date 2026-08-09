@@ -25,3 +25,7 @@ The 'reconcile' command identifies and processes merged pull requests that may h
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: "The 'reconcile' command is designed to handle updates from merged pull requests, allowing the knowledge base to remain current with the latest changes by catching up on any missed compilations." → "The 'reconcile' command identifies and processes merged pull requests that may have been missed since the last compile, ensuring that the knowledge base remains up-to-date."

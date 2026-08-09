@@ -22,3 +22,7 @@ The OpenAIEmbedder and AzureOpenAIEmbedder classes depend on the external 'opena
 
 - `knowledge_compiler/llm/embeddings.py` — `knowledge_compiler.llm.embeddings.OpenAIEmbedder.__init__`
 - `knowledge_compiler/llm/embeddings.py` — `knowledge_compiler.llm.embeddings.AzureOpenAIEmbedder.__init__`
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `description`: "The code dependencies on the 'openai' SDK are not externally validated during installation beyond the ImportError check. This could lead to runtime errors if the SDK is not installed, resulting in a failure to initialize the embedder." → "The OpenAIEmbedder and AzureOpenAIEmbedder classes depend on the external 'openai' library, raising risks if the library is not installed or if there are API changes. The initialization process raises exceptions if the library is not found, which can disrupt functionality.", `name`: 'Missing Dependency Handling' → 'Dependency on External Libraries', `related_components`: ['knowledge_compiler.llm.provider'] → []

@@ -25,3 +25,7 @@ RelationshipRow tracks relationships between entities within a repository. This 
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Relationship Management' → 'Relationship Tracking', `narrative`: 'The RelationshipRow class outlines the relationships between different entities in the system. By defining attributes like relation type and associated entity IDs, it enables the modeling of complex interactions and connections within the data.' → 'RelationshipRow tracks relationships between entities within a repository. This feature enables the representation of complex interdependencies and connections among various code components.'

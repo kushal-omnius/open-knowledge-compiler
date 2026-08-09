@@ -25,3 +25,7 @@ If an owner of a page is removed or not found during emission, it may lead to da
 ## Affects
 
 - [knowledge_compiler.wiki.emitter](../component/knowledge-compiler-wiki-emitter.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1804, `3dc1298695ac`)

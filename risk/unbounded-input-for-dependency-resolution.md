@@ -25,3 +25,7 @@ If an external dependency is not correctly resolved due to missing mappings or i
 ## Affects
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`) — `category`: 'Input Validation' → 'Dependency Management', `description`: 'The function accepts a dependency coordinate without strict validation or sanitization, which may introduce risks if unexpected formats or malicious input are provided.' → 'If an external dependency is not correctly resolved due to missing mappings or invalid coordinates, it could lead to runtime failures when the modules cannot be found.', `name`: 'Unbounded Input for Dependency Resolution' → 'Missing Dependency Resolution'

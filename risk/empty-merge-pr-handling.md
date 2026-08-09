@@ -25,3 +25,7 @@ The reconcile function may raise an error if an expected PR is not found among t
 ## Affects
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1804, `3dc1298695ac`)

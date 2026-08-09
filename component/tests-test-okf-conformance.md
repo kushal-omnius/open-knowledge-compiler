@@ -43,3 +43,7 @@ generated:
 ## Part of
 
 - `knowledge-compiler`
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1716, `33b333666803`)

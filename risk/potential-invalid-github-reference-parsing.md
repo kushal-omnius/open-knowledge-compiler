@@ -25,3 +25,7 @@ The parsing of the GitHub reference may lead to errors if the format is unexpect
 ## Affects
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

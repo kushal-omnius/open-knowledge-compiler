@@ -25,3 +25,7 @@ This feature provides deterministic recommendations for tests that should be wri
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

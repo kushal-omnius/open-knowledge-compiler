@@ -25,3 +25,7 @@ Lack of explicit error handling for relationship creation could lead to unexpect
 ## Affects
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

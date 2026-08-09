@@ -25,3 +25,7 @@ The 'validate-okf' command expects the wiki directory to exist without ensuring 
 ## Affects
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

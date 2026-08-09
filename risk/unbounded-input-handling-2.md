@@ -25,3 +25,7 @@ When attempting to retrieve an entity, if it does not exist in the database, the
 ## Affects
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`) — `category`: 'Data Integrity' → 'Error Handling', `description`: 'If external dependencies are referenced but not found in the dependency map, this could lead to missing data and potentially cause downstream functions to fail or return incorrect results.' → 'When attempting to retrieve an entity, if it does not exist in the database, the system will return None. This could lead to potential null reference errors if not handled properly.', `name`: 'Possible KeyError for Missing Dependencies' → 'Entity Retrieval Failure'

@@ -25,3 +25,7 @@ ProvenanceRow captures the origin of facts and artifacts, ensuring that the line
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The ProvenanceRow class provides a way to track the lineage of entities and facts over time. It incorporates attributes for compile runs and extraction details, ensuring that users can trace the origin and modifications of data within the system.' → 'ProvenanceRow captures the origin of facts and artifacts, ensuring that the lineage of information is traceable for validation and auditing purposes.'

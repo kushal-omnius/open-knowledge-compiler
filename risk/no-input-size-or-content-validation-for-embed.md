@@ -21,3 +21,7 @@ The embed functions handle API initialization and embedding calls with error han
 **Anchored to:**
 
 - `knowledge_compiler/llm/embeddings.py` — `knowledge_compiler.llm.embeddings.OpenAIEmbedder.embed`
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `description`: 'The methods for obtaining embeddings from OpenAI and Azure do not handle potential errors in the API responses robustly. An exception may be raised without additional context, which could lead to difficulty in diagnosing issues when the API calls fail.' → 'The embed functions handle API initialization and embedding calls with error handling, but they may still face unhandled exceptions if external conditions change, such as API downtime or changes in response structure.', `name`: 'Embedding Response Processing Error' → 'Error Handling on API Calls'

@@ -25,3 +25,7 @@ DeltaChangeRow keeps a log of modifications made to entities over time, allowing
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Delta Change Logging' → 'Change Log for Entities', `narrative`: 'The DeltaChangeRow class defines the schema for logging changes to entities over time. It captures operations like additions and removals, providing a historical record that supports auditing and rollback functionalities.' → 'DeltaChangeRow keeps a log of modifications made to entities over time, allowing for historical tracking and rollback of any changes if necessary.'

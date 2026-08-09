@@ -28,3 +28,7 @@ The code's reliance on external SDKs (like 'anthropic' and 'openai') for functio
 ## Affects
 
 - [knowledge_compiler.llm.provider](../component/knowledge-compiler-llm-provider.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Integration Risk' → 'Dependency Management', `description`: 'The implementation relies on optional external SDKs that are not guaranteed to be installed in the environment. If these libraries are not present, the providers will raise errors, affecting the functionality of the overall system.' → "The code's reliance on external SDKs (like 'anthropic' and 'openai') for functionality poses a risk if these dependencies are not installed or their APIs change. This could lead to runtime errors if users do not have the required SDKs or if the SDKs are updated in a way that is incompatible with the code."

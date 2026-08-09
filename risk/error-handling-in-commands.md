@@ -25,3 +25,7 @@ The 'compile' command combines multiple flags without detailed validation, poten
 ## Affects
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Missing Error Handling' → 'Logic Error', `description`: 'Several commands raise exceptions when encountering errors, but it is unclear if all potential error cases are handled, which could lead to ungraceful failures or incomplete user feedback.' → "The 'compile' command combines multiple flags without detailed validation, potentially leading to unexpected behavior if conflicting flags are set together.", `name`: 'Error Handling in Commands' → 'Escape Hatch Compilation Flags Validation'

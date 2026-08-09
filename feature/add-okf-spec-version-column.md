@@ -25,3 +25,7 @@ The migration script adds a new column 'okf_spec_version' to the 'compile_runs' 
 ## Implemented by
 
 - [alembic.versions.0005_okf_spec_version](../component/alembic-versions-0005-okf-spec-version.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

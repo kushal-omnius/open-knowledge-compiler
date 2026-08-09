@@ -25,3 +25,7 @@ Provides an analysis of how changes to a specific entity affect other components
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`) — `narrative`: 'This feature evaluates the potential impact of changes within a repository, assessing which components may be affected and identifying any gaps in test coverage. This allows better planning and prioritization of testing efforts.' → 'Provides an analysis of how changes to a specific entity affect other components in the repository. This aids developers in assessing the impact of modifications before deploying changes.'

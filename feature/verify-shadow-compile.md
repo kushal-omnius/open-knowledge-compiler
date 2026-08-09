@@ -25,3 +25,8 @@ The verify function performs a shadow compile to compare the current compilation
 ## Implemented by
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `name`: 'Verify Compilation Integrity' → 'Verify Compilation State', `narrative`: 'The verify function conducts a shadow compilation to compare the current state of the repository with previously compiled artefacts. It helps in identifying any divergence and ensures that the compilation process remains consistent.' → 'The verify function performs a shadow compile to compare the current compilation state against a full compile. This ensures that any discrepancies are identified prior to a full recompile and provides a report on the equivalency of the states.'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Verify Compilation State' → 'Verify Compilation Integrity', `narrative`: 'This feature allows users to shadow compile against current state data without writing any changes. It checks if the current compilation state is equivalent to a fresh full compile, providing a safety net for discrepancies.' → 'The verify function conducts a shadow compilation to compare the current state of the repository with previously compiled artefacts. It helps in identifying any divergence and ensures that the compilation process remains consistent.'

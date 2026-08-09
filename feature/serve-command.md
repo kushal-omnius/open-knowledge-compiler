@@ -25,3 +25,7 @@ The 'serve' command provides a read-only server interface to the compiled knowle
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: "The 'serve' command launches a read-only server that provides access to the compiled knowledge base, enabling users to retrieve information without modifying the state." → "The 'serve' command provides a read-only server interface to the compiled knowledge base, allowing for inspection and access without modifying the underlying data."

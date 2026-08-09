@@ -25,3 +25,7 @@ DeltaRelationshipChangeRow serves to log changes in entity relationships, ensuri
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The DeltaRelationshipChangeRow class records changes in relationships between entities, managing added and removed relationships. This ensures that the system maintains an accurate and up-to-date representation of the relational structure.' → 'DeltaRelationshipChangeRow serves to log changes in entity relationships, ensuring that all modifications are documented for future reference and accountability.'

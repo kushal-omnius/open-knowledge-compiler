@@ -27,3 +27,7 @@ This module provides various embedding provider classes, such as OpenAIEmbedder 
 ## Implemented by
 
 - [knowledge_compiler.llm.provider](../component/knowledge-compiler-llm-provider.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

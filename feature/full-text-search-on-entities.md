@@ -25,3 +25,7 @@ The upgrade function implements a database migration by creating necessary datab
 ## Implemented by
 
 - [alembic.versions.0001_phase1_schema](../component/alembic-versions-0001-phase1-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Database Schema Creation' → 'Database Migration for Phase-1 Schema', `narrative`: "The `upgrade` function creates the database schema as defined in the `Base.metadata`. This includes the creation of all necessary tables and their associated metadata, ensuring that the database structure aligns with the application's requirements." → 'The upgrade function implements a database migration by creating necessary database extensions and tables from the schema defined in the storage module. This migration ensures that the database can accommodate the latest schema changes including the creation of a GIN index for efficient keyword searching.'

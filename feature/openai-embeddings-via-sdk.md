@@ -26,3 +26,7 @@ The embed functions in the provided classes facilitate the conversion of a list 
 ## Implemented by
 
 - [knowledge_compiler.llm.provider](../component/knowledge-compiler-llm-provider.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'OpenAI Embedder' → 'Embed Functionality', `narrative`: "The OpenAIEmbedder class provides functionality to generate embeddings for a list of text inputs using OpenAI's embeddings API. It handles the initialization of the OpenAI client and processes responses to return ordered embedding vectors for the input texts." → 'The embed functions in the provided classes facilitate the conversion of a list of texts into embedding vectors, allowing users to utilize different providers based on their configuration. This enables flexible integration of language model embeddings into applications.'

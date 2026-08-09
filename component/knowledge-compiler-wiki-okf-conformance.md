@@ -72,3 +72,7 @@ generated:
 
 - [knowledge_compiler.cli](knowledge-compiler-cli.md)
 - [tests.test_okf_conformance](tests-test-okf-conformance.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1716, `33b333666803`)

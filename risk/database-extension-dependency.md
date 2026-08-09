@@ -25,3 +25,7 @@ The migration relies on the presence of the 'vector' extension before creating t
 ## Affects
 
 - [alembic.versions.0001_phase1_schema](../component/alembic-versions-0001-phase1-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

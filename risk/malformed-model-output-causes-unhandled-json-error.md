@@ -27,3 +27,7 @@ The complete methods handle API errors by raising LLMProviderError, but if other
 ## Affects
 
 - [knowledge_compiler.llm.provider](../component/knowledge-compiler-llm-provider.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Functional Risk' → 'Error Handling', `description`: 'The methods that complete prompts interact with external APIs, which can fail or return unexpected responses. While errors are caught and raised, the handling may not cover all possible API failure scenarios, which could lead to undefined behavior.' → 'The complete methods handle API errors by raising LLMProviderError, but if other unexpected exceptions occur, they may not be caught, leading to potential crashes. The functionality may not be robust against all failure modes that the API may introduce.', `name`: 'Error Handling with API Calls' → 'Uncaught API Errors'

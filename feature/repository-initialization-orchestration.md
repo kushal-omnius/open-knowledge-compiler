@@ -25,3 +25,7 @@ The init_repository function initializes a repository by upgrading the schema, w
 ## Implemented by
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The init_repository function creates or upgrades the database schema, writes the repository configuration to a kc.toml file, and registers the repository in the database. It is an essential setup process for ensuring a valid and usable state of the Knowledge Compiler.' → 'The init_repository function initializes a repository by upgrading the schema, writing a configuration file, and registering the repository in the database. This process ensures that the repository is set up correctly before it is used.'

@@ -58,3 +58,7 @@ generated:
 ## Used by
 
 - [tests.test_conftest_cleanup](tests-test-conftest-cleanup.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1716, `33b333666803`)

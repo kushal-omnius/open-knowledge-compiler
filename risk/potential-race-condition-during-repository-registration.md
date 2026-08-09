@@ -25,3 +25,7 @@ When registering a repository, if the slug already exists in the database but wi
 ## Affects
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Error Handling' → 'Data Integrity', `description`: 'The register_repository function does not handle potential errors during database operations, such as connection issues or database constraint violations, which may lead to unhandled exceptions and application crashes.' → 'When registering a repository, if the slug already exists in the database but with different details, it could lead to conflicts or data loss if not handled correctly.', `name`: 'No Error Handling on Database Operations' → 'Repository Registration Conflicts', `related_components`: ['knowledge_compiler.storage.schema.Repository'] → ['knowledge_compiler.compiler.bootstrap']

@@ -25,3 +25,7 @@ The 'init' command registers a repository and sets up its configuration in the k
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Register Repository Command' → 'Repository Initialization Command', `narrative`: "The 'init' command allows users to register a repository with the knowledge base by providing a unique slug and forge reference. It also creates initial configuration files necessary for subsequent operations." → "The 'init' command registers a repository and sets up its configuration in the knowledge base. It takes parameters like repository slug and forge reference to ensure proper setup."

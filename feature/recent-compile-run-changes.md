@@ -25,3 +25,8 @@ This feature delivers information about the most recent changes in the knowledge
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`)
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'This feature tracks and retrieves information about the most recent changes made in a repository, including details about the changes and the associated compile runs. It helps in auditing and understanding code evolution.' → "This feature delivers information about the most recent changes in the knowledge base, including additions, modifications, and deletions. This tracking is important for maintaining an accurate understanding of the knowledge base's evolution."

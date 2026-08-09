@@ -25,3 +25,7 @@ The Knowledge Compiler CLI (kc) allows users to compile engineering artifacts in
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The Knowledge Compiler CLI provides a command-line interface for compiling engineering artifacts into a knowledge base. It enables users to register repositories, compile them, inspect compile results, and validate tests against compiled knowledge.' → "The Knowledge Compiler CLI (kc) allows users to compile engineering artifacts into a knowledge base. It offers various commands like 'init', 'compile', and 'validate' to manage the lifecycle of knowledge base entries."

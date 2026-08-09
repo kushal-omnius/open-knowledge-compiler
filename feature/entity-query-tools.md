@@ -25,3 +25,7 @@ This feature retrieves detailed information about a specific entity by its slug.
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Entity Query Tools' → 'Get Entity Details', `narrative`: 'The server provides multiple tools to query the knowledge base, including searching for entities, retrieving detailed entity information, determining the impact of changes, and assessing test coverage. These tools facilitate efficient exploration and utilization of the knowledge contained in the database.' → 'This feature retrieves detailed information about a specific entity by its slug. It provides important contextual data including payload, relationships, and how the entity was derived.', `related_components`: ['knowledge_compiler.mcp'] → ['knowledge_compiler.mcp.queries']

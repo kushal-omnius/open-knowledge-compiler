@@ -25,3 +25,7 @@ CompileRun tracks the state of the compilation process, including the repository
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The CompileRun class provides a schema for tracking individual compile runs associated with repositories. It includes fields for status, timestamps, and metadata about the compile process, ensuring that compile runs can be effectively monitored and managed.' → "CompileRun tracks the state of the compilation process, including the repository involved and the status of the run. This allows for monitoring and action based on the run's outcomes."

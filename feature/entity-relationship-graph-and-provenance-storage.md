@@ -25,3 +25,7 @@ EntityRow defines how entities are stored and made searchable within the knowled
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Entity Representation' → 'Entity Storage and Searchability', `narrative`: 'The EntityRow class defines the structure for entities related to repositories. It includes the entity type, name, and associated metadata, allowing the system to effectively represent and query entities throughout the knowledge compiler.' → 'EntityRow defines how entities are stored and made searchable within the knowledge compiler. It incorporates full-text search capabilities to facilitate efficient query handling.'

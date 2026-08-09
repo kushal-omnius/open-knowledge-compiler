@@ -25,3 +25,8 @@ The compile_full function serves as an entry point for initiating a full compila
 ## Implemented by
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `narrative`: 'The compile_full function provides a mechanism to compile all artifacts in a repository and generate a comprehensive report of the compilation process. It allows for optional integration with language model tools for enhanced data extraction during the compilation.' → 'The compile_full function serves as an entry point for initiating a full compilation process within a specified repository directory. It supports optional configurations for LLM provider usage and allows for progress reporting during long-running extraction stages.'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'This feature executes a full compilation of the knowledge in a repository. It handles the setup and execution of the compile process while allowing for optional LLM functionalities and progress reporting during long-running stages.' → 'The compile_full function provides a mechanism to compile all artifacts in a repository and generate a comprehensive report of the compilation process. It allows for optional integration with language model tools for enhanced data extraction during the compilation.'

@@ -25,3 +25,7 @@ This feature determines whether specific components in the repository are adequa
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1778, `14d5668b6003`)

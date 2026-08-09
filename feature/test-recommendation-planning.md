@@ -25,3 +25,7 @@ Generates recommendations for tests based on identified coverage gaps. This ensu
 ## Implemented by
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`) — `name`: 'Test Recommendation Generation' → 'Test Recommendations', `narrative`: 'This feature generates recommendations for what tests should be created based on identified coverage gaps. It identifies API targets and relevant symbols to ensure comprehensive testing of code changes.' → 'Generates recommendations for tests based on identified coverage gaps. This ensures that key areas of the code are tested, improving software reliability.'

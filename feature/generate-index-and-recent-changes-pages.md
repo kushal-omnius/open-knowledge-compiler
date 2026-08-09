@@ -26,3 +26,8 @@ The Wiki Emitter generates Markdown pages for a wiki from knowledge intermediate
 ## Implemented by
 
 - [knowledge_compiler.wiki.emitter](../component/knowledge-compiler-wiki-emitter.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `narrative`: 'The Wiki Emitter is a plugin designed to generate Markdown files that conform to the OKF specification. It dynamically creates pages based on the entities and relationships defined in the Knowledge IR and ensures that only modified pages are updated during the compilation process.' → 'The Wiki Emitter generates Markdown pages for a wiki from knowledge intermediate representation. It ensures that only modified pages are regenerated while generating consistent output for indexing and changelogs.'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: 'The Wiki Emitter generates Markdown files from a knowledge intermediate representation, conforming to the Open Knowledge Format (OKF). It processes a list of entities and their relationships to produce wiki pages, a composite index, and a recent changes log.' → 'The Wiki Emitter is a plugin designed to generate Markdown files that conform to the OKF specification. It dynamically creates pages based on the entities and relationships defined in the Knowledge IR and ensures that only modified pages are updated during the compilation process.'

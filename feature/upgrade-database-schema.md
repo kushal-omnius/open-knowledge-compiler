@@ -25,3 +25,7 @@ The upgrade_schema function is responsible for running migrations to update the 
 ## Implemented by
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

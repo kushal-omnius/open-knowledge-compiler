@@ -25,3 +25,7 @@ LLMCacheRow provides a mechanism for caching responses from language model queri
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'LLM Cache Handling' → 'LLM Cache Management', `narrative`: 'The LLMCacheRow class implements a content-addressed cache for large language model outputs. It ensures that caching is done in an efficient manner without expiration, allowing for stable retrieval of pre-computed answers during compile runs.' → 'LLMCacheRow provides a mechanism for caching responses from language model queries, enhancing the performance and efficiency of the system by minimizing redundant computations.'

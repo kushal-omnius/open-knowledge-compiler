@@ -25,3 +25,7 @@ The emit_only function facilitates the emission of wiki pages based on the previ
 ## Implemented by
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1804, `3dc1298695ac`)

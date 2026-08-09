@@ -25,3 +25,7 @@ The function to collect requires may miss certain dynamic or non-standard import
 ## Affects
 
 - [knowledge_compiler.extractors.javascript_analyzer](../component/knowledge-compiler-extractors-javascript-analyzer.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

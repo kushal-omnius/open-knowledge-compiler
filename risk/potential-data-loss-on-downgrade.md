@@ -25,3 +25,7 @@ The downgrade process removes the 'okf_spec_version' column, which could result 
 ## Affects
 
 - [alembic.versions.0005_okf_spec_version](../component/alembic-versions-0005-okf-spec-version.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

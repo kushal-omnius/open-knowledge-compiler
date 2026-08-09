@@ -27,3 +27,7 @@ To avoid duplication of entity representations in the repository.
 ## Governs
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

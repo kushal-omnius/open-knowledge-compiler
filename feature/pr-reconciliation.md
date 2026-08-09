@@ -25,3 +25,8 @@ The reconcile function processes merged pull requests in order, ensuring that no
 ## Implemented by
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `name`: 'Reconcile Merged Pull Requests' → 'Reconcile Merged PRs', `narrative`: 'The reconcile function processes merged pull requests incrementally, ensuring that all changes are accounted for in the compiled knowledge base. It performs checks to avoid duplicate processing of already succeeded pull requests.' → 'The reconcile function processes merged pull requests in order, ensuring that no merged PR is skipped during compilation. This method enforces idempotency by confirming that each PR is only processed once, maintaining the integrity of the compilation workflow.'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Reconcile Merged PRs' → 'Reconcile Merged Pull Requests', `narrative`: 'This feature processes merged Pull Requests to update the repository state post-merge. It ensures that changes made to the codebase through merged PRs are reflected in the compilation output, maintaining an accurate representation of the repository.' → 'The reconcile function processes merged pull requests incrementally, ensuring that all changes are accounted for in the compiled knowledge base. It performs checks to avoid duplicate processing of already succeeded pull requests.'

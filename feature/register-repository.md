@@ -25,3 +25,7 @@ The register_repository function manages the registration of a repository slug w
 ## Implemented by
 
 - [knowledge_compiler.compiler.bootstrap](../component/knowledge-compiler-compiler-bootstrap.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

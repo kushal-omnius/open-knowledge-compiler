@@ -25,3 +25,7 @@ The system raises a LookupError when trying to access a non-registered repositor
 ## Affects
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1778, `14d5668b6003`) — `category`: 'Error Handling' → 'Input Validation', `description`: 'The function raises a LookupError if a repository with the specified slug is not found, which could lead to uncaught exceptions if not properly handled elsewhere in the application.' → 'The system raises a LookupError when trying to access a non-registered repository. If not caught, this unbounded input could cause application crashes or undesired behaviors.', `name`: 'Lookup Error Handling' → 'Unsafe Repository Access'

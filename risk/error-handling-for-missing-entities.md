@@ -30,3 +30,7 @@ The methods for retrieving entity details and other related functionalities may 
 ## Affects
 
 - [knowledge_compiler.mcp.queries](../component/knowledge-compiler-mcp-queries.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'User Experience' → 'Error Handling', `description`: 'The functions for retrieving entity details, calculating impact plans, and resolving dependencies return generic error messages when entities are not found, which could lead to uninformative feedback for users. This weakens the robustness of the system and may confuse users about the validity of their queries.' → 'The methods for retrieving entity details and other related functionalities may not adequately handle scenarios where an entity is not found, returning only a simple error message without logging or addressing the failure in a detailed manner.', `related_components`: ['knowledge_compiler.mcp'] → ['knowledge_compiler.mcp.queries']

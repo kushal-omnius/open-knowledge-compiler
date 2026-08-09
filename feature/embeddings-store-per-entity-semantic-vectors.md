@@ -25,3 +25,7 @@ EmbeddingRow handles the storage of semantic vectors for entities, facilitating 
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Embedding Management' → 'Embedding Storage', `narrative`: 'The EmbeddingRow class facilitates the storage of semantic vectors associated with entities. It enables the system to support features like similarity search and vector-based queries, enhancing the overall analysis capabilities of the knowledge compiler.' → 'EmbeddingRow handles the storage of semantic vectors for entities, facilitating advanced searching and retrieval based on machine learning models.'

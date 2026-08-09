@@ -42,3 +42,7 @@ generated:
 ## Risks
 
 - [Potential Data Loss on Downgrade](../risk/potential-data-loss-on-downgrade.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1716, `33b333666803`)

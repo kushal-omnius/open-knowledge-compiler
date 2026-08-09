@@ -25,3 +25,7 @@ The 'validate-test' command assesses the conformance of generated tests against 
 ## Implemented by
 
 - [knowledge_compiler.cli](../component/knowledge-compiler-cli.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `narrative`: "The 'validate-test' command scores generated tests against the compiled knowledge without performing a full compilation, thus allowing users to verify the adequacy of tests against the existing knowledge base." → "The 'validate-test' command assesses the conformance of generated tests against compiled knowledge without triggering a new compile, ensuring that existing knowledge aligns with the test specifications."

@@ -21,3 +21,7 @@ The build_embedder function serves as a factory for instantiating embedding prov
 **Anchored to:**
 
 - `knowledge_compiler/llm/embeddings.py` — `knowledge_compiler.llm.embeddings.build_embedder`
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Embedder Factory' → 'Embedding Configuration', `narrative`: 'The build_embedder function creates an instance of an embedder based on the specified provider in the configuration. This simplifies the process of selecting the appropriate embedding method based on the user-defined settings.' → 'The build_embedder function serves as a factory for instantiating embedding providers based on explicit configuration settings. This allows for dynamic selection of embedding services according to user needs.'

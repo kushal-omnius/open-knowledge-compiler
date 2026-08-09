@@ -25,3 +25,7 @@ ArtifactRow represents artifacts generated during compilation runs, facilitating
 ## Implemented by
 
 - [knowledge_compiler.storage.schema](../component/knowledge-compiler-storage-schema.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `name`: 'Artifact Storage' → 'Artifact Management', `narrative`: 'The ArtifactRow class captures the storage structure for artifacts generated during compile runs. It holds details such as the type of artifact, its source reference, and a hash of the content, facilitating efficient management and retrieval of compile artifacts.' → 'ArtifactRow represents artifacts generated during compilation runs, facilitating storage and retrieval of outputs. This is crucial for linking specific compiled outputs back to their genesis.'

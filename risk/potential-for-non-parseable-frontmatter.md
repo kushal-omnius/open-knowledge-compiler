@@ -25,3 +25,7 @@ If the frontmatter block is not properly formatted, it may lead to unhandled exc
 ## Affects
 
 - [knowledge_compiler.wiki.okf_conformance](../component/knowledge-compiler-wiki-okf-conformance.md)
+
+## Recent history
+
+- 2026-08-06 (**Creation**, compile run 1717, `33b333666803`)

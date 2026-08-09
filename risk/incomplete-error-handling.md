@@ -25,3 +25,8 @@ In the _compile_one function, exceptions during the compilation process can lead
 ## Affects
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `category`: 'Database Integrity' → 'State Management', `description`: 'The risk of SQL transactions failing exists during database operations involving multiple commits and rollbacks, especially when managing compile runs. This could lead to inconsistent database states if not handled properly.' → 'In the _compile_one function, exceptions during the compilation process can lead to rollback procedures that may not be fully idempotent, potentially introducing inconsistencies in the state if not managed properly.', `name`: 'SQL Transaction Failure' → 'Rollback Risks in Compile Process'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Error Handling' → 'Database Integrity', `description`: 'There is potential for uncaught exceptions during the compilation process, especially if external dependencies fail. Although there are rollback mechanisms, the failure states may not be clear to the user, leading to confusion.' → 'The risk of SQL transactions failing exists during database operations involving multiple commits and rollbacks, especially when managing compile runs. This could lead to inconsistent database states if not handled properly.', `name`: 'Incomplete Error Handling' → 'SQL Transaction Failure'

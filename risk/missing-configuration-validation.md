@@ -25,3 +25,8 @@ The read_config function raises a CompileError if the expected configuration fil
 ## Affects
 
 - [knowledge_compiler.compiler.run](../component/knowledge-compiler-compiler-run.md)
+
+## Recent history
+
+- 2026-08-06 (**Update**, compile run 1804, `3dc1298695ac`) — `description`: 'If the configuration file (kc.toml) is missing in the provided repository directory, the CompileError exception is raised, interrupting the compilation process without any recovery plan for guiding the user.' → 'The read_config function raises a CompileError if the expected configuration file (kc.toml) is not found in the specified directory. This may lead to runtime errors if not handled appropriately in higher layers of the application.', `name`: 'Missing Configuration File Handling' → 'Missing Configuration File Error Handling'
+- 2026-08-06 (**Update**, compile run 1717, `33b333666803`) — `category`: 'Configuration Error' → 'Error Handling', `description`: 'The absence of validation for the configuration files (kc.toml) can lead to runtime exceptions if expected configurations are not present. This could disrupt the compilation process or lead to unintended compilation states.' → 'If the configuration file (kc.toml) is missing in the provided repository directory, the CompileError exception is raised, interrupting the compilation process without any recovery plan for guiding the user.', `name`: 'Missing Configuration Validation' → 'Missing Configuration File Handling'
