@@ -185,7 +185,7 @@ def verify(repo_dir: Path) -> VerifyReport:
     with _locked_session(repo_dir) as (session, repo, ctx):
         collector = GitCollector(ctx["repo_dir"])
         artifacts = collector.collect_full()
-        facts = _extract(artifacts)
+        facts = _extract(artifacts) + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
         candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))

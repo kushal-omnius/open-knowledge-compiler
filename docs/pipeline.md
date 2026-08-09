@@ -137,6 +137,8 @@ When the per-run LLM budget cap (`kc.toml`, ADR-008) is reached mid-Extract, the
 
 Runs Collect + Extract + Normalize as a **shadow full compile** (no Persist, no Emit), then matches the shadow entity set against current state using the ADR-004 cascade itself — never slug equality (ADR-004's reproducibility statement). Reports: entities the incremental history missed / fabricated / mismatched, with match-rate metrics (feeding ADR-004's threshold tuning). Nonzero divergence → nonzero exit; the remedy is a real `kc compile --full` (slug-preserving) into the database.
 
+The shadow compile must include **all fact sources the real compile uses** — not only git-artifact-extracted facts but also kc.toml-sourced facts (`_journey_facts`, `_mutation_facts`). Omitting these causes spurious divergence for any `[[journeys]]` or `[mutation]` configuration (dogfood finding, 2026-08-09: fixed in `compiler/run.py`).
+
 ## 8. Open items
 
 - Concurrent LLM request batching within Extract — throughput engineering, dogfood-tuned.
