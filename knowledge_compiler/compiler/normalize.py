@@ -155,7 +155,9 @@ class _Normalizer:
     def run(self) -> CandidateState:
         rename_map = self._p1_rename_map()
         self._p2_deterministic_entities()
+        self._mutation_scores()
         self._p3_p4_candidates(rename_map)
+        self._user_journeys()
         self._p5_relationships()
         self._p6_wiki_pages()
         # P7 anchor currency happens inside matching (matched entities take candidate anchors)
@@ -209,6 +211,32 @@ class _Normalizer:
         self._test_coverage()
         self._pull_requests()
         self._jira_stories()
+
+    def _user_journeys(self) -> None:
+        """ADR-017 (items 3+4): V1 scope is deterministic-only — kc.toml
+        `[[journeys]]` names an ordered step list of already-compiled entity
+        slugs (component/api/business_rule/feature/risk — anything already in
+        self.entities). Natural key = slugified name, same pattern as
+        pull_request/jira_story. Runs after P3/P4 (not inside P2) precisely
+        so LLM-derived step slugs (business_rule/feature/risk) are already
+        minted and resolvable, not just deterministic ones. A step slug that
+        doesn't resolve to anything compiled this run is dropped with a
+        warning (DP8: visible, never silently merged) rather than failing
+        the whole journey or the compile."""
+        for f in self._facts_of("user_journey_observed"):
+            name = f.payload["name"]
+            resolved_steps = []
+            for step_slug in f.payload.get("steps", []):
+                if step_slug in self.entities:
+                    resolved_steps.append(step_slug)
+                else:
+                    self.warnings.append(
+                        f"user_journey '{name}': step slug '{step_slug}' does not "
+                        f"resolve to any compiled entity this run — dropped")
+            payload = {"name": name, "steps": resolved_steps}
+            self._put(self._entity("user_journey", f"user-journey/{slugify(name)}",
+                                   name, payload),
+                      rule="natural_key", signals={}, facts=[f])
 
     def _pull_requests(self) -> None:
         for f in self._facts_of("pr_observed"):
@@ -272,6 +300,32 @@ class _Normalizer:
             }
             self._put(self._entity("component", f"component/{slugify(path)}", path, payload),
                       rule="natural_key", signals={}, facts=group)
+
+    def _mutation_scores(self) -> None:
+        """Item 2 of the QA-agent-grounding backlog: attach mutation-kill data
+        (collectors/mutation.py, opt-in) to the Component entity it names, by
+        exact dotted-path match against the already-built `path` payload field
+        — the same natural key `_components` used, no new identity mechanism.
+        A scores-file module naming a path not observed this compile (not yet
+        instrumented, or a stale entry) is silently skipped, same class as the
+        external-dependency and unresolved-coverage-target precedents already
+        in this file."""
+        for f in self._facts_of("mutation_score_observed"):
+            slug = f"component/{slugify(f.payload['module'])}"
+            component = self.entities.get(slug)
+            if component is None or component.entity_type != "component":
+                continue
+            killed, survived, timeout = f.payload["killed"], f.payload["survived"], f.payload["timeout"]
+            total = killed + survived + timeout
+            payload = {
+                **component.payload,
+                "mutation_kill_rate": round(killed / total, 4) if total else None,
+                "mutation_sample": {"killed": killed, "survived": survived,
+                                    "timeout": timeout, "total": total},
+            }
+            self._put(self._entity("component", slug, component.name, payload,
+                                   anchors=component.anchors),
+                      rule="natural_key", signals={}, facts=[f])
 
     @staticmethod
     def _resolve_internal(dep: str, internal: set[str]) -> str | None:
@@ -504,6 +558,14 @@ class _Normalizer:
                     # related (sqlalchemy, click, ...) — legitimately related but
                     # not linkable entities; silently dropped (dogfood finding,
                     # same class as external coverage targets above)
+            elif e.entity_type == "user_journey":
+                # ADR-017: traverses edges are unordered (V1 relationships carry no
+                # payload, ir.md §3.3) — the journey's own payload["steps"] list is
+                # the source of truth for order; these edges only make the journey
+                # navigable from the wiki/relations side.
+                for step_slug in e.payload["steps"]:
+                    if step_slug in self.entities:
+                        self.relationships.add((e.slug, "traverses", step_slug))
             elif e.entity_type == "jira_story":
                 # ir.md §3.3: motivates | Jira Story -> Feature | Pull Request.
                 # PR linkage only for now (from jira_observed.linked_pr, set at
@@ -517,7 +579,8 @@ class _Normalizer:
 
     def _p6_wiki_pages(self) -> None:
         owners = [e for e in self.entities.values()
-                  if e.entity_type in ("component", "api", "feature", "business_rule", "risk")]
+                  if e.entity_type in ("component", "api", "feature", "business_rule",
+                                       "risk", "user_journey")]
         for owner in sorted(owners, key=lambda e: e.slug):
             slug = f"wiki-page/{slugify(owner.slug)}"
             payload = {"owner_slug": owner.slug, "page_type": "entity"}

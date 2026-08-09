@@ -132,6 +132,38 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 - **Depended on by:** —
 - **Related documents:** [ADR-015](ADR-015-javascript-language-analyzer.md) (sibling language-support ADR, same discipline; implemented, unlike this one)
 
+### [ADR-017 — UserJourney Entity for End-to-End Test Grounding](ADR-017-user-journey-entity.md)
+
+- **Status:** Accepted — implemented 2026-08-08, scope reduced to Option B at implementation time (see the ADR's own Status section)
+- **Summary:** Adds `UserJourney` as a new entity type so `test_plan` can distinguish "every step tested individually" from "the chain is proven end-to-end," closing a coverage-gaming gap component/API-level recommendations can't see. Full Option A (hybrid extraction: E2E-header parsing → Jira-epic clustering → LLM-candidate from Feature narratives) was the design target, but what shipped is deterministic-only: journeys are declared explicitly via `kc.toml [[journeys]]` (ordered list of already-compiled entity slugs), with the LLM-candidate and E2E-header/Jira-epic extraction sources explicitly deferred rather than built, to keep the first PR's scope tractable.
+- **Dependencies:** ADR-004 (entity identity cascade — deferred for the LLM-derived path, unused by the deterministic-only V1 slice actually shipped), ADR-008 (LLM candidate validation — same deferral), ADR-009 (two-layer IR boundary), ADR-011 (cross-repo deferral precedent, cited for journeys explicitly not spanning repos), ADR-012 (comparable-scope entity-addition precedent)
+- **Depended on by:** —
+- **Related documents:** `kc-cli-reference.md` (`test_plan` `journey` target kind, `[[journeys]]` config), `ir.md` §3.2/§3.3 (`user_journey` entity, `traverses` relation), `pipeline.md` §3.3 (`_user_journeys` Normalize pass)
+
+### [ADR-018 — Stale-Test Detection via Delta-Log Cross-Reference](ADR-018-stale-test-detection.md)
+
+- **Status:** Accepted — implemented 2026-08-08, as designed (Option A), no schema change
+- **Summary:** A test can `cover` a component while never having been touched since that component's behavior last changed — `coverage_for`/`test_plan` had no way to see this. Computed entirely at query time by comparing a Test Coverage row's own `last_compile_run_id` against the component(s) it covers: no new table, no new relationship payload, no Persist-stage change — reuses data the common entity envelope (ir.md §3.1) already carries.
+- **Dependencies:** ADR-011 (query-time-only precedent for a cross-cutting signal with no schema change), ADR-003 (delta log / `last_compile_run_id` as the source data)
+- **Depended on by:** —
+- **Related documents:** `data-model.md` (`entities` table note), `kc-cli-reference.md` (`coverage_for`/`test_plan` `stale` field)
+
+### [ADR-019 — Test Flakiness Signal from CI Run History](ADR-019-test-flakiness-signal.md)
+
+- **Status:** Proposed — **not implemented** (explicitly deferred out of the 2026-08-08 QA-grounding-improvements PR scope, backlog item 9)
+- **Summary:** Proposes ingesting CI run history (pass/fail per test invocation over time) as a new deterministic fact type via a CI-provider collector plugin (GitHub Actions first), aggregated into a per-test flakiness attribute so `coverage_for`/`test_plan` can distinguish trustworthy coverage from a coin-flip test — rejecting both "point at an external tool" (no shared, queryable surface) and "have the compiler execute tests itself" (a materially riskier operating model than anything the pipeline does today).
+- **Dependencies:** ADR-006 (language-analyzer plugin pattern this collector extension mirrors), ADR-007 (plugin activation discipline)
+- **Depended on by:** —
+- **Related documents:** `collectors/forge.py` (existing GitHub-sourced collector this would extend), `BRAINSTORM-test-generation-eval.md`
+
+### [ADR-020 — Escaped-Defect Trust Score](ADR-020-escaped-defect-trust-score.md)
+
+- **Status:** Proposed — **not implemented** (explicitly deferred out of the 2026-08-08 QA-grounding-improvements PR scope, backlog item 10)
+- **Summary:** Proposes a forward-looking, PR-triggered correlation between bug-fix PRs/Jira tickets and whether the entity they touched had `kc-covers`-claimed, passing coverage at the time — a cheaper alternative to the eval brainstorm's rejected full historical-bug-replay harness (Option E), producing a longitudinal per-entity trust score that measures outcomes rather than input proxies. Zero-value until real fix history accumulates; explicitly not a near-term deliverable.
+- **Dependencies:** ADR-002 (PR-triggered compile model this fits within), ADR-012 (measure-first, informational-not-gating precedent), ADR-018 (sibling query-time signal, no-schema-change precedent), ADR-019 (sibling sparse-sample caveat precedent)
+- **Depended on by:** —
+- **Related documents:** `BRAINSTORM-test-generation-eval.md` (Option E, the rejected alternative this is cheaper than)
+
 ## Dependency graph
 
 Arrows point from an ADR to what it depends on. ADR-001 and ADR-007 are the two foundations; no cycles.
@@ -173,9 +205,22 @@ graph TD
     ADR015["ADR-015 JavaScript Analyzer ✓"] --> ADR006
     ADR016["ADR-016 Java Analyzer (Proposed, unimplemented)"] --> ADR006
     ADR016 --> ADR014
+    ADR017["ADR-017 UserJourney Entity ✓ (scope reduced)"] --> ADR004
+    ADR017 --> ADR008
+    ADR017 --> ADR009
+    ADR017 --> ADR011
+    ADR017 --> ADR012
+    ADR018["ADR-018 Stale-Test Detection ✓"] --> ADR011
+    ADR018 --> ADR003
+    ADR019["ADR-019 Test Flakiness Signal (Proposed, unimplemented)"] --> ADR006
+    ADR019 --> ADR007
+    ADR020["ADR-020 Escaped-Defect Trust Score (Proposed, unimplemented)"] --> ADR002
+    ADR020 --> ADR012
+    ADR020 --> ADR018
+    ADR020 --> ADR019
 ```
 
-ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording designs for JavaScript and Java language-analyzer support respectively; ADR-015 was implemented the same day and its status moved to Accepted, while ADR-016 (Java) remains Proposed and unimplemented. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013, ADR-014, and ADR-016 remain Proposed pending review.
+ADR-001 through ADR-010 were Accepted as of the 2026-07-18 v1.0 freeze; ADR-011 was added 2026-07-20, recording a genuinely new decision reached during dogfood; ADR-012 was added 2026-07-29, recording the VerificationRequirement deferral decision reached after milestone-3 test-generation spikes. ADR-013 was proposed 2026-08-05, recording the open-source release plan and the OKF v0.1→v0.2 spec-drift discovery. ADR-014 was proposed 2026-08-06, recording a design (not yet built) to unify the wiki emitter and OKF validator behind one shared rules file. ADR-015 and ADR-016 were proposed 2026-08-06, recording designs for JavaScript and Java language-analyzer support respectively; ADR-015 was implemented the same day and its status moved to Accepted, while ADR-016 (Java) remains Proposed and unimplemented. ADR-017 through ADR-020 were proposed 2026-08-08, recording a QA-agent-test-grounding backlog surfaced by thinking through what a QA agent needs beyond declared-coverage percentages; ADR-017 (UserJourney) and ADR-018 (stale-test detection) were implemented the same day (ADR-017 with its extraction scope deliberately reduced from the proposed hybrid design to a deterministic-only `kc.toml`-declared slice — see its Status section) and their statuses moved to Accepted, while ADR-019 (test flakiness) and ADR-020 (escaped-defect trust score) remain Proposed and unimplemented, explicitly out of scope for that PR. All Accepted ADRs are immutable per the process in [README.md](README.md) — changes require a superseding ADR; ADR-013, ADR-014, ADR-016, ADR-019, and ADR-020 remain Proposed pending review.
 
 ## Architecture v1.0 — FROZEN (2026-07-18)
 

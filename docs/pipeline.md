@@ -52,6 +52,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 - **Produces:** the compile's candidate Knowledge IR (entities incl. Wiki Page derivation, relationships), fully identified.
 - **Owns:** the ADR-004 cascade incl. intra-compile candidate dedup in content-hash order (ir.md §4.2); rename mapping + anchor currency rewrites (ir.md §2.2); conflict surfacing (ir.md §4.3); slug minting with dedup suffixes.
 - **Failure:** an unknown fact shape is a loud failure (ADR-009 — no entity-smuggling through the fact layer).
+- **Additive (ADR-012/ADR-017):** two new deterministic Normalize passes, both reading `kc.toml` config rather than emitting new Extract-stage facts of their own — `_mutation_scores` (merges a `[mutation]` scores-file's per-module kill/survived/timeout counts into the matching Component's payload, silently skipping unresolvable modules) and `_user_journeys` (mints `user_journey` entities from `[[journeys]]`, resolving each declared step slug against already-normalized entities — run *after* the LLM-candidate pass so Feature/Business Rule/Risk slugs are resolvable too — dropping unresolvable steps with a compile warning rather than failing the compile).
 
 ### 3.4 Diff
 

@@ -46,7 +46,7 @@ def emit_all(state, tmp_path: Path, dirty=None) -> list[Path]:
     return WikiEmitter(tmp_path).emit(state.entities, state.relationships,
                                       dirty,
                                       [RunDelta(7, "abc123def456",
-                                                (("added", "component/billing", "component"),),
+                                                (("added", "component/billing", "component", {}),),
                                                 finished_at=FINISHED_AT)],
                                       CTX)
 
@@ -100,9 +100,9 @@ def test_log_md_lists_multiple_changes_as_separate_bullets(state, tmp_path):
     as distinct Markdown list items, not bare consecutive lines — the latter
     collapses into one run-on paragraph under standard Markdown rendering."""
     recent = [RunDelta(7, "abc123def456",
-                       (("added", "component/billing", "component"),
-                        ("changed", "component/billing-rules", "component"),
-                        ("removed", "feature/legacy-discount", "feature")),
+                       (("added", "component/billing", "component", {}),
+                        ("changed", "component/billing-rules", "component", {}),
+                        ("removed", "feature/legacy-discount", "feature", {})),
                        finished_at=FINISHED_AT)]
     WikiEmitter(tmp_path).emit(state.entities, state.relationships, None, recent, CTX)
     text = (tmp_path / "log.md").read_text(encoding="utf-8")
@@ -200,11 +200,54 @@ def test_orphaned_page_pruned_when_owner_removed(state, tmp_path):
     WikiEmitter(tmp_path).emit(
         remaining_entities, remaining_relationships, None,
         [RunDelta(8, "def456abc789",
-                  (("removed", "component/billing-rules", "component"),),
+                  (("removed", "component/billing-rules", "component", {}),),
                   finished_at=FINISHED_AT)],
         CTX)
     assert not rules_page.is_file()   # orphan: pruned
     assert api_page.is_file()         # still current: untouched
+
+
+def test_recent_history_section_is_bounded_and_entity_scoped(state, tmp_path):
+    """Item 5 of the QA-agent-grounding backlog: a bounded 'Recent history'
+    section on the entity's own page, sourced from the same `recent` delta
+    window log.md/recent-changes.md already use — filtered to this entity's
+    slug, capped, with a pointer to log.md for anything older."""
+    recent = [
+        RunDelta(9, "cafebabe0001",
+                (("changed", "component/billing-rules", "component",
+                  {"symbols": {"old": [], "new": ["x"]}}),),
+                finished_at=datetime(2026, 8, 6, 9, 0, 0, tzinfo=timezone.utc)),
+        RunDelta(7, "abc123def456",
+                (("added", "component/billing-rules", "component", {}),
+                 ("added", "component/billing", "component", {})),
+                finished_at=FINISHED_AT),
+    ]
+    WikiEmitter(tmp_path).emit(state.entities, state.relationships, None, recent, CTX)
+    page = (tmp_path / "component" / "billing-rules.md").read_text(encoding="utf-8")
+    assert "## Recent history" in page
+    assert "2026-08-06" in page and "**Update**" in page and "compile run 9" in page
+    assert "2026-08-05" in page and "**Creation**" in page and "compile run 7" in page
+    assert "`symbols`: [] → ['x']" in page
+    # a page with fewer entries than the per-page cap has no "see log.md" pointer
+    assert "Full chronological history" not in page
+
+    # a page not touched by any change entry gets no section at all
+    api_page = (tmp_path / "api" / "get-discounts.md").read_text(encoding="utf-8")
+    assert "## Recent history" not in api_page
+
+
+def test_recent_history_section_caps_and_points_to_log(state, tmp_path):
+    many = [RunDelta(n, f"deadbeef{n:04d}",
+                     (("changed", "component/billing-rules", "component", {}),),
+                     finished_at=FINISHED_AT)
+            for n in range(10, 0, -1)]  # newest-first, 10 entries touching this entity
+    WikiEmitter(tmp_path).emit(state.entities, state.relationships, None, many, CTX)
+    page = (tmp_path / "component" / "billing-rules.md").read_text(encoding="utf-8")
+    assert page.count("compile run") == 5          # capped at _RECENT_HISTORY_LIMIT
+    assert "compile run 10" in page                 # kept the newest 5 (10..6)
+    assert "compile run 6" in page
+    assert "compile run 5" not in page               # not the oldest
+    assert "Full chronological history: [log.md](log.md)." in page
 
 
 def test_emission_is_byte_deterministic(state, tmp_path):
