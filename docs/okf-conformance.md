@@ -26,13 +26,13 @@ kc-wiki/
 └── risk/
 ```
 
-Entity types with their own concept page (`normalize.md` P6 "page owners"): `component`, `api`, `feature`, `business_rule`, `risk`.
+Entity types with their own concept page (`normalize.md` P6 "page owners"): `component`, `api`, `feature`, `business_rule`, `risk`, `user_journey` (ADR-017, additive — deterministic-only V1, declared via `kc.toml [[journeys]]`).
 
 ## Frontmatter fields (concept pages)
 
 | OKF v0.2 field | KC emits it? | Notes |
 |---|---|---|
-| `type` | **Yes, always** | The entity's `entity_type` (`component`, `api`, `feature`, `business_rule`, `risk`). Required by spec §11 rule 2 — `kc validate-okf` checks this on every non-reserved file. |
+| `type` | **Yes, always** | The entity's `entity_type` (`component`, `api`, `feature`, `business_rule`, `risk`, `user_journey`). Required by spec §11 rule 2 — `kc validate-okf` checks this on every non-reserved file; the check is generic (non-empty `type`), not an enum, so new page-owner entity types (e.g. `user_journey`, ADR-017) never require a conformance-checker change. |
 | `title` | Yes | Entity's display `name`. |
 | `resource` | Not yet | Would map naturally to a forge URL for the source location — not currently emitted; a plausible additive enhancement. |
 | `tags` | Not yet | No KC concept currently maps to free-form tags. |
