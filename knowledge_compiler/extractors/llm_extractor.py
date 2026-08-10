@@ -33,7 +33,8 @@ class LLMSemanticExtractor:
     def __init__(self, provider, cache: LLMCache, max_calls: int,
                  known_symbols: dict[str, list[str]], modules: dict[str, str],
                  skip_files: frozenset[str] = frozenset(),
-                 on_progress: Callable[[int, int, str], None] | None = None) -> None:
+                 on_progress: Callable[[int, int, str], None] | None = None,
+                 known_annotations: dict[str, dict[str, str]] | None = None) -> None:
         """known_symbols: file -> symbol paths observed by the deterministic pass.
         modules: file -> module path. Both come from analyzer facts — the LLM
         layer is grounded in the deterministic skeleton, never the reverse.
@@ -41,7 +42,10 @@ class LLMSemanticExtractor:
         their fixtures read as domain rules; dogfood finding).
         on_progress: called (index, total, source_ref) after each eligible file
         completes (cache hit or real call) — this stage is the dominant latency
-        in a compile and was previously silent until the whole run finished."""
+        in a compile and was previously silent until the whole run finished.
+        known_annotations: file -> {local_name: external_key} from kc:external-key:
+        source annotations (ADR-022). Injected deterministically post-LLM so the
+        cache key is unaffected and the LLM never assigns identity."""
         self.provider = provider
         self.cache = cache
         self.max_calls = max_calls
@@ -49,6 +53,7 @@ class LLMSemanticExtractor:
         self.modules = modules
         self.skip_files = skip_files
         self.on_progress = on_progress
+        self.known_annotations: dict[str, dict[str, str]] = known_annotations or {}
         self.calls_made = 0
         self.warnings: list[str] = []
 
@@ -105,6 +110,7 @@ class LLMSemanticExtractor:
                                 extractor_version="0.1", model_id=self.provider.model_id,
                                 template_version=TEMPLATE_VERSION)
         valid_symbols = set(self.known_symbols.get(artifact.source_ref, []))
+        annotations = self.known_annotations.get(artifact.source_ref, {})
         facts: list[Fact] = []
         for field, fact_type in _FACT_TYPE.items():
             for item in getattr(output, field):
@@ -115,6 +121,15 @@ class LLMSemanticExtractor:
                     anchors = [Anchor(file_path=artifact.source_ref)]
                 payload = {k: v for k, v in sorted(item.model_dump().items())
                            if k != "symbol_paths"}
+                # ADR-022: inject external_key from kc:external-key: annotations.
+                # Deterministic post-LLM injection — cache key is unaffected.
+                # First annotated local name (sorted) among the item's symbol_paths wins.
+                if annotations:
+                    for sym in sorted(item.symbol_paths):
+                        local_name = sym.rsplit(".", 1)[-1]
+                        if local_name in annotations:
+                            payload["external_key"] = annotations[local_name]
+                            break
                 facts.append(Fact(fact_type=fact_type, payload=payload,
                                   artifact_refs=(artifact.source_ref,),
                                   extraction=extraction,

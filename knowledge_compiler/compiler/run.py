@@ -88,7 +88,7 @@ def read_repo_config(repo_dir: Path) -> dict:
 
 # --- entry points ---------------------------------------------------------------
 
-
+# kc:external-key: compile-full
 def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
                  embedder=None, progress=None) -> CompileSummary:
     """progress: optional callable(stage: str, i: int, n: int, detail: str), called
@@ -100,6 +100,7 @@ def compile_full(repo_dir: Path, no_llm: bool = False, llm_provider=None,
         return _compile_one(session, repo, ctx, pr=None)
 
 
+# kc:external-key: incremental-reconcile
 def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = None,
               no_llm: bool = False, llm_provider=None, embedder=None,
               jira_gateway=None, progress=None) -> list[CompileSummary]:
@@ -178,6 +179,7 @@ class VerifyReport:
     evidence_histogram: dict[str, int]               # cascade-rule usage (threshold tuning data)
 
 
+# kc:external-key: emit-only
 def emit_only(repo_dir: Path) -> CompileSummary:
     """Emit-stage-only rerun against already-compiled Knowledge IR — no
     Collect/Extract/Normalize, no new `compile_runs` row (ADR-013's cheap
@@ -212,6 +214,7 @@ def emit_only(repo_dir: Path) -> CompileSummary:
         return summary
 
 
+# kc:external-key: verify
 def verify(repo_dir: Path) -> VerifyReport:
     """Shadow compile: Collect + Extract + Normalize + Diff — zero writes.
     Empty delta <=> incremental history is equivalent to a fresh full compile.
@@ -473,6 +476,7 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
     if not _llm_enabled(ctx):
         return False, []
 
+    from knowledge_compiler.extractors.annotation_parser import parse_external_keys
     from knowledge_compiler.extractors.llm_extractor import (
         LLMBudgetExceeded, LLMSemanticExtractor,
     )
@@ -493,13 +497,20 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
         # detection: any file that produced a test_case_observed fact.
         skip = frozenset() if llm_cfg.get("include_tests", False) else frozenset(
             f.payload["file"] for f in facts if f.fact_type == "test_case_observed")
+        # ADR-022: pre-extract kc:external-key: annotations from artifact source.
+        # Deterministic; does not affect the LLM cache key.
+        annotations: dict[str, dict[str, str]] = {
+            a.source_ref: parse_external_keys(a.content)
+            for a in artifacts
+            if a.content is not None and a.source_ref not in skip
+        }
         progress = ctx.get("progress")
         on_progress = (lambda i, n, ref: progress("llm", i, n, ref)) if progress else None
         extractor = LLMSemanticExtractor(
             provider=provider, cache=LLMCache(session.get_bind()),
             max_calls=llm_cfg.get("max_calls_per_run", 200),
             known_symbols=symbols, modules=modules, skip_files=skip,
-            on_progress=on_progress)
+            on_progress=on_progress, known_annotations=annotations)
         facts.extend(extractor.extract(artifacts))
         return True, list(extractor.warnings)
     except LLMBudgetExceeded as exc:

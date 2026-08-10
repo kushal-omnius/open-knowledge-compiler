@@ -22,6 +22,7 @@ from knowledge_compiler.ir import (
 # --- Contract types -------------------------------------------------------------
 
 
+# kc:external-key: identity-cascade-thresholds
 @dataclass(frozen=True)
 class Thresholds:
     """Identity-matching config (ADR-004: dogfood-tuned; conservative defaults —
@@ -61,6 +62,7 @@ class CandidateState:
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 
 
+# kc:external-key: entity-slug-generation
 def slugify(text: str) -> str:
     return _SLUG_RE.sub("-", text.lower()).strip("-") or "unnamed"
 
