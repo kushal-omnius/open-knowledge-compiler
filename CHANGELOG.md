@@ -19,6 +19,25 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Added
 
+- **Commit-fill reconcile** (ADR-002 addendum): `kc reconcile` now runs two passes — the existing
+  PR-based pass, then a commit-fill pass (`ForgeGateway.list_commits`) for direct pushes, squash
+  commits, and repos without a PR workflow. New `CommitInfo` dataclass `(sha, timestamp, message,
+  files)`. New `scope='commit'` value in `compile_runs`; new `commit_timestamp` column
+  (migration 0006). Watermark unified to `max(COALESCE(commit_timestamp, merged_at))` across
+  succeeded non-full runs. Jira issue keys extracted from commit messages for direct-commit runs.
+  `FakeForge` gains a `commits` field and `list_commits()` method. 7 new tests in
+  `tests/test_commit_reconcile.py`.
+
+- **Jira→Feature enrichment**: new `_jira_feature_enrichment_facts()` pass in Extract — after
+  file-level LLM extraction, calls the LLM once per `jira_observed` issue (template
+  `jira-feature-match`) to match each Jira story to compiled feature candidates, emitting
+  `jira_feature_link_observed` facts `{jira_key, feature_names}`. Full-compile path uses
+  `_file_jira_all_keys()` to load all keys from the file cache so enrichment fires without a PR.
+  Normalize resolves these via `_jira_stories()` + `_p5_relationships()` to emit `motivates →
+  Feature` edges. Feature wiki pages gain a **"Motivated by Jira"** section listing each Jira
+  story as `**KEY** — summary`. Skipped when LLM or Jira is disabled; per-issue failures silently
+  skipped (best-effort, additive).
+
 QA-agent test-grounding improvements (backlog items 1, 2, 5, 6, 7, 3, 4; items
 8–10 explicitly deferred, see [ADR-019](docs/decisions/ADR-019-test-flakiness-signal.md)/[ADR-020](docs/decisions/ADR-020-escaped-defect-trust-score.md)):
 

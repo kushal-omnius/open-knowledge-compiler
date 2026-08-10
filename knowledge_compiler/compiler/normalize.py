@@ -250,9 +250,16 @@ class _Normalizer:
         # Natural key = issue key (architecture.md §6: "PR/Jira = their external
         # ids"). Multiple PRs can link the same issue across compiles; merge on
         # slug like any other natural-key entity.
+        linked_features_by_key: dict[str, list[str]] = {}
+        for f in self._facts_of("jira_feature_link_observed"):
+            linked_features_by_key.setdefault(f.payload["jira_key"], []).extend(
+                f.payload.get("feature_names", []))
         for f in self._facts_of("jira_observed"):
             key = f.payload["key"]
             payload = {k: v for k, v in sorted(f.payload.items())}
+            names = sorted(set(linked_features_by_key.get(key, [])))
+            if names:
+                payload["linked_feature_names"] = names
             self._put(self._entity("jira_story", f"jira-story/{slugify(key)}",
                                    f"{key}: {f.payload.get('summary', '')}", payload),
                       rule="natural_key", signals={}, facts=[f])
@@ -533,6 +540,10 @@ class _Normalizer:
                 if resolved and resolved != path:
                     self.relationships.add((observed[path], "depends_on", components[resolved]))
 
+        # feature_by_name: lookup for jira_story → feature motivates edges (LLM-derived)
+        feature_by_name = {e.name: e.slug for e in self.entities.values()
+                           if e.entity_type == "feature"}
+
         for e in sorted(self.entities.values(), key=lambda e: e.slug):
             if e.entity_type == "api":
                 for file in e.payload["files"]:
@@ -568,12 +579,15 @@ class _Normalizer:
                         self.relationships.add((e.slug, "traverses", step_slug))
             elif e.entity_type == "jira_story":
                 # ir.md §3.3: motivates | Jira Story -> Feature | Pull Request.
-                # PR linkage only for now (from jira_observed.linked_pr, set at
-                # Collect time from the PR title/body issue-key match) — Feature
-                # linkage would need an LLM-derived signal, not attempted here.
                 pr_slug = f"pull-request/{e.payload.get('linked_pr')}"
                 if e.payload.get("linked_pr") is not None and pr_slug in self.entities:
                     self.relationships.add((e.slug, "motivates", pr_slug))
+                # Feature linkage: LLM-derived via jira_feature_link_observed facts;
+                # names stored in payload["linked_feature_names"] by _jira_stories().
+                for feature_name in e.payload.get("linked_feature_names", []):
+                    feature_slug = feature_by_name.get(feature_name)
+                    if feature_slug:
+                        self.relationships.add((e.slug, "motivates", feature_slug))
 
     # -- P6: wiki pages (derived in Normalize — ADR-009 boundary) ------------------------
 

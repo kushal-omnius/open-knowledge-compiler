@@ -36,10 +36,11 @@ class CompileRun(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     repo_id: Mapped[int] = mapped_column(ForeignKey("repositories.id"))
-    scope: Mapped[str] = mapped_column(Text)              # 'full' | 'pr'
+    scope: Mapped[str] = mapped_column(Text)              # 'full' | 'pr' | 'commit'
     pr_number: Mapped[int | None] = mapped_column(Integer)
     commit_sha: Mapped[str] = mapped_column(Text)
-    merged_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))  # reconcile watermark (ADR-002)
+    merged_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))  # PR watermark (ADR-002)
+    commit_timestamp: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))  # direct-commit watermark
     status: Mapped[str] = mapped_column(Text)             # 'running' | 'succeeded' | 'failed'
     degraded: Mapped[bool] = mapped_column(Boolean, default=False)  # --no-llm (pipeline.md §6.1)
     fact_vocabulary_version: Mapped[str] = mapped_column(Text)
@@ -53,6 +54,8 @@ class CompileRun(Base):
         # Idempotence check (ADR-002): succeeded run per (repo, pr) => re-trigger is a no-op.
         Index("ix_compile_runs_repo_pr", "repo_id", "pr_number"),
         Index("ix_compile_runs_repo_merged", "repo_id", "merged_at"),
+        # Commit-fill watermark (commit-based reconcile, scope='commit').
+        Index("ix_compile_runs_repo_commit_ts", "repo_id", "commit_timestamp"),
     )
 
 

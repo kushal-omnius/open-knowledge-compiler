@@ -105,6 +105,7 @@ Emitted by language analyzers and deterministic extractors:
 | `doc_section_observed` | doc path, section heading, content ref — consumed as context input by LLM extractors and as provenance for candidates; produces no entity directly (§4.1) | README/doc collector |
 | `mutation_score_observed` | dotted module path, killed/survived/timeout counts | `[mutation]` collector (opt-in, ADR-012's named trigger — reads a CI-produced JSON summary, never executes the target repo's tests itself) |
 | `user_journey_observed` | name, ordered step slugs (`kc.toml` `[[journeys]]`, additive per ADR-017) | `[[journeys]]` config (deterministic-only V1 scope; LLM-candidate and E2E-header/Jira-epic extraction sources from ADR-017's Option A are explicitly deferred, not built) |
+| `jira_feature_link_observed` | jira_key, feature_names (list of feature entity names this story motivates) | Jira→Feature enrichment LLM pass (run.py `_jira_feature_enrichment_facts`): runs after `_extract_semantic` so feature candidates are available; uses LLM cache (ADR-008); skipped when LLM or Jira disabled. Normalize resolves feature names to slugs via `_jira_stories()` + `_p5_relationships()` to emit `motivates` → Feature edges. |
 
 ### 2.4 LLM candidate facts
 
@@ -175,7 +176,7 @@ Relationships are explicit, typed, and compiled — never inferred at query time
 | `depends_on` | Component → Component |
 | `contains` | Project → Component; Component → Component (package → module hierarchy) |
 | `affects` | Risk → Component \| Feature |
-| `motivates` | Jira Story → Feature \| Pull Request |
+| `motivates` | Jira Story → Feature \| Pull Request (Feature linkage is LLM-derived via `jira_feature_link_observed`; PR linkage is deterministic from `jira_observed.linked_pr`) |
 | `documents` | Wiki Page → any entity |
 | `traverses` | User Journey → API \| Component \| Business Rule \| Feature \| Risk (ADR-017, additive) |
 

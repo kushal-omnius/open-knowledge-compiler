@@ -62,7 +62,7 @@ kc compile --emit-only                # re-render the wiki only, no new compile
 
 ### `kc reconcile`
 
-Catch up on all merged PRs missed since the last successful compile. Runs `compile_pr` on each one in merge order, skipping any already-succeeded PR (idempotent). Uses a watermark (`max(merged_at)` over succeeded runs) so it never re-examines old history.
+Catch up on merged PRs and direct commits missed since the last successful compile. Runs two passes: PR-based (existing path) then commit-fill covering direct pushes, squash commits, and repos without a PR workflow. Items are processed in timestamp order; already-succeeded items are skipped (idempotent). Uses a unified watermark (`max(COALESCE(commit_timestamp, merged_at))` over succeeded non-full runs) so it never re-examines old history.
 
 ```bash
 kc reconcile [--dir <path>]
@@ -78,8 +78,8 @@ kc reconcile --dir /path/to/repo
 Output: one summary line per PR compiled, or `"up to date — no merged PRs after the watermark"`.
 
 **When to use `reconcile` vs `--full`:**
-- Normal steady-state (PRs merged to main): `kc reconcile`
-- First compile, direct pushes to main, or suspected drift: `kc compile --full`
+- Normal steady-state (PRs merged to main, direct pushes, or squash commits): `kc reconcile`
+- First compile or suspected drift: `kc compile --full`
 
 ---
 

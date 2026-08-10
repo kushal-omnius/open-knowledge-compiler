@@ -82,3 +82,45 @@ SCHEMA = ExtractionOut.model_json_schema()
 def build_prompt(path: str, module: str, symbols: list[str], source: str) -> str:
     symbol_lines = "\n".join(f"- {s}" for s in symbols) or "- (none)"
     return PROMPT.format(path=path, module=module, symbols=symbol_lines, source=source)
+
+
+# --- Jira → Feature linkage template (ADR-008) ------------------------------------
+
+JIRA_FEATURE_TEMPLATE_ID = "jira-feature-match"
+JIRA_FEATURE_TEMPLATE_VERSION = "1"
+
+_JIRA_FEATURE_PROMPT = """\
+You are the semantic enrichment layer of a knowledge compiler.
+Link a Jira story to the compiled features it motivated.
+
+Jira story: {key}
+Summary: {summary}
+Description: {description}
+
+Compiled features (name | narrative):
+{features}
+
+Which of the above features does this Jira story motivate? A story motivates a \
+feature when its summary or description requested or described that user-facing \
+capability. Return only names exactly as listed above. Return an empty list if \
+no feature clearly matches — be conservative."""
+
+
+class JiraFeatureMatchOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    motivates: list[str]
+
+
+JIRA_FEATURE_SCHEMA = JiraFeatureMatchOut.model_json_schema()
+
+
+def build_jira_feature_prompt(key: str, summary: str, description: str,
+                               features: dict[str, str]) -> str:
+    lines = "\n".join(f"- {name} | {narrative[:120]}"
+                      for name, narrative in sorted(features.items()))
+    return _JIRA_FEATURE_PROMPT.format(
+        key=key, summary=summary,
+        description=(description[:800] if description else "(none)"),
+        features=lines or "- (none)",
+    )

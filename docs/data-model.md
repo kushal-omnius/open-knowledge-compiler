@@ -29,8 +29,9 @@
 | Column | Notes |
 |---|---|
 | `id` PK, `repo_id` | |
-| `scope` | `full` \| `pr` |
-| `pr_number`, `commit_sha`, `merged_at` | `merged_at` is the reconciliation watermark (ADR-002): next reconcile lists PRs merged after `max(merged_at)` of successful runs |
+| `scope` | `full` \| `pr` \| `commit` |
+| `pr_number`, `commit_sha`, `merged_at` | `merged_at` is the reconciliation watermark for `scope='pr'` runs; see `commit_timestamp` |
+| `commit_timestamp` | Committer timestamp for `scope='commit'` (direct-push) runs (migration 0006); NULL for `pr` and `full` runs. Unified reconciliation watermark: `max(COALESCE(commit_timestamp, merged_at))` across succeeded non-full runs (ADR-002 addendum). |
 | `status` | `running` \| `succeeded` \| `failed` |
 | `fact_vocabulary_version`, `knowledge_model_version`, `okf_spec_version` | per ir.md §5; `okf_spec_version` records the OKF spec version this run's wiki emission targeted — a historical record of what was targeted at that compile, not a live pointer (ADR-013). Nullable: rows predating ADR-013 have none. |
 | `started_at`, `finished_at`, `error` | |
