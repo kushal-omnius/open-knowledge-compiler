@@ -4,6 +4,8 @@
 
 ## 2026-08-10
 
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 1920 (`8ea4d04f6971`).
+
 - **Deprecation** `business-rule/append-only-delta-change-table` (business_rule) — compile run 1919 (`121280c0bacf`).
 - **Deprecation** `business-rule/idempotence-check-for-compile-runs` (business_rule) — compile run 1919 (`121280c0bacf`).
 - **Deprecation** `business-rule/identity-matching-cascade` (business_rule) — compile run 1919 (`121280c0bacf`).
@@ -297,32 +299,3 @@ No knowledge changes — compile run 1802 (`8759e999effc`).
 No knowledge changes — compile run 1800 (`de5bc3bcdc85`).
 
 No knowledge changes — compile run 1779 (`14d5668b6003`).
-
-- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 1778 (`14d5668b6003`).
-- **Update** `component/tests-test-pipeline-integration` (component) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `feature/aggregate-knowledge-statistics` (feature) — compile run 1778 (`14d5668b6003`).
-- **Creation** `feature/entity-resolution` (feature) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `feature/fetch-entity-details-with-relationships-and-provenance` (feature) — compile run 1778 (`14d5668b6003`).
-- **Update** `feature/impact-planning-for-changes` (feature) — compile run 1778 (`14d5668b6003`).
-- **Update** `feature/recent-compile-run-changes` (feature) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `feature/resolve-repository-by-slug` (feature) — compile run 1778 (`14d5668b6003`).
-- **Creation** `feature/test-coverage-analysis` (feature) — compile run 1778 (`14d5668b6003`).
-- **Update** `feature/test-recommendation-planning` (feature) — compile run 1778 (`14d5668b6003`).
-- **Update** `risk/unbounded-input-for-dependency-resolution` (risk) — compile run 1778 (`14d5668b6003`).
-- **Update** `risk/unbounded-input-handling` (risk) — compile run 1778 (`14d5668b6003`).
-- **Update** `risk/unbounded-input-handling-2` (risk) — compile run 1778 (`14d5668b6003`).
-- **Update** `test-coverage/tests-test-pipeline-integration-py-test-emit-only-reruns-emission-without-new-compile-run` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Update** `test-coverage/tests-test-pipeline-integration-py-test-full-compile-builds-knowledge-base` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Update** `test-coverage/tests-test-pipeline-integration-py-test-recompile-unchanged-repo-is-empty-delta` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Update** `test-coverage/tests-test-pipeline-integration-py-test-source-change-produces-precise-delta` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Creation** `test-coverage/tests-test-pipeline-integration-py-test-test-plan-never-recommends-testing-a-test-file` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Update** `test-coverage/tests-test-pipeline-integration-py-test-two-repos-in-one-database-stay-isolated` (test_coverage) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `wiki-page/feature-aggregate-knowledge-statistics` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Creation** `wiki-page/feature-entity-resolution` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `wiki-page/feature-fetch-entity-details-with-relationships-and-provenance` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Deprecation** `wiki-page/feature-resolve-repository-by-slug` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Creation** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Update** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Update** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 1778 (`14d5668b6003`).
-- **Update** `wiki-page/risk-unbounded-input-handling-2` (wiki_page) — compile run 1778 (`14d5668b6003`).
