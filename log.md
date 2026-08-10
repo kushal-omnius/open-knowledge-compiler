@@ -4,6 +4,8 @@
 
 ## 2026-08-10
 
+No knowledge changes — compile run 1923 (`8ea4d04f6971`).
+
 No knowledge changes — compile run 1922 (`8ea4d04f6971`).
 
 - **Creation** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 1921 (`8ea4d04f6971`).
@@ -352,6 +354,3 @@ No knowledge changes — compile run 1922 (`8ea4d04f6971`).
 No knowledge changes — compile run 1803 (`8759e999effc`).
 
 No knowledge changes — compile run 1802 (`8759e999effc`).
-
-- **Deprecation** `feature/expose-package-and-ir-layer-version-metadata` (feature) — compile run 1801 (`26639e24e198`).
-- **Deprecation** `wiki-page/feature-expose-package-and-ir-layer-version-metadata` (wiki_page) — compile run 1801 (`26639e24e198`).
