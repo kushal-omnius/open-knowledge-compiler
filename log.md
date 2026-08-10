@@ -4,6 +4,64 @@
 
 ## 2026-08-10
 
+- **Creation** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `feature/compile-full` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `feature/emit-only-compilation` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/entity-matching-and-minting` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/entity-query-tools` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/identify-pr-introductions` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/impact-plan-generation` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/journey-coverage-assessment` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/knowledge-statistics-overview` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/list-entities` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `feature/llm-semantic-extraction` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `feature/pr-reconciliation` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `feature/read-only-mcp-server` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/recent-compile-run-changes` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/resolve-dependencies` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/search-knowledge` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `feature/slug-generation` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/test-coverage-information` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `feature/test-plan-recommendations` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `feature/verify-compile-state` (feature) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `risk/locking-mechanism-failure` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `risk/missing-configuration-validation` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `risk/missing-error-handling-for-unmatched-candidates` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `risk/no-successful-compile-error` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `risk/potential-data-loss-on-compile-failure` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `risk/validation-failure` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `risk/validator-errors-unchecked` (risk) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/business-rule-identity-matching-threshold-for-names` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/feature-compile-full` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `wiki-page/feature-deterministic-facts-to-entities-normalization` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/feature-emit-only-compilation` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-entity-matching-and-minting` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-entity-query-tools` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-identify-pr-introductions` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-impact-plan-generation` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-journey-coverage-assessment` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-knowledge-statistics-overview` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-list-entities` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `wiki-page/feature-pr-reconciliation` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/feature-read-only-mcp-server` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-recent-compile-run-changes` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-resolve-dependencies` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-search-knowledge` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/feature-slug-generation` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-test-coverage-information` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/feature-test-plan-recommendations` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/feature-verify-compile-state` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/risk-locking-mechanism-failure` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/risk-missing-error-handling-for-unmatched-candidates` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Deprecation** `wiki-page/risk-no-successful-compile-error` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/risk-potential-data-loss-on-compile-failure` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+- **Creation** `wiki-page/risk-validator-errors-unchecked` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
+
 - **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 1920 (`8ea4d04f6971`).
 
 - **Deprecation** `business-rule/append-only-delta-change-table` (business_rule) — compile run 1919 (`121280c0bacf`).
@@ -297,5 +355,3 @@ No knowledge changes — compile run 1802 (`8759e999effc`).
 - **Deprecation** `wiki-page/feature-expose-package-and-ir-layer-version-metadata` (wiki_page) — compile run 1801 (`26639e24e198`).
 
 No knowledge changes — compile run 1800 (`de5bc3bcdc85`).
-
-No knowledge changes — compile run 1779 (`14d5668b6003`).

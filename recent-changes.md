@@ -8,8 +8,64 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 1920 — `8ea4d04f6971`
+## Compile 1921 — `8ea4d04f6971`
 
-- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
+- **added** [business-rule/identity-matching-threshold-for-names](business-rule/identity-matching-threshold-for-names.md)
+- **added** [feature/compile-full](feature/compile-full.md)
+- **changed** [feature/deterministic-facts-to-entities-normalization](feature/deterministic-facts-to-entities-normalization.md)
+- **added** [feature/emit-only-compilation](feature/emit-only-compilation.md)
+- **removed** [feature/entity-matching-and-minting](feature/entity-matching-and-minting.md)
+- **removed** [feature/entity-query-tools](feature/entity-query-tools.md)
+- **removed** [feature/identify-pr-introductions](feature/identify-pr-introductions.md)
+- **removed** [feature/impact-plan-generation](feature/impact-plan-generation.md)
+- **removed** [feature/journey-coverage-assessment](feature/journey-coverage-assessment.md)
+- **removed** [feature/knowledge-statistics-overview](feature/knowledge-statistics-overview.md)
+- **removed** [feature/list-entities](feature/list-entities.md)
+- **changed** [feature/llm-semantic-extraction](feature/llm-semantic-extraction.md)
+- **changed** [feature/pr-reconciliation](feature/pr-reconciliation.md)
+- **added** [feature/read-only-mcp-server](feature/read-only-mcp-server.md)
+- **removed** [feature/recent-compile-run-changes](feature/recent-compile-run-changes.md)
+- **removed** [feature/resolve-dependencies](feature/resolve-dependencies.md)
+- **removed** [feature/search-knowledge](feature/search-knowledge.md)
+- **added** [feature/slug-generation](feature/slug-generation.md)
+- **removed** [feature/test-coverage-information](feature/test-coverage-information.md)
+- **removed** [feature/test-plan-recommendations](feature/test-plan-recommendations.md)
+- **added** [feature/verify-compile-state](feature/verify-compile-state.md)
+- **removed** [risk/locking-mechanism-failure](risk/locking-mechanism-failure.md)
+- **changed** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
+- **added** [risk/missing-error-handling-for-unmatched-candidates](risk/missing-error-handling-for-unmatched-candidates.md)
+- **removed** [risk/no-successful-compile-error](risk/no-successful-compile-error.md)
+- **added** [risk/potential-data-loss-on-compile-failure](risk/potential-data-loss-on-compile-failure.md)
+- **changed** [risk/run-termination-on-exhausted-llm-budget](risk/run-termination-on-exhausted-llm-budget.md)
+- **changed** [risk/validation-failure](risk/validation-failure.md)
+- **added** [risk/validator-errors-unchecked](risk/validator-errors-unchecked.md)
+- **added** `wiki-page/business-rule-identity-matching-threshold-for-names`
+- **added** `wiki-page/feature-compile-full`
+- **changed** `wiki-page/feature-deterministic-facts-to-entities-normalization`
+- **added** `wiki-page/feature-emit-only-compilation`
+- **removed** `wiki-page/feature-entity-matching-and-minting`
+- **removed** `wiki-page/feature-entity-query-tools`
+- **removed** `wiki-page/feature-identify-pr-introductions`
+- **removed** `wiki-page/feature-impact-plan-generation`
+- **removed** `wiki-page/feature-journey-coverage-assessment`
+- **removed** `wiki-page/feature-knowledge-statistics-overview`
+- **removed** `wiki-page/feature-list-entities`
+- **changed** `wiki-page/feature-pr-reconciliation`
+- **added** `wiki-page/feature-read-only-mcp-server`
+- **removed** `wiki-page/feature-recent-compile-run-changes`
+- **removed** `wiki-page/feature-resolve-dependencies`
+- **removed** `wiki-page/feature-search-knowledge`
+- **added** `wiki-page/feature-slug-generation`
+- **removed** `wiki-page/feature-test-coverage-information`
+- **removed** `wiki-page/feature-test-plan-recommendations`
+- **added** `wiki-page/feature-verify-compile-state`
+- **removed** `wiki-page/risk-locking-mechanism-failure`
+- **changed** `wiki-page/risk-missing-configuration-validation`
+- **added** `wiki-page/risk-missing-error-handling-for-unmatched-candidates`
+- **removed** `wiki-page/risk-no-successful-compile-error`
+- **added** `wiki-page/risk-potential-data-loss-on-compile-failure`
+- **changed** `wiki-page/risk-run-termination-on-exhausted-llm-budget`
+- **changed** `wiki-page/risk-validation-failure`
+- **added** `wiki-page/risk-validator-errors-unchecked`
 
 Full chronological history: [log.md](log.md).
