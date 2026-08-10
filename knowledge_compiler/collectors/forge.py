@@ -1,4 +1,5 @@
-"""Forge gateway (ADR-002): merged-PR listing and PR file diffs from the forge API.
+"""Forge gateway (ADR-002): merged-PR listing, PR file diffs, and direct-commit listing
+from the forge API.
 
 PR association comes from the forge, never commit parentage — squash/rebase safe
 (pipeline.md §3.1). The gateway is an interface; GitHub is the reference

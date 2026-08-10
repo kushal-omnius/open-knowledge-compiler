@@ -188,7 +188,7 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
 | `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
 | `kc compile --emit-only` | Re-render the wiki from already-compiled Knowledge IR only — no Collect/Extract/Normalize, no new compile run. The cheap OKF-spec-version rollout path ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md)) |
-| `kc reconcile` | Catch up on merged PRs since the watermark (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
+| `kc reconcile` | Catch up on merged PRs and direct commits since the watermark — two-pass: PR-based then commit-fill for direct pushes and squash commits (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
 | `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
