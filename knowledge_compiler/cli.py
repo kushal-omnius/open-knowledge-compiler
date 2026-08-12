@@ -43,8 +43,12 @@ def init_cmd(slug: str, forge_ref: str, default_branch: str, target_dir: str) ->
     from pathlib import Path
 
     from knowledge_compiler.compiler.bootstrap import init_repository
+    from knowledge_compiler.compiler.run import CompileError
 
-    repo_id, config_path = init_repository(Path(target_dir), slug, forge_ref, default_branch)
+    try:
+        repo_id, config_path = init_repository(Path(target_dir), slug, forge_ref, default_branch)
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
     click.echo(f"registered repository '{slug}' (id={repo_id}); wrote {config_path}")
 
 
@@ -184,7 +188,7 @@ def inspect_cmd(repo_dir: str) -> None:
     from sqlalchemy.orm import Session
 
     from knowledge_compiler.compiler.run import CompileError, read_repo_config
-    from knowledge_compiler.storage.db import make_engine
+    from knowledge_compiler.storage.db import DatabaseUnavailableError, check_connection, make_engine
     from knowledge_compiler.storage.schema import (
         CompileRun, DeltaChangeRow, EntityRow, RelationshipRow, Repository,
     )
@@ -194,7 +198,13 @@ def inspect_cmd(repo_dir: str) -> None:
     except CompileError as exc:
         raise click.ClickException(str(exc)) from exc
 
-    with Session(make_engine()) as session:
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    with Session(engine) as session:
         repo = session.execute(select(Repository).where(Repository.slug == slug)).scalar_one_or_none()
         if repo is None:
             raise click.ClickException(f"repository '{slug}' is not registered — run `kc init`")
@@ -247,7 +257,7 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
 
     from knowledge_compiler.compiler.run import CompileError, read_config
     from knowledge_compiler.mcp.queries import resolve_repo
-    from knowledge_compiler.storage.db import make_engine
+    from knowledge_compiler.storage.db import DatabaseUnavailableError, check_connection, make_engine
     from knowledge_compiler.validation import score_test
 
     try:
@@ -257,7 +267,13 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
     slug = config["repository"]["slug"]
     dep_map = config.get("dependencies", {})
 
-    with Session(make_engine()) as session:
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    with Session(engine) as session:
         try:
             repo = resolve_repo(session, slug)
         except LookupError as exc:
@@ -355,9 +371,14 @@ def serve_cmd(repo_dir: str) -> None:
     compiles (ADR-002) — state updates come from CI-triggered `kc compile`."""
     from pathlib import Path
 
+    from knowledge_compiler.storage.db import DatabaseUnavailableError
+
     try:
         from knowledge_compiler.mcp.server import serve
     except ImportError as exc:
         raise click.ClickException(
             "mcp SDK not installed — pip install 'open-knowledge-compiler[serve]'") from exc
-    serve(Path(repo_dir))
+    try:
+        serve(Path(repo_dir))
+    except DatabaseUnavailableError as exc:
+        raise click.ClickException(str(exc)) from exc
