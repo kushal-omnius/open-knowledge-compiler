@@ -9,8 +9,11 @@ from alembic.config import Config
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from knowledge_compiler.storage.db import make_engine
+from knowledge_compiler.storage.db import DatabaseUnavailableError, check_connection, make_engine
 from knowledge_compiler.storage.schema import Repository
+
+# CompileError lives in compiler.run; imported lazily (function-local) below
+# to avoid a module-load-order assumption between the two compiler/ siblings.
 
 _ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 
@@ -106,12 +109,24 @@ scores_file = "mutation-scores.json"
 
 def upgrade_schema() -> None:
     """Run migrations to head. URL comes from KC_DATABASE_URL (storage/db.py)."""
+    from knowledge_compiler.compiler.run import CompileError
+
+    try:
+        check_connection(make_engine())
+    except DatabaseUnavailableError as exc:
+        raise CompileError(str(exc)) from exc
     command.upgrade(Config(str(_ALEMBIC_INI)), "head")
 
 
 def register_repository(slug: str, forge_ref: str, default_branch: str, config_ref: str) -> int:
     """Idempotent: registering an existing slug updates its refs and returns its id."""
+    from knowledge_compiler.compiler.run import CompileError
+
     engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise CompileError(str(exc)) from exc
     with Session(engine) as session, session.begin():
         repo = session.execute(select(Repository).where(Repository.slug == slug)).scalar_one_or_none()
         if repo is None:

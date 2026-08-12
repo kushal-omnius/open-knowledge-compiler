@@ -118,6 +118,27 @@ Jira collector: second gateway backend, `[jira] source = "rest" | "file"`
   by including both calls in the shadow compile; the invariant (the shadow
   compile must include every fact source the real compile uses) is now
   documented in `pipeline.md` §7.
+- Every DB-touching entry point (`init`, `compile`/`reconcile`/`verify`/
+  `--emit-only`, `inspect`, `validate-test`, `serve`) would either hang
+  indefinitely or surface a raw driver traceback when Postgres was
+  unreachable (Docker not running, wrong `KC_DATABASE_URL`, network
+  black-hole) — no bounded wait, no actionable message. `storage/db.py`
+  gains a `connect_timeout` (`KC_DB_CONNECT_TIMEOUT_SECONDS`, default 120s)
+  applied via `psycopg`'s `connect_args`, shared with `alembic/env.py` so
+  `kc init`'s migration step gets the same bound, plus a
+  `check_connection()` helper that fails fast with `is Docker running? Try:
+  docker compose up -d` instead of a bare `OperationalError`. Every entry
+  point above now calls it before doing any real work and translates the
+  result into its existing exception idiom (`CompileError` /
+  `click.ClickException`). `kc serve` checks at startup rather than on the
+  first tool call.
+- `GitHubGateway`'s error message for a 404 from the GitHub API (`kc reconcile`
+  / `kc compile --pr`) just echoed the raw `HTTPError`, which reads as "this
+  repo doesn't exist" — but GitHub returns 404, not 403, for a repo the token
+  can't see, specifically so a caller can't distinguish "doesn't exist" from
+  "no access." The message now explicitly names both real causes (private
+  repo the token lacks access to, or a stale/wrong `forge_ref` in `kc.toml`)
+  and points at what to check. Other HTTP error codes are unaffected.
 
 ## [1.0.0] — 2026-08-06
 

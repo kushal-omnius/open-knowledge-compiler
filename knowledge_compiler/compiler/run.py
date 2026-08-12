@@ -38,7 +38,9 @@ def _extract(artifacts: list[Artifact]) -> list[Fact]:
         facts.extend(analyzer.analyze(artifacts))
     return facts
 from knowledge_compiler.ir import Artifact, Extraction, Fact, content_hash
-from knowledge_compiler.storage.db import make_engine, repo_lock_key
+from knowledge_compiler.storage.db import (
+    DatabaseUnavailableError, check_connection, make_engine, repo_lock_key,
+)
 from knowledge_compiler.storage.persist import load_current_state, persist_compile
 from knowledge_compiler.storage.schema import ArtifactRow, CompileRun, FactRow, Repository
 
@@ -275,7 +277,12 @@ def _locked_session(repo_dir: Path):
         "wiki_dir": repo_dir / config.get("wiki", {}).get("output_dir", "kc-wiki"),
         "config": config,
     }
-    with Session(make_engine()) as session:
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise CompileError(str(exc)) from exc
+    with Session(engine) as session:
         session.execute(text("SELECT pg_advisory_lock(:k)"), {"k": repo_lock_key(repo_slug)})
         try:
             repo = session.execute(

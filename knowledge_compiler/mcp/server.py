@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from knowledge_compiler.mcp import queries
 from knowledge_compiler.retrieval.search import search as retrieval_search
-from knowledge_compiler.storage.db import make_engine
+from knowledge_compiler.storage.db import check_connection, make_engine
 
 ENTITY_TYPES_HINT = ("component, api, business_rule, feature, risk, test_coverage, "
                      "pull_request, project")
@@ -29,6 +29,7 @@ def build_server(repo_dir: Path):
     repo_slug = config["repository"]["slug"]
     dep_map = config.get("dependencies", {})
     engine = make_engine()
+    check_connection(engine)  # fail at startup, not on the first tool call
 
     embedder = None
     emb_cfg = config.get("embeddings", {})
