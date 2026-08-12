@@ -118,6 +118,13 @@ Jira collector: second gateway backend, `[jira] source = "rest" | "file"`
   by including both calls in the shadow compile; the invariant (the shadow
   compile must include every fact source the real compile uses) is now
   documented in `pipeline.md` §7.
+- `GitHubGateway`'s error message for a 404 from the GitHub API (`kc reconcile`
+  / `kc compile --pr`) just echoed the raw `HTTPError`, which reads as "this
+  repo doesn't exist" — but GitHub returns 404, not 403, for a repo the token
+  can't see, specifically so a caller can't distinguish "doesn't exist" from
+  "no access." The message now explicitly names both real causes (private
+  repo the token lacks access to, or a stale/wrong `forge_ref` in `kc.toml`)
+  and points at what to check. Other HTTP error codes are unaffected.
 
 ## [1.0.0] — 2026-08-06
 

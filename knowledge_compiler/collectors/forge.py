@@ -84,6 +84,17 @@ class GitHubGateway:
         try:
             with urllib.request.urlopen(req) as resp:
                 return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise ForgeError(
+                    f"GitHub API {path} failed: HTTP 404 Not Found — GitHub returns 404 "
+                    f"(not 403) for a repo your token can't see, so this usually means "
+                    f"'{self.owner}/{self.repo}' is private and the token lacks access, or "
+                    f"the org/repo name in kc.toml's forge_ref is stale/wrong — not that the "
+                    f"repo genuinely doesn't exist. Check kc.toml [repository] forge_ref and "
+                    f"the token's org access."
+                ) from exc
+            raise ForgeError(f"GitHub API {path} failed: {exc}") from exc
         except Exception as exc:
             raise ForgeError(f"GitHub API {path} failed: {exc}") from exc
 
