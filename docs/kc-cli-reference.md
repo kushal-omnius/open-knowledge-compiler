@@ -357,6 +357,12 @@ kc validate-test tests/test_billing.py --for-entity component/billing-rules
 | `CF_ACCOUNT_ID` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
 | `CF_API_TOKEN` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
 | `KC_DATABASE_URL` | all commands | Postgres connection string. Default: `postgresql+psycopg://kc:kc@localhost:5432/kc_wiki`. |
+| `KC_DB_CONNECT_TIMEOUT_SECONDS` | all commands | How long to wait for Postgres before failing (default: 120s). |
+| `JIRA_BASE_URL` | `kc compile` (Jira collector) | Atlassian Cloud base URL, e.g. `https://your-org.atlassian.net`. Required when `[jira] source = "rest"`. |
+| `JIRA_EMAIL` | `kc compile` (Jira collector) | Atlassian account email for API token auth. |
+| `JIRA_API_TOKEN` | `kc compile` (Jira collector) | Atlassian API token (generate at account settings → Security → API tokens). |
+
+For provider setup guides and the Jira collector how-to, see [docs/integrations.md](integrations.md).
 
 ---
 
