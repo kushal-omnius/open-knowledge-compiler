@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2200 (`093a5df8dd47`).
+
 - **Update** `component/knowledge-compiler-compiler-bootstrap` (component) — compile run 2199 (`57e55e3fb1ed`).
 - **Update** `component/knowledge-compiler-storage-db` (component) — compile run 2199 (`57e55e3fb1ed`).
 - **Creation** `component/tests-test-forge-gateway` (component) — compile run 2199 (`57e55e3fb1ed`).
@@ -433,5 +435,3 @@
 - **Creation** `pull-request/4` (pull_request) — compile run 2192 (`8759e999effc`).
 
 - **Creation** `pull-request/3` (pull_request) — compile run 2191 (`26639e24e198`).
-
-- **Creation** `pull-request/2` (pull_request) — compile run 2190 (`de5bc3bcdc85`).
