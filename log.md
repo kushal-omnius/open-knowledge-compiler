@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2157 (`003a24cf276f`).
+
 No knowledge changes — compile run 2156 (`89408ec668bb`).
 
 - **Creation** `business-rule/identity-matching-configuration` (business_rule) — compile run 2155 (`11dbc1fd81c6`).
@@ -214,12 +216,3 @@ No knowledge changes — compile run 2151 (`72dc7bde8673`).
 - **Update** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure` (wiki_page) — compile run 2149 (`e382639f3f20`).
 
 No knowledge changes — compile run 2148 (`a148633a7b71`).
-
-- **Update** `component/knowledge-compiler-extractors-typescript-analyzer` (component) — compile run 2147 (`132008ede87a`).
-- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2147 (`132008ede87a`).
-- **Update** `feature/typescript-fact-extractor` (feature) — compile run 2147 (`132008ede87a`).
-- **Creation** `risk/insufficient-handling-of-non-conformant-artifacts` (risk) — compile run 2147 (`132008ede87a`).
-- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2147 (`132008ede87a`).
-- **Update** `wiki-page/feature-typescript-fact-extractor` (wiki_page) — compile run 2147 (`132008ede87a`).
-- **Creation** `wiki-page/risk-insufficient-handling-of-non-conformant-artifacts` (wiki_page) — compile run 2147 (`132008ede87a`).
-- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2147 (`132008ede87a`).
