@@ -4,6 +4,36 @@
 
 ## 2026-08-18
 
+- **Deprecation** `business-rule/idempotence-of-compile-runs` (business_rule) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `business-rule/unique-entity-slug` (business_rule) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `business-rule/unique-relationship-edge` (business_rule) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `business-rule/unique-repository-slug` (business_rule) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/artifact-storage` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/compile-run-and-repository-recording` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/delta-change-logging` (feature) — compile run 2144 (`9996266b96a4`).
+- **Creation** `feature/delta-relationship-change-logging` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/embedding-management` (feature) — compile run 2144 (`9996266b96a4`).
+- **Creation** `feature/entity-representation` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/fact-storage` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/llm-cache-management` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/provenance-tracking` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/relationship-management` (feature) — compile run 2144 (`9996266b96a4`).
+- **Update** `feature/repository-management` (feature) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `risk/incomplete-deletion-handling` (risk) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `risk/potential-data-inconsistency` (risk) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/business-rule-idempotence-of-compile-runs` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/business-rule-unique-entity-slug` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/business-rule-unique-relationship-edge` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/business-rule-unique-repository-slug` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Update** `wiki-page/feature-artifact-storage` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Creation** `wiki-page/feature-delta-relationship-change-logging` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Creation** `wiki-page/feature-entity-representation` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Update** `wiki-page/feature-fact-storage` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Update** `wiki-page/feature-llm-cache-management` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Update** `wiki-page/feature-relationship-management` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/risk-incomplete-deletion-handling` (wiki_page) — compile run 2144 (`9996266b96a4`).
+- **Deprecation** `wiki-page/risk-potential-data-inconsistency` (wiki_page) — compile run 2144 (`9996266b96a4`).
+
 - **Update** `business-rule/idempotence-of-compile-runs` (business_rule) — compile run 2143 (`3c0c2dd87de7`).
 - **Creation** `business-rule/unique-entity-slug` (business_rule) — compile run 2143 (`3c0c2dd87de7`).
 - **Creation** `business-rule/unique-relationship-edge` (business_rule) — compile run 2143 (`3c0c2dd87de7`).
@@ -570,5 +600,3 @@ No knowledge changes — compile run 1922 (`8ea4d04f6971`).
 - **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
 - **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
 - **Creation** `wiki-page/risk-validator-errors-unchecked` (wiki_page) — compile run 1921 (`8ea4d04f6971`).
-
-- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 1920 (`8ea4d04f6971`).

@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2143 · Commit: `3c0c2dd87de7`
+Repo: `knowledge-compiler` · Compile run: 2144 · Commit: `9996266b96a4`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,10 +81,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (83)
+## Features (85)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
-- [Artifact Management](feature/artifact-storage.md)
+- [Artifact Storage](feature/artifact-storage.md)
 - [Persist Compile Results](feature/atomic-application-of-a-compile-delta.md)
 - [AzureOpenAIProvider](feature/azureopenaiprovider.md)
 - [_cleanup_test_repos](feature/cleanup-test-repos.md)
@@ -101,6 +101,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Database Engine Creation](feature/database-engine-creation.md)
 - [Delta Change Logging](feature/delta-change-logging.md)
 - [Embedding Emitter](feature/delta-driven-embedding-updates-with-retry-semantics.md)
+- [Delta Relationship Change Logging](feature/delta-relationship-change-logging.md)
 - [Determine Introduced PR](feature/determine-introduced-pr.md)
 - [Content Hashing](feature/deterministic-content-hashing-utility.md)
 - [Normalization of Knowledge IR](feature/deterministic-facts-to-entities-normalization.md)
@@ -109,10 +110,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Vector Extension Creation](feature/embeddings-schema-migration.md)
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Entity Embedding Text Formatter](feature/entity-embedding-text-formatter.md)
+- [Entity Representation](feature/entity-representation.md)
 - [Resolve Repository](feature/entity-resolution.md)
 - [Get Entity](feature/entity-retrieval.md)
 - [Extractor Protocol](feature/extractor-protocol.md)
-- [Fact Management](feature/fact-storage.md)
+- [Fact Storage](feature/fact-storage.md)
 - [Fake Embedder](feature/fake-embedder.md)
 - [FakeLLMProvider](feature/fake-llm-provider.md)
 - [Database Schema Creation](feature/full-text-search-on-entities.md)
@@ -135,7 +137,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [List Merged Pull Requests](feature/list-merged-pull-requests.md)
 - [LLM Cache](feature/llm-cache.md)
 - [LLM Cache Creation](feature/llm-cache-database-migration.md)
-- [LLM Cache Management](feature/llm-cache-management.md)
+- [LLM Cache Handling](feature/llm-cache-management.md)
 - [AnthropicProvider](feature/llm-provider-interface.md)
 - [LLM Semantic Extraction](feature/llm-semantic-extraction.md)
 - [LLMProvider Protocol](feature/llmprovider-protocol.md)
@@ -151,7 +153,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Recent Changes](feature/recent-changes.md)
 - [Recent Changes Logger](feature/recent-changes-logger.md)
 - [Load Current State](feature/rehydrate-current-ir-state-from-the-database.md)
-- [Relationship Tracking](feature/relationship-management.md)
+- [Relationship Management](feature/relationship-management.md)
 - [Repository Initialization](feature/repository-initialization-orchestration.md)
 - [Repository Management](feature/repository-management.md)
 - [RetrievalProvider Protocol](feature/retrievalprovider-protocol.md)
@@ -167,17 +169,13 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Verify Compilation State](feature/verify-compilation-state.md)
 - [Versioning Information](feature/versioning-information.md)
 
-## Business Rules (7)
+## Business Rules (3)
 
 - [Atomic Persistence of Compile State](business-rule/entity-upsert-update-conditioned-on-delta.md)
-- [Idempotent Compile Runs](business-rule/idempotence-of-compile-runs.md)
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
-- [Unique Entity Slug](business-rule/unique-entity-slug.md)
-- [Unique Relationship Edge](business-rule/unique-relationship-edge.md)
-- [Unique Repository Slug](business-rule/unique-repository-slug.md)
 
-## Risks (49)
+## Risks (47)
 
 - [Advisory Lock Failure Handling](risk/advisory-lock-failure-handling.md)
 - [Cache File Risk](risk/cache-file-risk.md)
@@ -194,7 +192,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
 - [Error Handling in Gateway Function](risk/error-handling-in-gateway-function.md)
 - [Potential Missing Environment Variable](risk/hardcoded-default-database-credentials.md)
-- [Incomplete Deletion Handling](risk/incomplete-deletion-handling.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [LLM Provider Dependency](risk/llm-provider-dependency.md)
@@ -208,7 +205,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [LLM Provider Failure](risk/no-validation-of-embedder-output-length.md)
 - [Nonexistent Claims](risk/nonexistent-claims.md)
 - [Missing Dependency Handling](risk/partial-exception-handling-for-external-sdk.md)
-- [Potential Data Inconsistency](risk/potential-data-inconsistency.md)
 - [Potential Data Loss During Downgrade](risk/potential-data-loss-during-downgrade.md)
 - [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
 - [Missing Anchor Handling](risk/potential-for-identity-conflicts.md)
