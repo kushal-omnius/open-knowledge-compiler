@@ -8,8 +8,25 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2176 — `47529ea7a4cc`
+## Compile 2177 — `f4f91e0a7428`
 
-No knowledge changes.
+- **changed** [component/knowledge-compiler-cli](component/knowledge-compiler-cli.md)
+- **added** [feature/compile-command](feature/compile-command.md)
+- **changed** [feature/knowledge-compiler-cli](feature/knowledge-compiler-cli.md)
+- **added** [feature/reconcile-command](feature/reconcile-command.md)
+- **added** [feature/register-repository-command](feature/register-repository-command.md)
+- **added** [feature/serve-command](feature/serve-command.md)
+- **added** [feature/validate-test-command](feature/validate-test-command.md)
+- **changed** [risk/compile-errors](risk/compile-errors.md)
+- **added** [risk/error-handling-in-commands](risk/error-handling-in-commands.md)
+- **removed** [risk/missing-error-handling-on-github-gateway](risk/missing-error-handling-on-github-gateway.md)
+- **added** `wiki-page/feature-compile-command`
+- **added** `wiki-page/feature-reconcile-command`
+- **added** `wiki-page/feature-register-repository-command`
+- **added** `wiki-page/feature-serve-command`
+- **added** `wiki-page/feature-validate-test-command`
+- **changed** `wiki-page/risk-compile-errors`
+- **added** `wiki-page/risk-error-handling-in-commands`
+- **removed** `wiki-page/risk-missing-error-handling-on-github-gateway`
 
 Full chronological history: [log.md](log.md).

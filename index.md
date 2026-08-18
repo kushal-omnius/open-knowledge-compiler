@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2176 · Commit: `47529ea7a4cc`
+Repo: `knowledge-compiler` · Compile run: 2177 · Commit: `f4f91e0a7428`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (79)
+## Features (84)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Storage](feature/artifact-storage.md)
@@ -91,6 +91,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Cloudflare LLM Provider](feature/cloudflare-llm-provider.md)
 - [Collector Protocol](feature/collector-protocol.md)
 - [Commit Timestamp Addition](feature/commit-timestamp-addition.md)
+- [Compile Command](feature/compile-command.md)
 - [Compile Full](feature/compile-full.md)
 - [Compile Run Tracking](feature/compile-run-and-repository-recording.md)
 - [Compute Diff](feature/compute-state-delta-between-candidate-and-current.md)
@@ -148,6 +149,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
 - [Recent Changes Tracking](feature/recent-changes.md)
 - [Reconcile Merged PRs](feature/reconcile.md)
+- [Reconcile Command](feature/reconcile-command.md)
+- [Register Repository Command](feature/register-repository-command.md)
 - [Load Current State](feature/rehydrate-current-ir-state-from-the-database.md)
 - [Relationship Management](feature/relationship-management.md)
 - [Initialize Repository](feature/repository-initialization-orchestration.md)
@@ -157,10 +160,12 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Run Migrations Offline](feature/run-migrations-in-offline-mode.md)
 - [Run Migrations Online](feature/run-migrations-in-online-mode.md)
 - [Semantic Search](feature/semantic-vector-search-cosine-knn.md)
+- [Serve Command](feature/serve-command.md)
 - [Publisher Protocol](feature/stage-plugin-interface-protocols.md)
 - [Test Recommendation Generation](feature/test-recommendation-planning.md)
 - [Test Scoring](feature/test-scoring.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
+- [Validate Test Command](feature/validate-test-command.md)
 - [Versioning Information](feature/versioning-information.md)
 
 ## Business Rules (4)
@@ -173,7 +178,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 ## Risks (49)
 
 - [Dangling Pages](risk/clean-page-regeneration.md)
-- [Potential Improper State Handling in Commands](risk/compile-errors.md)
+- [Input Validation for Commands](risk/compile-errors.md)
 - [Concurrent Execution Risk](risk/concurrent-execution-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
@@ -185,6 +190,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
 - [Error Handling for Missing Entities](risk/error-handling-for-missing-entities.md)
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
+- [Error Handling in Commands](risk/error-handling-in-commands.md)
 - [Hardcoded Configuration Template](risk/file-write-risks.md)
 - [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
 - [Incomplete Error Handling](risk/incomplete-error-handling.md)
@@ -196,7 +202,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Missing Configuration Validation](risk/missing-configuration-validation.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
-- [Missing Error Handling on GitHub Gateway](risk/missing-error-handling-on-github-gateway.md)
 - [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
 - [Embedding Response Processing Error](risk/no-input-size-or-content-validation-for-embed.md)
 - [Potential for Missing Relationship Cleanup](risk/no-local-error-handling-or-transactional-boundary-management.md)

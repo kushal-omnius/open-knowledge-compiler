@@ -4,6 +4,25 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-cli` (component) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `feature/compile-command` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Update** `feature/knowledge-compiler-cli` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `feature/reconcile-command` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `feature/register-repository-command` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `feature/serve-command` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `feature/validate-test-command` (feature) — compile run 2177 (`f4f91e0a7428`).
+- **Update** `risk/compile-errors` (risk) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `risk/error-handling-in-commands` (risk) — compile run 2177 (`f4f91e0a7428`).
+- **Deprecation** `risk/missing-error-handling-on-github-gateway` (risk) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/feature-compile-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/feature-reconcile-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/feature-register-repository-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/feature-serve-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/feature-validate-test-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Update** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Creation** `wiki-page/risk-error-handling-in-commands` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+- **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
+
 No knowledge changes — compile run 2176 (`47529ea7a4cc`).
 
 - **Update** `feature/compile-full` (feature) — compile run 2175 (`96d3a1d934ec`).
@@ -106,5 +125,3 @@ No knowledge changes — compile run 2169 (`3fc85505c984`).
 - **Update** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2168 (`eb04551fdedb`).
 - **Creation** `wiki-page/risk-repository-initialization-error` (wiki_page) — compile run 2168 (`eb04551fdedb`).
 - **Deprecation** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2168 (`eb04551fdedb`).
-
-No knowledge changes — compile run 2167 (`08bf5fda2381`).
