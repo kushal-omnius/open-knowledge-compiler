@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2167 · Commit: `08bf5fda2381`
+Repo: `knowledge-compiler` · Compile run: 2168 · Commit: `eb04551fdedb`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (88)
+## Features (82)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Storage](feature/artifact-storage.md)
@@ -90,10 +90,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [_cleanup_test_repos](feature/cleanup-test-repos.md)
 - [Cloudflare LLM Provider](feature/cloudflare-llm-provider.md)
 - [Collector Protocol](feature/collector-protocol.md)
-- [Reconcile Command](feature/command-line-interface-for-knowledge-compiler.md)
 - [Commit Timestamp Addition](feature/commit-timestamp-addition.md)
 - [Full Compilation](feature/compile-full.md)
-- [Compile Command](feature/compile-repository.md)
 - [Compile Run Tracking](feature/compile-run-and-repository-recording.md)
 - [Compute Diff](feature/compute-state-delta-between-candidate-and-current.md)
 - [Embedder Factory](feature/config-driven-embedder-factory.md)
@@ -126,12 +124,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Identify PR that Introduced Changes](feature/identify-pr-that-introduced-changes.md)
 - [Impact Planning for Changes](feature/impact-analysis.md)
 - [Semantic Verification](feature/incremental-compilation.md)
-- [CLI Initialization](feature/initialize-repository.md)
-- [Inspect Command](feature/inspect-repository-details.md)
 - [JavaScript Code Analysis](feature/javascript-code-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Base Server](feature/knowledge-base-server.md)
+- [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
 - [Knowledge Statistics](feature/knowledge-statistics.md)
 - [LanguageAnalyzer Protocol](feature/languageanalyzer-protocol.md)
 - [List Entities](feature/list-entities-2.md)
@@ -162,14 +159,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Run Migrations Offline](feature/run-migrations-in-offline-mode.md)
 - [Run Migrations Online](feature/run-migrations-in-online-mode.md)
 - [Semantic Search](feature/semantic-vector-search-cosine-knn.md)
-- [Serve Command](feature/serve-mcp-interface.md)
 - [Publisher Protocol](feature/stage-plugin-interface-protocols.md)
 - [Coverage Analysis](feature/test-coverage-analysis.md)
 - [Test Recommendation Planning](feature/test-recommendation-planning.md)
 - [Test Scoring](feature/test-scoring.md)
-- [Test Validation Command](feature/test-validation-command.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
-- [Verify Command](feature/verify-compilation-state.md)
 - [Versioning Information](feature/versioning-information.md)
 
 ## Business Rules (4)
@@ -179,9 +173,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (45)
+## Risks (48)
 
 - [Dangling Pages](risk/clean-page-regeneration.md)
+- [Compile Errors](risk/compile-errors.md)
 - [Compile Failure Handling](risk/compile-failure-handling.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
@@ -201,14 +196,16 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [JIRA Integration Reliability](risk/jira-integration-reliability.md)
 - [LookupError Handling](risk/lookup-failure-handling.md)
 - [Error Handling with API Calls](risk/malformed-model-output-causes-unhandled-json-error.md)
+- [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
 - [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
 - [Embedding Response Processing Error](risk/no-input-size-or-content-validation-for-embed.md)
 - [Potential for Missing Relationship Cleanup](risk/no-local-error-handling-or-transactional-boundary-management.md)
 - [Exception Handling Flaw](risk/no-rate-limit-awareness-or-retry-backoff.md)
 - [LLM Provider Failure Handling](risk/no-validation-of-embedder-output-length.md)
+- [Nonexistent Claims](risk/nonexistent-claims.md)
 - [Missing Dependency Handling](risk/partial-exception-handling-for-external-sdk.md)
-- [Path Traversal Risk](risk/path-traversal-risk.md)
+- [Database Lookup Errors](risk/path-traversal-risk.md)
 - [Potential Data Loss During Downgrade](risk/potential-data-loss-during-downgrade.md)
 - [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
@@ -217,7 +214,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Database Connection Handling](risk/potential-race-condition-during-repository-registration.md)
 - [Publish Error Handling](risk/publish-error-handling.md)
 - [Missing Error Handling on Cache Retrieval](risk/race-on-first-write-leading-to-integrity-errors.md)
-- [Missing Repository Registration Handling](risk/repository-not-found-check.md)
+- [Repository Initialization Error](risk/repository-initialization-error.md)
 - [LLM Budget Exceeded](risk/run-termination-on-exhausted-llm-budget.md)
 - [Schema Enforcement](risk/schema-enforcement.md)
 - [Silent Omission of Missing Issues](risk/silent-omission-of-missing-issues.md)

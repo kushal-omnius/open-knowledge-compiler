@@ -8,8 +8,36 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2167 — `08bf5fda2381`
+## Compile 2168 — `eb04551fdedb`
 
-No knowledge changes.
+- **removed** [feature/command-line-interface-for-knowledge-compiler](feature/command-line-interface-for-knowledge-compiler.md)
+- **removed** [feature/compile-repository](feature/compile-repository.md)
+- **removed** [feature/initialize-repository](feature/initialize-repository.md)
+- **removed** [feature/inspect-repository-details](feature/inspect-repository-details.md)
+- **added** [feature/knowledge-compiler-cli](feature/knowledge-compiler-cli.md)
+- **removed** [feature/serve-mcp-interface](feature/serve-mcp-interface.md)
+- **changed** [feature/test-scoring](feature/test-scoring.md)
+- **removed** [feature/test-validation-command](feature/test-validation-command.md)
+- **removed** [feature/verify-compilation-state](feature/verify-compilation-state.md)
+- **added** [risk/compile-errors](risk/compile-errors.md)
+- **added** [risk/missing-coverage-block](risk/missing-coverage-block.md)
+- **added** [risk/nonexistent-claims](risk/nonexistent-claims.md)
+- **changed** [risk/path-traversal-risk](risk/path-traversal-risk.md)
+- **added** [risk/repository-initialization-error](risk/repository-initialization-error.md)
+- **removed** [risk/repository-not-found-check](risk/repository-not-found-check.md)
+- **removed** `wiki-page/feature-command-line-interface-for-knowledge-compiler`
+- **removed** `wiki-page/feature-compile-repository`
+- **removed** `wiki-page/feature-initialize-repository`
+- **removed** `wiki-page/feature-inspect-repository-details`
+- **added** `wiki-page/feature-knowledge-compiler-cli`
+- **removed** `wiki-page/feature-serve-mcp-interface`
+- **removed** `wiki-page/feature-test-validation-command`
+- **removed** `wiki-page/feature-verify-compilation-state`
+- **added** `wiki-page/risk-compile-errors`
+- **added** `wiki-page/risk-missing-coverage-block`
+- **added** `wiki-page/risk-nonexistent-claims`
+- **changed** `wiki-page/risk-path-traversal-risk`
+- **added** `wiki-page/risk-repository-initialization-error`
+- **removed** `wiki-page/risk-repository-not-found-check`
 
 Full chronological history: [log.md](log.md).

@@ -4,6 +4,36 @@
 
 ## 2026-08-18
 
+- **Deprecation** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/compile-repository` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/initialize-repository` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/inspect-repository-details` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `feature/knowledge-compiler-cli` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/serve-mcp-interface` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Update** `feature/test-scoring` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/test-validation-command` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `feature/verify-compilation-state` (feature) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `risk/compile-errors` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `risk/missing-coverage-block` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `risk/nonexistent-claims` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Update** `risk/path-traversal-risk` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `risk/repository-initialization-error` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `risk/repository-not-found-check` (risk) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-command-line-interface-for-knowledge-compiler` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-compile-repository` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-initialize-repository` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-inspect-repository-details` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `wiki-page/feature-knowledge-compiler-cli` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-serve-mcp-interface` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-test-validation-command` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/feature-verify-compilation-state` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `wiki-page/risk-missing-coverage-block` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `wiki-page/risk-nonexistent-claims` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Update** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Creation** `wiki-page/risk-repository-initialization-error` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+- **Deprecation** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2168 (`eb04551fdedb`).
+
 No knowledge changes — compile run 2167 (`08bf5fda2381`).
 
 - **Update** `component/knowledge-compiler-cli` (component) — compile run 2166 (`a39b058642bd`).
@@ -96,5 +126,3 @@ No knowledge changes — compile run 2161 (`bba797dd9fcb`).
 - **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
 
 No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
-
-No knowledge changes — compile run 2158 (`d77e6a290055`).
