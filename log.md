@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2174 (`c45580ed7114`).
+
 - **Update** `feature/entity-retrieval` (feature) — compile run 2173 (`68b4347d850f`).
 - **Deprecation** `feature/identify-pr-that-introduced-changes` (feature) — compile run 2173 (`68b4347d850f`).
 - **Update** `feature/impact-analysis` (feature) — compile run 2173 (`68b4347d850f`).
@@ -101,5 +103,3 @@ No knowledge changes — compile run 2167 (`08bf5fda2381`).
 - **Deprecation** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2166 (`a39b058642bd`).
 
 No knowledge changes — compile run 2165 (`ab39520ca6c9`).
-
-No knowledge changes — compile run 2164 (`b505f6486519`).
