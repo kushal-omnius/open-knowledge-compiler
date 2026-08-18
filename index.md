@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2190 · Commit: `de5bc3bcdc85`
+Repo: `knowledge-compiler` · Compile run: 2191 · Commit: `26639e24e198`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
