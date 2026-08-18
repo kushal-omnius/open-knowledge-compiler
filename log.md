@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2184 (`835f9e99fbd6`).
+
 No knowledge changes — compile run 2183 (`5367954634b6`).
 
 - **Update** `component/alembic-versions-0005-okf-spec-version` (component) — compile run 2182 (`a6d8e91d9542`).
@@ -242,5 +244,3 @@ No knowledge changes — compile run 2176 (`47529ea7a4cc`).
 - **Deprecation** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
 - **Deprecation** `wiki-page/risk-repository-initialization-error` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
 - **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-
-No knowledge changes — compile run 2174 (`c45580ed7114`).
