@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+- **Creation** `pull-request/2` (pull_request) — compile run 2190 (`de5bc3bcdc85`).
+
 - **Deprecation** `feature/versioning-information` (feature) — compile run 2189 (`2e3da7425f9a`).
 - **Deprecation** `wiki-page/feature-versioning-information` (wiki_page) — compile run 2189 (`2e3da7425f9a`).
 
@@ -111,5 +113,3 @@ No knowledge changes — compile run 2183 (`5367954634b6`).
 - **Creation** `wiki-page/risk-potential-data-loss-on-downgrade` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
 
 No knowledge changes — compile run 2181 (`628b86b6701d`).
-
-No knowledge changes — compile run 2180 (`eda060e499ec`).
