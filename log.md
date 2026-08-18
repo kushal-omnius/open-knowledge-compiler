@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2171 (`06c1b369cae8`).
+
 No knowledge changes — compile run 2170 (`d20803e9af55`).
 
 No knowledge changes — compile run 2169 (`3fc85505c984`).
@@ -75,5 +77,3 @@ No knowledge changes — compile run 2164 (`b505f6486519`).
 No knowledge changes — compile run 2163 (`538e5c2d725a`).
 
 No knowledge changes — compile run 2162 (`98acc2153cdd`).
-
-No knowledge changes — compile run 2161 (`bba797dd9fcb`).
