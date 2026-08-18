@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2165 · Commit: `ab39520ca6c9`
+Repo: `knowledge-compiler` · Compile run: 2166 · Commit: `a39b058642bd`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -126,13 +126,12 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Identify PR that Introduced Changes](feature/identify-pr-that-introduced-changes.md)
 - [Impact Planning for Changes](feature/impact-analysis.md)
 - [Semantic Verification](feature/incremental-compilation.md)
-- [Init Command](feature/initialize-repository.md)
+- [CLI Initialization](feature/initialize-repository.md)
 - [Inspect Command](feature/inspect-repository-details.md)
 - [JavaScript Code Analysis](feature/javascript-code-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Base Server](feature/knowledge-base-server.md)
-- [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
 - [Knowledge Statistics](feature/knowledge-statistics.md)
 - [LanguageAnalyzer Protocol](feature/languageanalyzer-protocol.md)
 - [List Entities](feature/list-entities-2.md)
@@ -168,6 +167,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Coverage Analysis](feature/test-coverage-analysis.md)
 - [Test Recommendation Planning](feature/test-recommendation-planning.md)
 - [Test Scoring](feature/test-scoring.md)
+- [Test Validation Command](feature/test-validation-command.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
 - [Verify Command](feature/verify-compilation-state.md)
 - [Versioning Information](feature/versioning-information.md)
@@ -179,7 +179,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (49)
+## Risks (45)
 
 - [Dangling Pages](risk/clean-page-regeneration.md)
 - [Compile Failure Handling](risk/compile-failure-handling.md)
@@ -193,8 +193,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
 - [Error Handling for Missing Entities](risk/error-handling-for-missing-entities.md)
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
-- [Missing Forge Reference Validation](risk/error-handling-in-gateway-function.md)
-- [Error Handling with Compile Errors](risk/error-handling-with-compile-errors.md)
 - [File Write Risks](risk/file-write-risks.md)
 - [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
@@ -203,15 +201,14 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [JIRA Integration Reliability](risk/jira-integration-reliability.md)
 - [LookupError Handling](risk/lookup-failure-handling.md)
 - [Error Handling with API Calls](risk/malformed-model-output-causes-unhandled-json-error.md)
-- [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
 - [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
 - [Embedding Response Processing Error](risk/no-input-size-or-content-validation-for-embed.md)
 - [Potential for Missing Relationship Cleanup](risk/no-local-error-handling-or-transactional-boundary-management.md)
 - [Exception Handling Flaw](risk/no-rate-limit-awareness-or-retry-backoff.md)
 - [LLM Provider Failure Handling](risk/no-validation-of-embedder-output-length.md)
-- [Nonexistent Claims](risk/nonexistent-claims.md)
 - [Missing Dependency Handling](risk/partial-exception-handling-for-external-sdk.md)
+- [Path Traversal Risk](risk/path-traversal-risk.md)
 - [Potential Data Loss During Downgrade](risk/potential-data-loss-during-downgrade.md)
 - [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
@@ -220,7 +217,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Database Connection Handling](risk/potential-race-condition-during-repository-registration.md)
 - [Publish Error Handling](risk/publish-error-handling.md)
 - [Missing Error Handling on Cache Retrieval](risk/race-on-first-write-leading-to-integrity-errors.md)
-- [Repository Not Found Check](risk/repository-not-found-check.md)
+- [Missing Repository Registration Handling](risk/repository-not-found-check.md)
 - [LLM Budget Exceeded](risk/run-termination-on-exhausted-llm-budget.md)
 - [Schema Enforcement](risk/schema-enforcement.md)
 - [Silent Omission of Missing Issues](risk/silent-omission-of-missing-issues.md)
@@ -228,5 +225,4 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Token Exposure Risk](risk/token-exposure-risk.md)
 - [Unbounded Input Handling](risk/unbounded-input-handling.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
-- [Insufficient Feedback on Idempotence](risk/user-input-validation.md)
 - [Validation Failure](risk/validation-failure.md)

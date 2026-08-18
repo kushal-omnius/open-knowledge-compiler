@@ -4,6 +4,34 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-cli` (component) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/compile-repository` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/initialize-repository` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/inspect-repository-details` (feature) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `feature/knowledge-compiler-cli` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/serve-mcp-interface` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/test-scoring` (feature) — compile run 2166 (`a39b058642bd`).
+- **Creation** `feature/test-validation-command` (feature) — compile run 2166 (`a39b058642bd`).
+- **Update** `feature/verify-compilation-state` (feature) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `risk/error-handling-in-gateway-function` (risk) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `risk/error-handling-with-compile-errors` (risk) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `risk/missing-coverage-block` (risk) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `risk/nonexistent-claims` (risk) — compile run 2166 (`a39b058642bd`).
+- **Creation** `risk/path-traversal-risk` (risk) — compile run 2166 (`a39b058642bd`).
+- **Update** `risk/repository-not-found-check` (risk) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `risk/user-input-validation` (risk) — compile run 2166 (`a39b058642bd`).
+- **Update** `wiki-page/feature-initialize-repository` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/feature-knowledge-compiler-cli` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Creation** `wiki-page/feature-test-validation-command` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/risk-error-handling-in-gateway-function` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/risk-error-handling-with-compile-errors` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/risk-missing-coverage-block` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/risk-nonexistent-claims` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Creation** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Update** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2166 (`a39b058642bd`).
+- **Deprecation** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2166 (`a39b058642bd`).
+
 No knowledge changes — compile run 2165 (`ab39520ca6c9`).
 
 No knowledge changes — compile run 2164 (`b505f6486519`).
@@ -70,5 +98,3 @@ No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
 No knowledge changes — compile run 2158 (`d77e6a290055`).
 
 No knowledge changes — compile run 2157 (`003a24cf276f`).
-
-No knowledge changes — compile run 2156 (`89408ec668bb`).
