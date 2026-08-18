@@ -4,6 +4,38 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `component/knowledge-compiler-extractors-javascript-analyzer` (component) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `component/tests-test-javascript-analyzer` (component) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `feature/compile-full` (feature) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `feature/javascript-code-analysis` (feature) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `feature/javascript-language-analysis` (feature) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `feature/reconcile` (feature) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `risk/missing-configuration-validation` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `risk/potential-missing-imports-handling` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `risk/sql-transaction-failure` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `risk/stale-state-handling` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `risk/uncontrolled-llm-errors` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `risk/validation-of-input-file-types` (risk) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-bare-require-call-is-a-dependency` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-cjs-exports-dot-name-assignment-produces-symbol` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-describe-wrapped-tests-are-found` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-assignment-is-a-dependency` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-object-literal-produces-symbols` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-nested-describe-blocks-are-found` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `test-coverage/tests-test-javascript-analyzer-py-test-skip-and-only-variants-are-found` (test_coverage) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `wiki-page/feature-javascript-code-analysis` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `wiki-page/feature-javascript-language-analysis` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `wiki-page/risk-potential-missing-imports-handling` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `wiki-page/risk-sql-transaction-failure` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Deprecation** `wiki-page/risk-stale-state-handling` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `wiki-page/risk-uncontrolled-llm-errors` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+- **Creation** `wiki-page/risk-validation-of-input-file-types` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
+
 No knowledge changes — compile run 2184 (`835f9e99fbd6`).
 
 No knowledge changes — compile run 2183 (`5367954634b6`).
@@ -211,36 +243,3 @@ No knowledge changes — compile run 2179 (`7e2f5fbca933`).
 - **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
 
 No knowledge changes — compile run 2176 (`47529ea7a4cc`).
-
-- **Update** `feature/compile-full` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `feature/delta-driven-embedding-updates-with-retry-semantics` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `feature/incremental-compilation` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `feature/knowledge-compiler-cli` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `feature/reconcile` (feature) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `risk/compile-errors` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `risk/compile-failure-handling` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `risk/concurrent-execution-risk` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `risk/incomplete-error-handling` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `risk/jira-integration-reliability` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `risk/missing-configuration-validation` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `risk/missing-error-handling-on-github-gateway` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `risk/no-validation-of-embedder-output-length` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `risk/path-traversal-risk` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `risk/repository-initialization-error` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `risk/validation-failure` (risk) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/feature-compile-full` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `wiki-page/risk-compile-failure-handling` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `wiki-page/risk-concurrent-execution-risk` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `wiki-page/risk-incomplete-error-handling` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `wiki-page/risk-jira-integration-reliability` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Creation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/risk-no-validation-of-embedder-output-length` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Deprecation** `wiki-page/risk-repository-initialization-error` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
-- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2175 (`96d3a1d934ec`).

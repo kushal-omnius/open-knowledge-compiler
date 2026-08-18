@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2184 · Commit: `835f9e99fbd6`
+Repo: `knowledge-compiler` · Compile run: 2185 · Commit: `0f3266d76fd5`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -120,9 +120,9 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Identify PR Introductions](feature/identify-pr-introductions.md)
 - [Impact Analysis](feature/impact-analysis.md)
 - [Impact Plan Generation](feature/impact-plan-generation.md)
-- [Verify State](feature/incremental-compilation.md)
+- [Verify Compilation Integrity](feature/incremental-compilation.md)
 - [Inspect Command](feature/inspect-command.md)
-- [JavaScript Code Analysis](feature/javascript-code-analysis.md)
+- [JavaScript Language Analysis](feature/javascript-language-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
@@ -145,7 +145,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Read Mutation Scores](feature/read-mutation-scores.md)
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
 - [Recent Changes Tracking](feature/recent-changes.md)
-- [Reconcile PRs](feature/reconcile.md)
+- [Reconcile Merged Pull Requests](feature/reconcile.md)
 - [Reconcile Command](feature/reconcile-command.md)
 - [Register Repository](feature/register-repository.md)
 - [Repository Initialization Command](feature/register-repository-command.md)
@@ -185,7 +185,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unique Constraint on Entities](business-rule/unique-constraint-on-entities.md)
 - [Unique Constraints on Relationships](business-rule/unique-constraints-on-relationships.md)
 
-## Risks (53)
+## Risks (54)
 
 - [Error Handling for Repository Initialization](risk/compile-errors.md)
 - [Conformance Check Risk in Validate OKF Command](risk/conformance-check-risk-in-validate-okf-command.md)
@@ -209,7 +209,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [Lookup Error Handling](risk/lookup-failure-handling.md)
 - [Uncaught API Errors](risk/malformed-model-output-causes-unhandled-json-error.md)
-- [Missing Configuration File](risk/missing-configuration-validation.md)
+- [Missing Configuration File Handling](risk/missing-configuration-validation.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
 - [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
@@ -225,18 +225,19 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
 - [Potential for Non-Parseable Frontmatter](risk/potential-for-non-parseable-frontmatter.md)
 - [Potential Invalid GitHub Reference Parsing](risk/potential-invalid-github-reference-parsing.md)
-- [Potential Missing Imports Handling](risk/potential-missing-imports-handling.md)
 - [Repository Registration Conflicts](risk/potential-race-condition-during-repository-registration.md)
 - [Publish Error Handling](risk/publish-error-handling.md)
 - [Missing Error Handling on Cache Retrieval](risk/race-on-first-write-leading-to-integrity-errors.md)
 - [LLM Budget Exhaustion](risk/run-termination-on-exhausted-llm-budget.md)
 - [Schema Enforcement](risk/schema-enforcement.md)
 - [Silent Omission of Missing Issues](risk/silent-omission-of-missing-issues.md)
-- [Stale State Handling](risk/stale-state-handling.md)
+- [SQL Transaction Failure](risk/sql-transaction-failure.md)
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
 - [Token Exposure Risk](risk/token-exposure-risk.md)
 - [Unbounded Input for Dependency Resolution](risk/unbounded-input-for-dependency-resolution.md)
 - [Possible KeyError for Missing Dependencies](risk/unbounded-input-handling.md)
 - [Unbounded Input in Search](risk/unbounded-input-in-search.md)
+- [Uncontrolled LLM Errors](risk/uncontrolled-llm-errors.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
 - [Validation Failure](risk/validation-failure.md)
+- [Error Handling for Parsing Failures](risk/validation-of-input-file-types.md)
