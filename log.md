@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2158 (`d77e6a290055`).
+
 No knowledge changes — compile run 2157 (`003a24cf276f`).
 
 No knowledge changes — compile run 2156 (`89408ec668bb`).
@@ -214,5 +216,3 @@ No knowledge changes — compile run 2151 (`72dc7bde8673`).
 - **Update** `wiki-page/feature-provider-factory` (wiki_page) — compile run 2149 (`e382639f3f20`).
 - **Update** `wiki-page/risk-malformed-model-output-causes-unhandled-json-error` (wiki_page) — compile run 2149 (`e382639f3f20`).
 - **Update** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure` (wiki_page) — compile run 2149 (`e382639f3f20`).
-
-No knowledge changes — compile run 2148 (`a148633a7b71`).
