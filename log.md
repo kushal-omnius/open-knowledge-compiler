@@ -4,6 +4,29 @@
 
 ## 2026-08-18
 
+- **Update** `component/tests-test-wiki-emitter` (component) — compile run 2193 (`3dc1298695ac`).
+- **Update** `feature/compile-full` (feature) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `feature/emit-wiki` (feature) — compile run 2193 (`3dc1298695ac`).
+- **Update** `feature/generate-index-and-recent-changes-pages` (feature) — compile run 2193 (`3dc1298695ac`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2193 (`3dc1298695ac`).
+- **Update** `feature/reconcile` (feature) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `pull-request/5` (pull_request) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `risk/dangling-page-risk` (risk) — compile run 2193 (`3dc1298695ac`).
+- **Update** `risk/missing-configuration-validation` (risk) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `risk/possible-sql-injection` (risk) — compile run 2193 (`3dc1298695ac`).
+- **Update** `risk/sql-transaction-failure` (risk) — compile run 2193 (`3dc1298695ac`).
+- **Deprecation** `risk/uncontrolled-llm-errors` (risk) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page` (test_coverage) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets` (test_coverage) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender` (test_coverage) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `wiki-page/feature-emit-wiki` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `wiki-page/risk-dangling-page-risk` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Creation** `wiki-page/risk-possible-sql-injection` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Update** `wiki-page/risk-sql-transaction-failure` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+- **Deprecation** `wiki-page/risk-uncontrolled-llm-errors` (wiki_page) — compile run 2193 (`3dc1298695ac`).
+
 - **Creation** `pull-request/4` (pull_request) — compile run 2192 (`8759e999effc`).
 
 - **Creation** `pull-request/3` (pull_request) — compile run 2191 (`26639e24e198`).
@@ -99,5 +122,3 @@
 - **Creation** `wiki-page/risk-validation-of-input-file-types` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
 
 No knowledge changes — compile run 2184 (`835f9e99fbd6`).
-
-No knowledge changes — compile run 2183 (`5367954634b6`).

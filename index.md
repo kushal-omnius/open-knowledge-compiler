@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2192 · Commit: `8759e999effc`
+Repo: `knowledge-compiler` · Compile run: 2193 · Commit: `3dc1298695ac`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (94)
+## Features (95)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
@@ -107,6 +107,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Embedding Storage](feature/embedding-management.md)
 - [Embedding Providers](feature/embedding-providers-2.md)
 - [Vector Extension Creation](feature/embeddings-schema-migration.md)
+- [Emit Wiki](feature/emit-wiki.md)
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Get Entity Details](feature/entity-query-tools.md)
 - [Entity Storage and Searchability](feature/entity-representation.md)
@@ -122,7 +123,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Identify the Pull Request Introducing a Change](feature/identify-the-pull-request-introducing-a-change.md)
 - [Generate Impact Analysis Plan](feature/impact-analysis.md)
 - [Impact Plan Generation](feature/impact-plan-generation.md)
-- [Verify Compilation Integrity](feature/incremental-compilation.md)
+- [Verify Compilation State](feature/incremental-compilation.md)
 - [Inspect Command](feature/inspect-command.md)
 - [JavaScript Code Analysis](feature/javascript-language-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
@@ -148,7 +149,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Read Mutation Scores](feature/read-mutation-scores.md)
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
 - [Recent Changes Tracking](feature/recent-changes.md)
-- [Reconcile Merged Pull Requests](feature/reconcile.md)
+- [Reconcile PR Compiles](feature/reconcile.md)
 - [Reconcile Command](feature/reconcile-command.md)
 - [Register Repository](feature/register-repository.md)
 - [Repository Initialization Command](feature/register-repository-command.md)
@@ -189,10 +190,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unique Constraint on Entities](business-rule/unique-constraint-on-entities.md)
 - [Unique Constraints on Relationships](business-rule/unique-constraints-on-relationships.md)
 
-## Risks (53)
+## Risks (54)
 
 - [Error Handling for Repository Initialization](risk/compile-errors.md)
 - [Conformance Check Risk in Validate OKF Command](risk/conformance-check-risk-in-validate-okf-command.md)
+- [Dangling Page Risk](risk/dangling-page-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
@@ -224,6 +226,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Pending Entity Handling](risk/no-validation-of-embedder-output-length.md)
 - [Nonexistent Claims](risk/nonexistent-claims.md)
 - [Dependency on External Libraries](risk/partial-exception-handling-for-external-sdk.md)
+- [Possible SQL Injection](risk/possible-sql-injection.md)
 - [Immutable Delta Log Vulnerability](risk/potential-data-loss-on-deletes.md)
 - [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
@@ -236,11 +239,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [LLM Budget Exhaustion](risk/run-termination-on-exhausted-llm-budget.md)
 - [Schema Enforcement](risk/schema-enforcement.md)
 - [Silent Omission of Missing Issues](risk/silent-omission-of-missing-issues.md)
-- [SQL Transaction Failure](risk/sql-transaction-failure.md)
+- [Rollback on Exception](risk/sql-transaction-failure.md)
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
 - [Token Exposure Risk](risk/token-exposure-risk.md)
 - [Potential Failure in Dependency Resolution](risk/unbounded-input-for-dependency-resolution.md)
 - [Unbounded Input in Search](risk/unbounded-input-in-search.md)
-- [Uncontrolled LLM Errors](risk/uncontrolled-llm-errors.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
 - [Validation Failure](risk/validation-failure.md)
