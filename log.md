@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+- **Creation** `pull-request/4` (pull_request) — compile run 2192 (`8759e999effc`).
+
 - **Creation** `pull-request/3` (pull_request) — compile run 2191 (`26639e24e198`).
 
 - **Creation** `pull-request/2` (pull_request) — compile run 2190 (`de5bc3bcdc85`).
@@ -99,17 +101,3 @@
 No knowledge changes — compile run 2184 (`835f9e99fbd6`).
 
 No knowledge changes — compile run 2183 (`5367954634b6`).
-
-- **Update** `component/alembic-versions-0005-okf-spec-version` (component) — compile run 2182 (`a6d8e91d9542`).
-- **Update** `feature/add-okf-spec-version-column` (feature) — compile run 2182 (`a6d8e91d9542`).
-- **Update** `feature/full-text-search-on-entities` (feature) — compile run 2182 (`a6d8e91d9542`).
-- **Creation** `risk/database-extension-dependency` (risk) — compile run 2182 (`a6d8e91d9542`).
-- **Deprecation** `risk/nullable-column-without-enforcement` (risk) — compile run 2182 (`a6d8e91d9542`).
-- **Deprecation** `risk/potential-data-loss-during-downgrade` (risk) — compile run 2182 (`a6d8e91d9542`).
-- **Creation** `risk/potential-data-loss-on-downgrade` (risk) — compile run 2182 (`a6d8e91d9542`).
-- **Update** `wiki-page/feature-add-okf-spec-version-column` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
-- **Update** `wiki-page/feature-full-text-search-on-entities` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
-- **Creation** `wiki-page/risk-database-extension-dependency` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
-- **Deprecation** `wiki-page/risk-nullable-column-without-enforcement` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
-- **Deprecation** `wiki-page/risk-potential-data-loss-during-downgrade` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
-- **Creation** `wiki-page/risk-potential-data-loss-on-downgrade` (wiki_page) — compile run 2182 (`a6d8e91d9542`).
