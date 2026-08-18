@@ -8,36 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2144 — `9996266b96a4`
+## Compile 2145 — `068abc045220`
 
-- **removed** [business-rule/idempotence-of-compile-runs](business-rule/idempotence-of-compile-runs.md)
-- **removed** [business-rule/unique-entity-slug](business-rule/unique-entity-slug.md)
-- **removed** [business-rule/unique-relationship-edge](business-rule/unique-relationship-edge.md)
-- **removed** [business-rule/unique-repository-slug](business-rule/unique-repository-slug.md)
-- **changed** [feature/artifact-storage](feature/artifact-storage.md)
-- **changed** [feature/compile-run-and-repository-recording](feature/compile-run-and-repository-recording.md)
-- **changed** [feature/delta-change-logging](feature/delta-change-logging.md)
-- **added** [feature/delta-relationship-change-logging](feature/delta-relationship-change-logging.md)
-- **changed** [feature/embedding-management](feature/embedding-management.md)
-- **added** [feature/entity-representation](feature/entity-representation.md)
-- **changed** [feature/fact-storage](feature/fact-storage.md)
-- **changed** [feature/llm-cache-management](feature/llm-cache-management.md)
-- **changed** [feature/provenance-tracking](feature/provenance-tracking.md)
-- **changed** [feature/relationship-management](feature/relationship-management.md)
-- **changed** [feature/repository-management](feature/repository-management.md)
-- **removed** [risk/incomplete-deletion-handling](risk/incomplete-deletion-handling.md)
-- **removed** [risk/potential-data-inconsistency](risk/potential-data-inconsistency.md)
-- **removed** `wiki-page/business-rule-idempotence-of-compile-runs`
-- **removed** `wiki-page/business-rule-unique-entity-slug`
-- **removed** `wiki-page/business-rule-unique-relationship-edge`
-- **removed** `wiki-page/business-rule-unique-repository-slug`
-- **changed** `wiki-page/feature-artifact-storage`
-- **added** `wiki-page/feature-delta-relationship-change-logging`
-- **added** `wiki-page/feature-entity-representation`
-- **changed** `wiki-page/feature-fact-storage`
-- **changed** `wiki-page/feature-llm-cache-management`
-- **changed** `wiki-page/feature-relationship-management`
-- **removed** `wiki-page/risk-incomplete-deletion-handling`
-- **removed** `wiki-page/risk-potential-data-inconsistency`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
