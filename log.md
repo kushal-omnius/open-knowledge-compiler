@@ -4,6 +4,41 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `component/tests-test-pipeline-integration` (component) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `feature/compute-coverage-for-a-component` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `feature/entity-retrieval` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `feature/identify-the-pull-request-introducing-a-change` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `feature/impact-analysis` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `feature/knowledge-statistics` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `feature/list-entities-by-type` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `feature/resolve-cross-repository-dependencies` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `feature/resolve-repository` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `feature/test-recommendation-planning` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `feature/track-recent-changes-in-a-repository` (feature) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `risk/lookup-failure-handling` (risk) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `risk/unbounded-input-for-dependency-resolution` (risk) — compile run 2187 (`5b489ee9f53d`).
+- **Deprecation** `risk/unbounded-input-handling` (risk) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `test-coverage/tests-test-pipeline-integration-py-test-emit-only-reruns-emission-without-new-compile-run` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `test-coverage/tests-test-pipeline-integration-py-test-full-compile-builds-knowledge-base` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `test-coverage/tests-test-pipeline-integration-py-test-recompile-unchanged-repo-is-empty-delta` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `test-coverage/tests-test-pipeline-integration-py-test-source-change-produces-precise-delta` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `test-coverage/tests-test-pipeline-integration-py-test-test-plan-never-recommends-testing-a-test-file` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `test-coverage/tests-test-pipeline-integration-py-test-two-repos-in-one-database-stay-isolated` (test_coverage) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `wiki-page/feature-compute-coverage-for-a-component` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/feature-entity-retrieval` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `wiki-page/feature-identify-the-pull-request-introducing-a-change` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `wiki-page/feature-list-entities-by-type` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `wiki-page/feature-resolve-cross-repository-dependencies` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/feature-resolve-repository` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Creation** `wiki-page/feature-track-recent-changes-in-a-repository` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Update** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+- **Deprecation** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
+
 - **Update** `component/knowledge-compiler-extractors-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
 - **Update** `component/tests-test-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
 - **Update** `feature/javascript-language-analysis` (feature) — compile run 2186 (`33b333666803`).
@@ -238,22 +273,3 @@ No knowledge changes — compile run 2179 (`7e2f5fbca933`).
 - **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2178 (`faa14be39bbb`).
 - **Creation** `wiki-page/risk-stale-state-handling` (wiki_page) — compile run 2178 (`faa14be39bbb`).
 - **Creation** `wiki-page/risk-unbounded-input-in-search` (wiki_page) — compile run 2178 (`faa14be39bbb`).
-
-- **Update** `component/knowledge-compiler-cli` (component) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `feature/compile-command` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Update** `feature/knowledge-compiler-cli` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `feature/reconcile-command` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `feature/register-repository-command` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `feature/serve-command` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `feature/validate-test-command` (feature) — compile run 2177 (`f4f91e0a7428`).
-- **Update** `risk/compile-errors` (risk) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `risk/error-handling-in-commands` (risk) — compile run 2177 (`f4f91e0a7428`).
-- **Deprecation** `risk/missing-error-handling-on-github-gateway` (risk) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/feature-compile-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/feature-reconcile-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/feature-register-repository-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/feature-serve-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/feature-validate-test-command` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Update** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Creation** `wiki-page/risk-error-handling-in-commands` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-- **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2177 (`f4f91e0a7428`).

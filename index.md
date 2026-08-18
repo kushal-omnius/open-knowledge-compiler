@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2186 · Commit: `33b333666803`
+Repo: `knowledge-compiler` · Compile run: 2187 · Commit: `5b489ee9f53d`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (90)
+## Features (95)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
@@ -92,6 +92,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Compile Command](feature/compile-command.md)
 - [Compile Full](feature/compile-full.md)
 - [Compile Run Tracking](feature/compile-run-and-repository-recording.md)
+- [Compute Coverage for a Component](feature/compute-coverage-for-a-component.md)
 - [Compute Diff](feature/compute-state-delta-between-candidate-and-current.md)
 - [Embedding Configuration](feature/config-driven-embedder-factory.md)
 - [Database URL Configuration](feature/configurable-sqlalchemy-engine-creation.md)
@@ -109,7 +110,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Get Entity Details](feature/entity-query-tools.md)
 - [Entity Storage and Searchability](feature/entity-representation.md)
-- [Get Entity](feature/entity-retrieval.md)
+- [Entity Retrieval and Relationships](feature/entity-retrieval.md)
 - [Extractor Protocol](feature/extractor-protocol.md)
 - [Fact Storage System](feature/fact-storage.md)
 - [Database Migration for Phase-1 Schema](feature/full-text-search-on-entities.md)
@@ -118,7 +119,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Git Collector](feature/git-collector.md)
 - [Hybrid Search](feature/hybrid-search-with-reciprocal-rank-fusion.md)
 - [Identify PR Introductions](feature/identify-pr-introductions.md)
-- [Impact Analysis](feature/impact-analysis.md)
+- [Identify the Pull Request Introducing a Change](feature/identify-the-pull-request-introducing-a-change.md)
+- [Generate Impact Analysis Plan](feature/impact-analysis.md)
 - [Impact Plan Generation](feature/impact-plan-generation.md)
 - [Verify Compilation Integrity](feature/incremental-compilation.md)
 - [Inspect Command](feature/inspect-command.md)
@@ -126,10 +128,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
-- [Knowledge Statistics Retrieval](feature/knowledge-statistics.md)
+- [Collect Knowledge Metrics](feature/knowledge-statistics.md)
 - [Knowledge Statistics Overview](feature/knowledge-statistics-overview.md)
 - [LanguageAnalyzer Protocol](feature/languageanalyzer-protocol.md)
 - [List Entities](feature/list-entities.md)
+- [List Entities by Type](feature/list-entities-by-type.md)
 - [List Merged Pull Requests](feature/list-merged-pull-requests.md)
 - [LLM Cache](feature/llm-cache.md)
 - [LLM Cache Creation](feature/llm-cache-database-migration.md)
@@ -153,8 +156,9 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Relationship Tracking](feature/relationship-management.md)
 - [Initialize Repository](feature/repository-initialization-orchestration.md)
 - [Repository Management](feature/repository-management.md)
+- [Resolve Cross-Repository Dependencies](feature/resolve-cross-repository-dependencies.md)
 - [Resolve Dependencies](feature/resolve-dependencies.md)
-- [Resolve Repository](feature/resolve-repository.md)
+- [Query Repository Information](feature/resolve-repository.md)
 - [RetrievalProvider Protocol](feature/retrievalprovider-protocol.md)
 - [Run Migrations Offline](feature/run-migrations-in-offline-mode.md)
 - [Run Migrations Online](feature/run-migrations-in-online-mode.md)
@@ -164,8 +168,9 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Publisher Protocol](feature/stage-plugin-interface-protocols.md)
 - [Test Coverage Information](feature/test-coverage-information.md)
 - [Test Plan Recommendations](feature/test-plan-recommendations.md)
-- [Test Recommendation Generation](feature/test-recommendation-planning.md)
+- [Create Test Plan Recommendations](feature/test-recommendation-planning.md)
 - [Test Scoring](feature/test-scoring.md)
+- [Track Recent Changes in a Repository](feature/track-recent-changes-in-a-repository.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
 - [Upgrade Database Schema](feature/upgrade-database-schema.md)
 - [Validate OKF Command](feature/validate-okf-command.md)
@@ -185,7 +190,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unique Constraint on Entities](business-rule/unique-constraint-on-entities.md)
 - [Unique Constraints on Relationships](business-rule/unique-constraints-on-relationships.md)
 
-## Risks (54)
+## Risks (53)
 
 - [Error Handling for Repository Initialization](risk/compile-errors.md)
 - [Conformance Check Risk in Validate OKF Command](risk/conformance-check-risk-in-validate-okf-command.md)
@@ -207,7 +212,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
-- [Lookup Error Handling](risk/lookup-failure-handling.md)
+- [Missing Error Handling for Repository Resolution](risk/lookup-failure-handling.md)
 - [Uncaught API Errors](risk/malformed-model-output-causes-unhandled-json-error.md)
 - [Missing Configuration File Handling](risk/missing-configuration-validation.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
@@ -235,8 +240,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [SQL Transaction Failure](risk/sql-transaction-failure.md)
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
 - [Token Exposure Risk](risk/token-exposure-risk.md)
-- [Unbounded Input for Dependency Resolution](risk/unbounded-input-for-dependency-resolution.md)
-- [Possible KeyError for Missing Dependencies](risk/unbounded-input-handling.md)
+- [Potential Failure in Dependency Resolution](risk/unbounded-input-for-dependency-resolution.md)
 - [Unbounded Input in Search](risk/unbounded-input-in-search.md)
 - [Uncontrolled LLM Errors](risk/uncontrolled-llm-errors.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
