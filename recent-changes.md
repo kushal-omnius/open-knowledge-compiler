@@ -8,38 +8,22 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2185 — `0f3266d76fd5`
+## Compile 2186 — `33b333666803`
 
-- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
 - **changed** [component/knowledge-compiler-extractors-javascript-analyzer](component/knowledge-compiler-extractors-javascript-analyzer.md)
 - **changed** [component/tests-test-javascript-analyzer](component/tests-test-javascript-analyzer.md)
-- **changed** [feature/compile-full](feature/compile-full.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **removed** [feature/javascript-code-analysis](feature/javascript-code-analysis.md)
-- **added** [feature/javascript-language-analysis](feature/javascript-language-analysis.md)
-- **changed** [feature/reconcile](feature/reconcile.md)
-- **changed** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
-- **removed** [risk/potential-missing-imports-handling](risk/potential-missing-imports-handling.md)
-- **added** [risk/sql-transaction-failure](risk/sql-transaction-failure.md)
-- **removed** [risk/stale-state-handling](risk/stale-state-handling.md)
-- **added** [risk/uncontrolled-llm-errors](risk/uncontrolled-llm-errors.md)
-- **added** [risk/validation-of-input-file-types](risk/validation-of-input-file-types.md)
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-bare-require-call-is-a-dependency`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-cjs-exports-dot-name-assignment-produces-symbol`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-describe-wrapped-tests-are-found`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-assignment-is-a-dependency`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-object-literal-produces-symbols`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-nested-describe-blocks-are-found`
-- **removed** `test-coverage/tests-test-javascript-analyzer-py-test-skip-and-only-variants-are-found`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **removed** `wiki-page/feature-javascript-code-analysis`
-- **added** `wiki-page/feature-javascript-language-analysis`
-- **changed** `wiki-page/feature-reconcile`
-- **changed** `wiki-page/risk-missing-configuration-validation`
-- **removed** `wiki-page/risk-potential-missing-imports-handling`
-- **added** `wiki-page/risk-sql-transaction-failure`
-- **removed** `wiki-page/risk-stale-state-handling`
-- **added** `wiki-page/risk-uncontrolled-llm-errors`
-- **added** `wiki-page/risk-validation-of-input-file-types`
+- **changed** [feature/javascript-language-analysis](feature/javascript-language-analysis.md)
+- **added** [risk/potential-missing-imports-handling](risk/potential-missing-imports-handling.md)
+- **removed** [risk/validation-of-input-file-types](risk/validation-of-input-file-types.md)
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-bare-require-call-is-a-dependency`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-cjs-exports-dot-name-assignment-produces-symbol`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-describe-wrapped-tests-are-found`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-assignment-is-a-dependency`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-object-literal-produces-symbols`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-nested-describe-blocks-are-found`
+- **added** `test-coverage/tests-test-javascript-analyzer-py-test-skip-and-only-variants-are-found`
+- **changed** `wiki-page/feature-javascript-language-analysis`
+- **added** `wiki-page/risk-potential-missing-imports-handling`
+- **removed** `wiki-page/risk-validation-of-input-file-types`
 
 Full chronological history: [log.md](log.md).

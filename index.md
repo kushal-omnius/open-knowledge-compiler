@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2185 · Commit: `0f3266d76fd5`
+Repo: `knowledge-compiler` · Compile run: 2186 · Commit: `33b333666803`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -122,7 +122,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Impact Plan Generation](feature/impact-plan-generation.md)
 - [Verify Compilation Integrity](feature/incremental-compilation.md)
 - [Inspect Command](feature/inspect-command.md)
-- [JavaScript Language Analysis](feature/javascript-language-analysis.md)
+- [JavaScript Code Analysis](feature/javascript-language-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
@@ -225,6 +225,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
 - [Potential for Non-Parseable Frontmatter](risk/potential-for-non-parseable-frontmatter.md)
 - [Potential Invalid GitHub Reference Parsing](risk/potential-invalid-github-reference-parsing.md)
+- [Potential Missing Imports Handling](risk/potential-missing-imports-handling.md)
 - [Repository Registration Conflicts](risk/potential-race-condition-during-repository-registration.md)
 - [Publish Error Handling](risk/publish-error-handling.md)
 - [Missing Error Handling on Cache Retrieval](risk/race-on-first-write-leading-to-integrity-errors.md)
@@ -240,4 +241,3 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Uncontrolled LLM Errors](risk/uncontrolled-llm-errors.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
 - [Validation Failure](risk/validation-failure.md)
-- [Error Handling for Parsing Failures](risk/validation-of-input-file-types.md)

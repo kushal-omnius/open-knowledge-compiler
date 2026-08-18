@@ -4,6 +4,22 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-extractors-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
+- **Update** `component/tests-test-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
+- **Update** `feature/javascript-language-analysis` (feature) — compile run 2186 (`33b333666803`).
+- **Creation** `risk/potential-missing-imports-handling` (risk) — compile run 2186 (`33b333666803`).
+- **Deprecation** `risk/validation-of-input-file-types` (risk) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-bare-require-call-is-a-dependency` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-cjs-exports-dot-name-assignment-produces-symbol` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-describe-wrapped-tests-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-assignment-is-a-dependency` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-object-literal-produces-symbols` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-nested-describe-blocks-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-skip-and-only-variants-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
+- **Update** `wiki-page/feature-javascript-language-analysis` (wiki_page) — compile run 2186 (`33b333666803`).
+- **Creation** `wiki-page/risk-potential-missing-imports-handling` (wiki_page) — compile run 2186 (`33b333666803`).
+- **Deprecation** `wiki-page/risk-validation-of-input-file-types` (wiki_page) — compile run 2186 (`33b333666803`).
+
 - **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2185 (`0f3266d76fd5`).
 - **Update** `component/knowledge-compiler-extractors-javascript-analyzer` (component) — compile run 2185 (`0f3266d76fd5`).
 - **Update** `component/tests-test-javascript-analyzer` (component) — compile run 2185 (`0f3266d76fd5`).
@@ -241,5 +257,3 @@ No knowledge changes — compile run 2179 (`7e2f5fbca933`).
 - **Update** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
 - **Creation** `wiki-page/risk-error-handling-in-commands` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
 - **Deprecation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2177 (`f4f91e0a7428`).
-
-No knowledge changes — compile run 2176 (`47529ea7a4cc`).
