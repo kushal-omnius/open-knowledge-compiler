@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2156 (`89408ec668bb`).
+
 - **Creation** `business-rule/identity-matching-configuration` (business_rule) — compile run 2155 (`11dbc1fd81c6`).
 - **Update** `component/knowledge-compiler-collectors-jira` (component) — compile run 2155 (`11dbc1fd81c6`).
 - **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2155 (`11dbc1fd81c6`).
@@ -221,12 +223,3 @@ No knowledge changes — compile run 2148 (`a148633a7b71`).
 - **Update** `wiki-page/feature-typescript-fact-extractor` (wiki_page) — compile run 2147 (`132008ede87a`).
 - **Creation** `wiki-page/risk-insufficient-handling-of-non-conformant-artifacts` (wiki_page) — compile run 2147 (`132008ede87a`).
 - **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2147 (`132008ede87a`).
-
-- **Update** `feature/configurable-sqlalchemy-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
-- **Update** `feature/database-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
-- **Update** `feature/per-repository-advisory-lock-context-manager` (feature) — compile run 2146 (`71e8c5d19d02`).
-- **Deprecation** `risk/advisory-lock-failure-handling` (risk) — compile run 2146 (`71e8c5d19d02`).
-- **Update** `risk/hardcoded-default-database-credentials` (risk) — compile run 2146 (`71e8c5d19d02`).
-- **Update** `wiki-page/feature-per-repository-advisory-lock-context-manager` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
-- **Deprecation** `wiki-page/risk-advisory-lock-failure-handling` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
-- **Update** `wiki-page/risk-hardcoded-default-database-credentials` (wiki_page) — compile run 2146 (`71e8c5d19d02`).

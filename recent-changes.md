@@ -8,55 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2155 — `11dbc1fd81c6`
+## Compile 2156 — `89408ec668bb`
 
-- **added** [business-rule/identity-matching-configuration](business-rule/identity-matching-configuration.md)
-- **changed** [component/knowledge-compiler-collectors-jira](component/knowledge-compiler-collectors-jira.md)
-- **changed** [component/knowledge-compiler-compiler-normalize](component/knowledge-compiler-compiler-normalize.md)
-- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
-- **changed** [component/tests-test-incremental](component/tests-test-incremental.md)
-- **added** [feature/compile-full](feature/compile-full.md)
-- **changed** [feature/deterministic-facts-to-entities-normalization](feature/deterministic-facts-to-entities-normalization.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **changed** [feature/jira-issue-collector](feature/jira-issue-collector.md)
-- **added** [feature/reconcile](feature/reconcile.md)
-- **changed** [feature/repository-initialization-orchestration](feature/repository-initialization-orchestration.md)
-- **removed** [risk/cache-file-risk](risk/cache-file-risk.md)
-- **removed** [risk/data-handling-risk](risk/data-handling-risk.md)
-- **added** [risk/file-write-risks](risk/file-write-risks.md)
-- **added** [risk/incomplete-compile-summary-on-failure](risk/incomplete-compile-summary-on-failure.md)
-- **removed** [risk/llm-provider-dependency](risk/llm-provider-dependency.md)
-- **changed** [risk/missing-environment-variables](risk/missing-environment-variables.md)
-- **added** [risk/missing-repository-configuration](risk/missing-repository-configuration.md)
-- **changed** [risk/potential-for-identity-conflicts](risk/potential-for-identity-conflicts.md)
-- **changed** [risk/potential-race-condition-during-repository-registration](risk/potential-race-condition-during-repository-registration.md)
-- **removed** [risk/repository-locking-mechanism](risk/repository-locking-mechanism.md)
-- **changed** [risk/rollback-on-exception](risk/rollback-on-exception.md)
-- **added** [risk/silent-omission-of-missing-issues](risk/silent-omission-of-missing-issues.md)
-- **changed** `test-coverage/tests-test-incremental-py-test-dropped-import-removes-edge-despite-target-out-of-scope`
-- **added** `test-coverage/tests-test-incremental-py-test-jira-disabled-by-default-no-facts`
-- **added** `test-coverage/tests-test-incremental-py-test-jira-facts-mint-story-and-link-to-pr`
-- **changed** `test-coverage/tests-test-incremental-py-test-pr-compile-produces-precise-delta`
-- **changed** `test-coverage/tests-test-incremental-py-test-pr-deletion-removes-only-in-scope-entities`
-- **changed** `test-coverage/tests-test-incremental-py-test-pr-slice-links-into-out-of-scope-components`
-- **changed** `test-coverage/tests-test-incremental-py-test-reconcile-processes-backlog-in-order-and-is-idempotent`
-- **added** `wiki-page/business-rule-identity-matching-configuration`
-- **added** `wiki-page/feature-compile-full`
-- **changed** `wiki-page/feature-deterministic-facts-to-entities-normalization`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **changed** `wiki-page/feature-jira-issue-collector`
-- **added** `wiki-page/feature-reconcile`
-- **removed** `wiki-page/risk-cache-file-risk`
-- **removed** `wiki-page/risk-data-handling-risk`
-- **added** `wiki-page/risk-file-write-risks`
-- **added** `wiki-page/risk-incomplete-compile-summary-on-failure`
-- **removed** `wiki-page/risk-llm-provider-dependency`
-- **changed** `wiki-page/risk-missing-environment-variables`
-- **added** `wiki-page/risk-missing-repository-configuration`
-- **changed** `wiki-page/risk-potential-for-identity-conflicts`
-- **changed** `wiki-page/risk-potential-race-condition-during-repository-registration`
-- **removed** `wiki-page/risk-repository-locking-mechanism`
-- **changed** `wiki-page/risk-rollback-on-exception`
-- **added** `wiki-page/risk-silent-omission-of-missing-issues`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
