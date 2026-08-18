@@ -77,9 +77,24 @@ kc reconcile --dir /path/to/repo
 
 Output: one summary line per PR compiled, or `"up to date — no merged PRs after the watermark"`.
 
-**When to use `reconcile` vs `--full`:**
-- Normal steady-state (PRs merged to main, direct pushes, or squash commits): `kc reconcile`
-- First compile or suspected drift: `kc compile --full`
+**`kc compile` requires exactly one of `--full`, `--pr`, or `--emit-only` — there is no bare incremental mode.**
+
+**When to use `reconcile` vs `compile --full`:**
+
+Both produce the same final entity state. The difference is cost and history:
+
+| | `kc reconcile` | `kc compile --full` |
+|---|---|---|
+| Files extracted | Only files changed in each PR | Every file in the repo, every time |
+| LLM calls (1–3 PRs, 5–10 files) | ~5–10 calls | ~50+ calls |
+| LLM calls (20 accumulated PRs) | More expensive — same files hit once per touching commit | Always ~50+ calls |
+| PR attribution | Preserved — `which_pr_introduced` works, delta history per-PR | Lost — only current state recorded |
+| Design intent | Run after every merge (CI-triggered, ADR-002) | First compile, suspected drift, or big restructure |
+
+**Rule of thumb:**
+- Run `kc reconcile` frequently — ideally after every merge. At that cadence (1–3 PRs at a time) it is 5–10× cheaper than `--full` because it only touches changed files.
+- If reconcile has accumulated many commits (10+), `--full` becomes comparably cheaper and gives a cleaner baseline — but you lose per-PR lineage for those commits.
+- Use `--full` for: first compile, after a large restructure, or when `kc verify` reports drift.
 
 ---
 
