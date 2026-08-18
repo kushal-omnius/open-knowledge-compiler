@@ -4,6 +4,45 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-collectors-jira` (component) — compile run 2196 (`ff056d40fda9`).
+- **Update** `feature/compile-process-management` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `feature/error-handling-for-compilation` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `feature/gateway-factory` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `feature/incremental-compilation` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Update** `feature/jira-issue-collector` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `feature/semantic-extraction-capability` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `feature/verification-of-compilation-state` (feature) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `pull-request/8` (pull_request) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `risk/cache-file-read-failure` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `risk/error-handling-for-http-requests` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `risk/file-write-risks` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `risk/incomplete-commit-handling` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Update** `risk/missing-configuration-validation` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Update** `risk/missing-environment-variables` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `risk/possible-sql-injection` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `risk/silent-omission-of-missing-issues` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `risk/sql-transaction-failure` (risk) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/feature-error-handling-for-compilation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/feature-gateway-factory` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/feature-jira-issue-collector` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/feature-repository-initialization-orchestration` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/feature-semantic-extraction-capability` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/risk-cache-file-read-failure` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/risk-error-handling-for-http-requests` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Creation** `wiki-page/risk-incomplete-commit-handling` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/risk-missing-environment-variables` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/risk-possible-sql-injection` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/risk-silent-omission-of-missing-issues` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+- **Deprecation** `wiki-page/risk-sql-transaction-failure` (wiki_page) — compile run 2196 (`ff056d40fda9`).
+
 - **Update** `business-rule/identity-matching-configuration` (business_rule) — compile run 2195 (`f6adaf993f17`).
 - **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2195 (`f6adaf993f17`).
 - **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2195 (`f6adaf993f17`).
@@ -196,19 +235,3 @@
 - **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
 - **Update** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
 - **Deprecation** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2187 (`5b489ee9f53d`).
-
-- **Update** `component/knowledge-compiler-extractors-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
-- **Update** `component/tests-test-javascript-analyzer` (component) — compile run 2186 (`33b333666803`).
-- **Update** `feature/javascript-language-analysis` (feature) — compile run 2186 (`33b333666803`).
-- **Creation** `risk/potential-missing-imports-handling` (risk) — compile run 2186 (`33b333666803`).
-- **Deprecation** `risk/validation-of-input-file-types` (risk) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-bare-require-call-is-a-dependency` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-cjs-exports-dot-name-assignment-produces-symbol` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-describe-wrapped-tests-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-assignment-is-a-dependency` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-module-exports-object-literal-produces-symbols` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-nested-describe-blocks-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Creation** `test-coverage/tests-test-javascript-analyzer-py-test-skip-and-only-variants-are-found` (test_coverage) — compile run 2186 (`33b333666803`).
-- **Update** `wiki-page/feature-javascript-language-analysis` (wiki_page) — compile run 2186 (`33b333666803`).
-- **Creation** `wiki-page/risk-potential-missing-imports-handling` (wiki_page) — compile run 2186 (`33b333666803`).
-- **Deprecation** `wiki-page/risk-validation-of-input-file-types` (wiki_page) — compile run 2186 (`33b333666803`).
