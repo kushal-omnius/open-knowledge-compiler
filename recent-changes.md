@@ -8,52 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2150 — `a0f08b9b6a20`
+## Compile 2151 — `72dc7bde8673`
 
-- **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
-- **changed** [component/knowledge-compiler-mcp-server](component/knowledge-compiler-mcp-server.md)
-- **added** [feature/dependency-resolution](feature/dependency-resolution.md)
-- **added** [feature/dependency-resolution-2](feature/dependency-resolution-2.md)
-- **changed** [feature/determine-introduced-pr](feature/determine-introduced-pr.md)
-- **changed** [feature/entity-resolution](feature/entity-resolution.md)
-- **changed** [feature/entity-retrieval](feature/entity-retrieval.md)
-- **changed** [feature/get-entity-details](feature/get-entity-details.md)
-- **changed** [feature/identify-pr-introduction](feature/identify-pr-introduction.md)
-- **changed** [feature/knowledge-base-search](feature/knowledge-base-search.md)
-- **added** [feature/knowledge-base-server](feature/knowledge-base-server.md)
-- **changed** [feature/knowledge-statistics](feature/knowledge-statistics.md)
-- **added** [feature/knowledge-statistics-2](feature/knowledge-statistics-2.md)
-- **changed** [feature/list-entities](feature/list-entities.md)
-- **added** [feature/list-entities-2](feature/list-entities-2.md)
-- **changed** [feature/recent-changes](feature/recent-changes.md)
-- **changed** [feature/recent-changes-logger](feature/recent-changes-logger.md)
-- **changed** [feature/repository-initialization-orchestration](feature/repository-initialization-orchestration.md)
-- **changed** [feature/test-coverage-analysis](feature/test-coverage-analysis.md)
-- **changed** [feature/test-coverage-analysis-2](feature/test-coverage-analysis-2.md)
-- **changed** [risk/potential-race-condition-during-repository-registration](risk/potential-race-condition-during-repository-registration.md)
-- **removed** [risk/stale-test-coverage-detection](risk/stale-test-coverage-detection.md)
-- **changed** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
-- **added** [risk/unbounded-input-in-dependency-resolution](risk/unbounded-input-in-dependency-resolution.md)
-- **added** `wiki-page/feature-dependency-resolution`
-- **added** `wiki-page/feature-dependency-resolution-2`
-- **changed** `wiki-page/feature-determine-introduced-pr`
-- **changed** `wiki-page/feature-entity-retrieval`
-- **changed** `wiki-page/feature-get-entity-details`
-- **changed** `wiki-page/feature-identify-pr-introduction`
-- **changed** `wiki-page/feature-knowledge-base-search`
-- **added** `wiki-page/feature-knowledge-base-server`
-- **changed** `wiki-page/feature-knowledge-statistics`
-- **added** `wiki-page/feature-knowledge-statistics-2`
-- **changed** `wiki-page/feature-list-entities`
-- **added** `wiki-page/feature-list-entities-2`
-- **changed** `wiki-page/feature-recent-changes`
-- **changed** `wiki-page/feature-recent-changes-logger`
-- **changed** `wiki-page/feature-repository-initialization-orchestration`
-- **changed** `wiki-page/feature-test-coverage-analysis`
-- **changed** `wiki-page/feature-test-coverage-analysis-2`
-- **changed** `wiki-page/risk-potential-race-condition-during-repository-registration`
-- **removed** `wiki-page/risk-stale-test-coverage-detection`
-- **changed** `wiki-page/risk-unbounded-input-handling`
-- **added** `wiki-page/risk-unbounded-input-in-dependency-resolution`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
