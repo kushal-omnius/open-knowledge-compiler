@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2170 (`d20803e9af55`).
+
 No knowledge changes — compile run 2169 (`3fc85505c984`).
 
 - **Deprecation** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2168 (`eb04551fdedb`).
@@ -75,54 +77,3 @@ No knowledge changes — compile run 2163 (`538e5c2d725a`).
 No knowledge changes — compile run 2162 (`98acc2153cdd`).
 
 No knowledge changes — compile run 2161 (`bba797dd9fcb`).
-
-- **Update** `component/knowledge-compiler-cli` (component) — compile run 2160 (`025b533ee212`).
-- **Update** `component/knowledge-compiler-extractors-llm-extractor` (component) — compile run 2160 (`025b533ee212`).
-- **Update** `component/knowledge-compiler-retrieval-embed` (component) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/compile-full` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/compile-repository` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/delta-driven-embedding-updates-with-retry-semantics` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/incremental-compilation` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/initialize-repository` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/inspect-repository-details` (feature) — compile run 2160 (`025b533ee212`).
-- **Creation** `feature/knowledge-compiler-cli` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/reconcile` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/serve-mcp-interface` (feature) — compile run 2160 (`025b533ee212`).
-- **Update** `feature/verify-compilation-state` (feature) — compile run 2160 (`025b533ee212`).
-- **Creation** `risk/compile-failure-handling` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `risk/error-handling-in-gateway-function` (risk) — compile run 2160 (`025b533ee212`).
-- **Creation** `risk/error-handling-with-compile-errors` (risk) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `risk/incomplete-compile-summary-on-failure` (risk) — compile run 2160 (`025b533ee212`).
-- **Creation** `risk/jira-integration-reliability` (risk) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `risk/missing-repository-configuration` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `risk/no-validation-of-embedder-output-length` (risk) — compile run 2160 (`025b533ee212`).
-- **Creation** `risk/repository-not-found-check` (risk) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `risk/rollback-on-exception` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `risk/user-input-validation` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `risk/validation-failure` (risk) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-command-line-interface-for-knowledge-compiler` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-compile-full` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-compile-repository` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-delta-driven-embedding-updates-with-retry-semantics` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-initialize-repository` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-inspect-repository-details` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Creation** `wiki-page/feature-knowledge-compiler-cli` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-serve-mcp-interface` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/feature-verify-compilation-state` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Creation** `wiki-page/risk-compile-failure-handling` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/risk-error-handling-in-gateway-function` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Creation** `wiki-page/risk-error-handling-with-compile-errors` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `wiki-page/risk-incomplete-compile-summary-on-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Creation** `wiki-page/risk-jira-integration-reliability` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `wiki-page/risk-missing-repository-configuration` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/risk-no-validation-of-embedder-output-length` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Creation** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Deprecation** `wiki-page/risk-rollback-on-exception` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2160 (`025b533ee212`).
-- **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
