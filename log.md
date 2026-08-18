@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2139 (`bd64b07db813`).
+
 No knowledge changes — compile run 2138 (`68ebb2190721`).
 
 ## 2026-08-10
@@ -354,5 +356,3 @@ No knowledge changes — compile run 1922 (`8ea4d04f6971`).
 - **Update** `wiki-page/risk-incomplete-error-handling` (wiki_page) — compile run 1804 (`3dc1298695ac`).
 - **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 1804 (`3dc1298695ac`).
 - **Deprecation** `wiki-page/risk-uncontrolled-llm-errors` (wiki_page) — compile run 1804 (`3dc1298695ac`).
-
-No knowledge changes — compile run 1803 (`8759e999effc`).
