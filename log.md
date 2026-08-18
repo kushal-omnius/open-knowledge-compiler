@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2180 (`eda060e499ec`).
+
 No knowledge changes — compile run 2179 (`7e2f5fbca933`).
 
 - **Creation** `business-rule/append-only-delta-change-table` (business_rule) — compile run 2178 (`faa14be39bbb`).
@@ -256,5 +258,3 @@ No knowledge changes — compile run 2174 (`c45580ed7114`).
 No knowledge changes — compile run 2172 (`32438d0aea0c`).
 
 No knowledge changes — compile run 2171 (`06c1b369cae8`).
-
-No knowledge changes — compile run 2170 (`d20803e9af55`).
