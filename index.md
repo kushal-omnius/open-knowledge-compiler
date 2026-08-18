@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2146 · Commit: `71e8c5d19d02`
+Repo: `knowledge-compiler` · Compile run: 2147 · Commit: `132008ede87a`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -165,7 +165,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Coverage for Component](feature/test-coverage-analysis.md)
 - [Test Coverage Analysis](feature/test-coverage-analysis-2.md)
 - [Test Scoring](feature/test-scoring.md)
-- [TypeScript Language Analyzer](feature/typescript-fact-extractor.md)
+- [TypeScript Analysis](feature/typescript-fact-extractor.md)
 - [Verify Compilation State](feature/verify-compilation-state.md)
 - [Versioning Information](feature/versioning-information.md)
 
@@ -175,7 +175,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (46)
+## Risks (47)
 
 - [Cache File Risk](risk/cache-file-risk.md)
 - [Dangling Pages](risk/clean-page-regeneration.md)
@@ -193,6 +193,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
+- [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [LLM Provider Dependency](risk/llm-provider-dependency.md)
 - [Unhandled API Error Responses](risk/malformed-model-output-causes-unhandled-json-error.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
@@ -206,7 +207,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Missing Dependency Handling](risk/partial-exception-handling-for-external-sdk.md)
 - [Potential Data Loss During Downgrade](risk/potential-data-loss-during-downgrade.md)
 - [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
-- [Missing Anchor Handling](risk/potential-for-identity-conflicts.md)
+- [Missing Anchor Risk](risk/potential-for-identity-conflicts.md)
 - [Potential for Non-Parseable Frontmatter](risk/potential-for-non-parseable-frontmatter.md)
 - [Potential Missing Imports Handling](risk/potential-missing-imports-handling.md)
 - [Missing Error Handling in Database Operations](risk/potential-race-condition-during-repository-registration.md)

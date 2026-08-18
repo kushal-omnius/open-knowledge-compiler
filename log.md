@@ -4,6 +4,15 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-extractors-typescript-analyzer` (component) — compile run 2147 (`132008ede87a`).
+- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2147 (`132008ede87a`).
+- **Update** `feature/typescript-fact-extractor` (feature) — compile run 2147 (`132008ede87a`).
+- **Creation** `risk/insufficient-handling-of-non-conformant-artifacts` (risk) — compile run 2147 (`132008ede87a`).
+- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2147 (`132008ede87a`).
+- **Update** `wiki-page/feature-typescript-fact-extractor` (wiki_page) — compile run 2147 (`132008ede87a`).
+- **Creation** `wiki-page/risk-insufficient-handling-of-non-conformant-artifacts` (wiki_page) — compile run 2147 (`132008ede87a`).
+- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2147 (`132008ede87a`).
+
 - **Update** `feature/configurable-sqlalchemy-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
 - **Update** `feature/database-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
 - **Update** `feature/per-repository-advisory-lock-context-manager` (feature) — compile run 2146 (`71e8c5d19d02`).
@@ -547,7 +556,3 @@ No knowledge changes — compile run 2145 (`068abc045220`).
 No knowledge changes — compile run 2139 (`bd64b07db813`).
 
 No knowledge changes — compile run 2138 (`68ebb2190721`).
-
-## 2026-08-10
-
-No knowledge changes — compile run 1923 (`8ea4d04f6971`).

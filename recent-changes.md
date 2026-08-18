@@ -8,15 +8,15 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2146 — `71e8c5d19d02`
+## Compile 2147 — `132008ede87a`
 
-- **changed** [feature/configurable-sqlalchemy-engine-creation](feature/configurable-sqlalchemy-engine-creation.md)
-- **changed** [feature/database-engine-creation](feature/database-engine-creation.md)
-- **changed** [feature/per-repository-advisory-lock-context-manager](feature/per-repository-advisory-lock-context-manager.md)
-- **removed** [risk/advisory-lock-failure-handling](risk/advisory-lock-failure-handling.md)
-- **changed** [risk/hardcoded-default-database-credentials](risk/hardcoded-default-database-credentials.md)
-- **changed** `wiki-page/feature-per-repository-advisory-lock-context-manager`
-- **removed** `wiki-page/risk-advisory-lock-failure-handling`
-- **changed** `wiki-page/risk-hardcoded-default-database-credentials`
+- **changed** [component/knowledge-compiler-extractors-typescript-analyzer](component/knowledge-compiler-extractors-typescript-analyzer.md)
+- **changed** [feature/deterministic-facts-to-entities-normalization](feature/deterministic-facts-to-entities-normalization.md)
+- **changed** [feature/typescript-fact-extractor](feature/typescript-fact-extractor.md)
+- **added** [risk/insufficient-handling-of-non-conformant-artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
+- **changed** [risk/potential-for-identity-conflicts](risk/potential-for-identity-conflicts.md)
+- **changed** `wiki-page/feature-typescript-fact-extractor`
+- **added** `wiki-page/risk-insufficient-handling-of-non-conformant-artifacts`
+- **changed** `wiki-page/risk-potential-for-identity-conflicts`
 
 Full chronological history: [log.md](log.md).
