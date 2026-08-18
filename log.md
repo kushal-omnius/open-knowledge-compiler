@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2161 (`bba797dd9fcb`).
+
 - **Update** `component/knowledge-compiler-cli` (component) — compile run 2160 (`025b533ee212`).
 - **Update** `component/knowledge-compiler-extractors-llm-extractor` (component) — compile run 2160 (`025b533ee212`).
 - **Update** `component/knowledge-compiler-retrieval-embed` (component) — compile run 2160 (`025b533ee212`).
@@ -203,5 +205,3 @@ No knowledge changes — compile run 2156 (`89408ec668bb`).
 - **Update** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
 
 No knowledge changes — compile run 2152 (`7ca523fee40b`).
-
-No knowledge changes — compile run 2151 (`72dc7bde8673`).

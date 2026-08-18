@@ -8,57 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2160 — `025b533ee212`
+## Compile 2161 — `bba797dd9fcb`
 
-- **changed** [component/knowledge-compiler-cli](component/knowledge-compiler-cli.md)
-- **changed** [component/knowledge-compiler-extractors-llm-extractor](component/knowledge-compiler-extractors-llm-extractor.md)
-- **changed** [component/knowledge-compiler-retrieval-embed](component/knowledge-compiler-retrieval-embed.md)
-- **changed** [feature/command-line-interface-for-knowledge-compiler](feature/command-line-interface-for-knowledge-compiler.md)
-- **changed** [feature/compile-full](feature/compile-full.md)
-- **changed** [feature/compile-repository](feature/compile-repository.md)
-- **changed** [feature/delta-driven-embedding-updates-with-retry-semantics](feature/delta-driven-embedding-updates-with-retry-semantics.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **changed** [feature/initialize-repository](feature/initialize-repository.md)
-- **changed** [feature/inspect-repository-details](feature/inspect-repository-details.md)
-- **added** [feature/knowledge-compiler-cli](feature/knowledge-compiler-cli.md)
-- **changed** [feature/llm-semantic-extraction](feature/llm-semantic-extraction.md)
-- **changed** [feature/reconcile](feature/reconcile.md)
-- **changed** [feature/serve-mcp-interface](feature/serve-mcp-interface.md)
-- **changed** [feature/verify-compilation-state](feature/verify-compilation-state.md)
-- **added** [risk/compile-failure-handling](risk/compile-failure-handling.md)
-- **changed** [risk/error-handling-in-gateway-function](risk/error-handling-in-gateway-function.md)
-- **added** [risk/error-handling-with-compile-errors](risk/error-handling-with-compile-errors.md)
-- **removed** [risk/incomplete-compile-summary-on-failure](risk/incomplete-compile-summary-on-failure.md)
-- **added** [risk/jira-integration-reliability](risk/jira-integration-reliability.md)
-- **removed** [risk/missing-repository-configuration](risk/missing-repository-configuration.md)
-- **changed** [risk/no-validation-of-embedder-output-length](risk/no-validation-of-embedder-output-length.md)
-- **added** [risk/repository-not-found-check](risk/repository-not-found-check.md)
-- **removed** [risk/rollback-on-exception](risk/rollback-on-exception.md)
-- **changed** [risk/run-termination-on-exhausted-llm-budget](risk/run-termination-on-exhausted-llm-budget.md)
-- **changed** [risk/user-input-validation](risk/user-input-validation.md)
-- **changed** [risk/validation-failure](risk/validation-failure.md)
-- **changed** `wiki-page/feature-command-line-interface-for-knowledge-compiler`
-- **changed** `wiki-page/feature-compile-full`
-- **changed** `wiki-page/feature-compile-repository`
-- **changed** `wiki-page/feature-delta-driven-embedding-updates-with-retry-semantics`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **changed** `wiki-page/feature-initialize-repository`
-- **changed** `wiki-page/feature-inspect-repository-details`
-- **added** `wiki-page/feature-knowledge-compiler-cli`
-- **changed** `wiki-page/feature-reconcile`
-- **changed** `wiki-page/feature-serve-mcp-interface`
-- **changed** `wiki-page/feature-verify-compilation-state`
-- **added** `wiki-page/risk-compile-failure-handling`
-- **changed** `wiki-page/risk-error-handling-in-gateway-function`
-- **added** `wiki-page/risk-error-handling-with-compile-errors`
-- **removed** `wiki-page/risk-incomplete-compile-summary-on-failure`
-- **added** `wiki-page/risk-jira-integration-reliability`
-- **removed** `wiki-page/risk-missing-repository-configuration`
-- **changed** `wiki-page/risk-no-validation-of-embedder-output-length`
-- **added** `wiki-page/risk-repository-not-found-check`
-- **removed** `wiki-page/risk-rollback-on-exception`
-- **changed** `wiki-page/risk-run-termination-on-exhausted-llm-budget`
-- **changed** `wiki-page/risk-user-input-validation`
-- **changed** `wiki-page/risk-validation-failure`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
