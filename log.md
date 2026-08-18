@@ -4,6 +4,24 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-llm-provider` (component) — compile run 2149 (`e382639f3f20`).
+- **Update** `feature/azureopenaiprovider` (feature) — compile run 2149 (`e382639f3f20`).
+- **Creation** `feature/cloudflare-llm-provider` (feature) — compile run 2149 (`e382639f3f20`).
+- **Update** `feature/fake-llm-provider` (feature) — compile run 2149 (`e382639f3f20`).
+- **Update** `feature/llm-provider-interface` (feature) — compile run 2149 (`e382639f3f20`).
+- **Update** `feature/openai-provider` (feature) — compile run 2149 (`e382639f3f20`).
+- **Update** `feature/provider-factory` (feature) — compile run 2149 (`e382639f3f20`).
+- **Update** `risk/malformed-model-output-causes-unhandled-json-error` (risk) — compile run 2149 (`e382639f3f20`).
+- **Update** `risk/missing-sdk-dependency-causes-provider-construction-failure` (risk) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/feature-azureopenaiprovider` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Creation** `wiki-page/feature-cloudflare-llm-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/feature-fake-llm-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/feature-llm-provider-interface` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/feature-openai-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/feature-provider-factory` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/risk-malformed-model-output-causes-unhandled-json-error` (wiki_page) — compile run 2149 (`e382639f3f20`).
+- **Update** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure` (wiki_page) — compile run 2149 (`e382639f3f20`).
+
 No knowledge changes — compile run 2148 (`a148633a7b71`).
 
 - **Update** `component/knowledge-compiler-extractors-typescript-analyzer` (component) — compile run 2147 (`132008ede87a`).
@@ -554,5 +572,3 @@ No knowledge changes — compile run 2145 (`068abc045220`).
 - **Deprecation** `wiki-page/risk-test-identification-based-solely-on-filename` (wiki_page) — compile run 2140 (`99f2f418ca6c`).
 - **Creation** `wiki-page/risk-unimplemented-commands` (wiki_page) — compile run 2140 (`99f2f418ca6c`).
 - **Deprecation** `wiki-page/risk-validator-errors-unchecked` (wiki_page) — compile run 2140 (`99f2f418ca6c`).
-
-No knowledge changes — compile run 2139 (`bd64b07db813`).

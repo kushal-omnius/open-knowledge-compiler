@@ -8,8 +8,24 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2148 — `a148633a7b71`
+## Compile 2149 — `e382639f3f20`
 
-No knowledge changes.
+- **changed** [component/knowledge-compiler-llm-provider](component/knowledge-compiler-llm-provider.md)
+- **changed** [feature/azureopenaiprovider](feature/azureopenaiprovider.md)
+- **added** [feature/cloudflare-llm-provider](feature/cloudflare-llm-provider.md)
+- **changed** [feature/fake-llm-provider](feature/fake-llm-provider.md)
+- **changed** [feature/llm-provider-interface](feature/llm-provider-interface.md)
+- **changed** [feature/openai-provider](feature/openai-provider.md)
+- **changed** [feature/provider-factory](feature/provider-factory.md)
+- **changed** [risk/malformed-model-output-causes-unhandled-json-error](risk/malformed-model-output-causes-unhandled-json-error.md)
+- **changed** [risk/missing-sdk-dependency-causes-provider-construction-failure](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
+- **changed** `wiki-page/feature-azureopenaiprovider`
+- **added** `wiki-page/feature-cloudflare-llm-provider`
+- **changed** `wiki-page/feature-fake-llm-provider`
+- **changed** `wiki-page/feature-llm-provider-interface`
+- **changed** `wiki-page/feature-openai-provider`
+- **changed** `wiki-page/feature-provider-factory`
+- **changed** `wiki-page/risk-malformed-model-output-causes-unhandled-json-error`
+- **changed** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure`
 
 Full chronological history: [log.md](log.md).

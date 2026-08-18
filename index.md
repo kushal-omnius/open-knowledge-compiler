@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2148 · Commit: `a148633a7b71`
+Repo: `knowledge-compiler` · Compile run: 2149 · Commit: `e382639f3f20`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,13 +81,14 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (85)
+## Features (86)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Storage](feature/artifact-storage.md)
 - [Persist Compile Results](feature/atomic-application-of-a-compile-delta.md)
-- [AzureOpenAIProvider](feature/azureopenaiprovider.md)
+- [Azure OpenAI LLM Provider](feature/azureopenaiprovider.md)
 - [_cleanup_test_repos](feature/cleanup-test-repos.md)
+- [Cloudflare LLM Provider](feature/cloudflare-llm-provider.md)
 - [Collector Protocol](feature/collector-protocol.md)
 - [Reconcile PRs](feature/command-line-interface-for-knowledge-compiler.md)
 - [Commit Timestamp Addition](feature/commit-timestamp-addition.md)
@@ -116,7 +117,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Extractor Protocol](feature/extractor-protocol.md)
 - [Fact Storage](feature/fact-storage.md)
 - [Fake Embedder](feature/fake-embedder.md)
-- [FakeLLMProvider](feature/fake-llm-provider.md)
+- [Fake LLM Provider](feature/fake-llm-provider.md)
 - [Database Schema Creation](feature/full-text-search-on-entities.md)
 - [Wiki Emitter](feature/generate-index-and-recent-changes-pages.md)
 - [Get Entity Details](feature/get-entity-details.md)
@@ -138,15 +139,15 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [LLM Cache](feature/llm-cache.md)
 - [LLM Cache Creation](feature/llm-cache-database-migration.md)
 - [LLM Cache Handling](feature/llm-cache-management.md)
-- [AnthropicProvider](feature/llm-provider-interface.md)
+- [Anthropic LLM Provider](feature/llm-provider-interface.md)
 - [LLM Semantic Extraction](feature/llm-semantic-extraction.md)
 - [LLMProvider Protocol](feature/llmprovider-protocol.md)
 - [OpenAI Embedder](feature/openai-embeddings-via-sdk.md)
-- [OpenAIProvider](feature/openai-provider.md)
+- [OpenAI LLM Provider](feature/openai-provider.md)
 - [Advisory Locking Mechanism](feature/per-repository-advisory-lock-context-manager.md)
 - [Prompt Builder](feature/prompt-rendering-for-semantic-extraction.md)
 - [Provenance Tracking](feature/provenance-tracking.md)
-- [build_provider function](feature/provider-factory.md)
+- [LLM Provider Factory](feature/provider-factory.md)
 - [Python Language Analysis](feature/python-language-analysis.md)
 - [Read Mutation Scores](feature/read-mutation-scores.md)
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
@@ -195,10 +196,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [LLM Provider Dependency](risk/llm-provider-dependency.md)
-- [Unhandled API Error Responses](risk/malformed-model-output-causes-unhandled-json-error.md)
+- [Error Handling with API Calls](risk/malformed-model-output-causes-unhandled-json-error.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Environment Dependency Risk](risk/missing-environment-variables.md)
-- [API Initialization Failure](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
+- [Dependency on External SDKs](risk/missing-sdk-dependency-causes-provider-construction-failure.md)
 - [Embedding Response Processing Error](risk/no-input-size-or-content-validation-for-embed.md)
 - [Potential for Missing Relationship Cleanup](risk/no-local-error-handling-or-transactional-boundary-management.md)
 - [Exception Handling Flaw](risk/no-rate-limit-awareness-or-retry-backoff.md)
