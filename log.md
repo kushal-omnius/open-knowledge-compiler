@@ -4,6 +4,71 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2198 (`92190247e6d5`).
+- **Creation** `component/knowledge-compiler-extractors-annotation-parser` (component) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/compile-process-management` (feature) — compile run 2198 (`92190247e6d5`).
+- **Creation** `feature/emit-wiki` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/entity-creation-and-management` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/entity-query-tools` (feature) — compile run 2198 (`92190247e6d5`).
+- **Creation** `feature/external-key-annotation-parsing` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/identify-pr-introductions` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/impact-plan-generation` (feature) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/journey-coverage-analysis` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/knowledge-base-server` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/knowledge-statistics-overview` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/linked-context-retrieval` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/list-entities` (feature) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/normalization-of-facts` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/recent-changes` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/resolve-dependencies` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/search-knowledge` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/semantic-extraction` (feature) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `feature/test-coverage-information` (feature) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/test-plan-recommendations` (feature) — compile run 2198 (`92190247e6d5`).
+- **Update** `feature/verification-of-compilation-state` (feature) — compile run 2198 (`92190247e6d5`).
+- **Creation** `pull-request/11` (pull_request) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `risk/database-transaction-rollback-risks` (risk) — compile run 2198 (`92190247e6d5`).
+- **Creation** `risk/dependency-resolution-failure` (risk) — compile run 2198 (`92190247e6d5`).
+- **Creation** `risk/failed-lock-session` (risk) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `risk/idempotence-checks` (risk) — compile run 2198 (`92190247e6d5`).
+- **Creation** `risk/llm-extraction-fallback` (risk) — compile run 2198 (`92190247e6d5`).
+- **Update** `risk/missing-configuration-validation` (risk) — compile run 2198 (`92190247e6d5`).
+- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2198 (`92190247e6d5`).
+- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2198 (`92190247e6d5`).
+- **Update** `risk/validation-failure` (risk) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/component-knowledge-compiler-extractors-annotation-parser` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/feature-emit-wiki` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-entity-creation-and-management` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-entity-query-tools` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/feature-external-key-annotation-parsing` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-identify-pr-introductions` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-impact-plan-generation` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-journey-coverage-analysis` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-knowledge-base-server` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-knowledge-statistics-overview` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-linked-context-retrieval` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-list-entities` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-recent-changes` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-resolve-dependencies` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-search-knowledge` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-semantic-extraction` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/feature-test-coverage-information` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/feature-test-plan-recommendations` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/risk-database-transaction-rollback-risks` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/risk-dependency-resolution-failure` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/risk-failed-lock-session` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Deprecation** `wiki-page/risk-idempotence-checks` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Creation** `wiki-page/risk-llm-extraction-fallback` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2198 (`92190247e6d5`).
+- **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2198 (`92190247e6d5`).
+
 - **Deprecation** `business-rule/append-only-delta-change-table` (business_rule) — compile run 2197 (`121280c0bacf`).
 - **Deprecation** `business-rule/idempotence-check-for-compile-runs` (business_rule) — compile run 2197 (`121280c0bacf`).
 - **Deprecation** `business-rule/identity-matching-configuration` (business_rule) — compile run 2197 (`121280c0bacf`).
@@ -279,5 +344,3 @@
 
 - **Deprecation** `feature/versioning-information` (feature) — compile run 2189 (`2e3da7425f9a`).
 - **Deprecation** `wiki-page/feature-versioning-information` (wiki_page) — compile run 2189 (`2e3da7425f9a`).
-
-- **Creation** `pull-request/1` (pull_request) — compile run 2188 (`14d5668b6003`).
