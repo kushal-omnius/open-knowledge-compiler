@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2183 (`5367954634b6`).
+
 - **Update** `component/alembic-versions-0005-okf-spec-version` (component) — compile run 2182 (`a6d8e91d9542`).
 - **Update** `feature/add-okf-spec-version-column` (feature) — compile run 2182 (`a6d8e91d9542`).
 - **Update** `feature/full-text-search-on-entities` (feature) — compile run 2182 (`a6d8e91d9542`).
@@ -242,31 +244,3 @@ No knowledge changes — compile run 2176 (`47529ea7a4cc`).
 - **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
 
 No knowledge changes — compile run 2174 (`c45580ed7114`).
-
-- **Update** `feature/entity-retrieval` (feature) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `feature/identify-pr-that-introduced-changes` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/impact-analysis` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/knowledge-statistics` (feature) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `feature/list-entities-2` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/recent-changes` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/resolve-repository` (feature) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `feature/test-coverage-analysis` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `feature/test-recommendation-planning` (feature) — compile run 2173 (`68b4347d850f`).
-- **Update** `risk/file-write-risks` (risk) — compile run 2173 (`68b4347d850f`).
-- **Update** `risk/lookup-failure-handling` (risk) — compile run 2173 (`68b4347d850f`).
-- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2173 (`68b4347d850f`).
-- **Creation** `risk/unbounded-input-for-dependency-resolution` (risk) — compile run 2173 (`68b4347d850f`).
-- **Update** `risk/unbounded-input-handling` (risk) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `wiki-page/feature-identify-pr-that-introduced-changes` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `wiki-page/feature-list-entities-2` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/feature-recent-changes` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Deprecation** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Creation** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2173 (`68b4347d850f`).
-- **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2173 (`68b4347d850f`).
