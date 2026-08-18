@@ -8,8 +8,20 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2181 — `628b86b6701d`
+## Compile 2182 — `a6d8e91d9542`
 
-No knowledge changes.
+- **changed** [component/alembic-versions-0005-okf-spec-version](component/alembic-versions-0005-okf-spec-version.md)
+- **changed** [feature/add-okf-spec-version-column](feature/add-okf-spec-version-column.md)
+- **changed** [feature/full-text-search-on-entities](feature/full-text-search-on-entities.md)
+- **added** [risk/database-extension-dependency](risk/database-extension-dependency.md)
+- **removed** [risk/nullable-column-without-enforcement](risk/nullable-column-without-enforcement.md)
+- **removed** [risk/potential-data-loss-during-downgrade](risk/potential-data-loss-during-downgrade.md)
+- **added** [risk/potential-data-loss-on-downgrade](risk/potential-data-loss-on-downgrade.md)
+- **changed** `wiki-page/feature-add-okf-spec-version-column`
+- **changed** `wiki-page/feature-full-text-search-on-entities`
+- **added** `wiki-page/risk-database-extension-dependency`
+- **removed** `wiki-page/risk-nullable-column-without-enforcement`
+- **removed** `wiki-page/risk-potential-data-loss-during-downgrade`
+- **added** `wiki-page/risk-potential-data-loss-on-downgrade`
 
 Full chronological history: [log.md](log.md).

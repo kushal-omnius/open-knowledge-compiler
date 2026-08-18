@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2181 · Commit: `628b86b6701d`
+Repo: `knowledge-compiler` · Compile run: 2182 · Commit: `a6d8e91d9542`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -83,7 +83,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 
 ## Features (90)
 
-- [Track OKF Specification Version](feature/add-okf-spec-version-column.md)
+- [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
 - [Persist Compile Results](feature/atomic-application-of-a-compile-delta.md)
 - [_cleanup_test_repos](feature/cleanup-test-repos.md)
@@ -112,7 +112,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Get Entity](feature/entity-retrieval.md)
 - [Extractor Protocol](feature/extractor-protocol.md)
 - [Fact Storage System](feature/fact-storage.md)
-- [Database Schema Creation](feature/full-text-search-on-entities.md)
+- [Database Migration for Phase-1 Schema](feature/full-text-search-on-entities.md)
 - [Wiki Emitter](feature/generate-index-and-recent-changes-pages.md)
 - [Git Branch Publisher](feature/git-branch-publisher.md)
 - [Git Collector](feature/git-collector.md)
@@ -192,6 +192,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
+- [Database Extension Dependency](risk/database-extension-dependency.md)
 - [Database Schema Migration Failure](risk/database-schema-migration-failure.md)
 - [Data Loss Risk](risk/destructive-column-replacement.md)
 - [Missing Publication Directory](risk/destructive-force-push.md)
@@ -218,10 +219,9 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Exception Handling Flaw](risk/no-rate-limit-awareness-or-retry-backoff.md)
 - [Pending Entity Handling](risk/no-validation-of-embedder-output-length.md)
 - [Nonexistent Claims](risk/nonexistent-claims.md)
-- [Nullable Column without Enforcement](risk/nullable-column-without-enforcement.md)
 - [Dependency on External Libraries](risk/partial-exception-handling-for-external-sdk.md)
-- [Potential Data Loss During Downgrade](risk/potential-data-loss-during-downgrade.md)
 - [Immutable Delta Log Vulnerability](risk/potential-data-loss-on-deletes.md)
+- [Potential Data Loss on Downgrade](risk/potential-data-loss-on-downgrade.md)
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
 - [Potential for Non-Parseable Frontmatter](risk/potential-for-non-parseable-frontmatter.md)
 - [Potential Invalid GitHub Reference Parsing](risk/potential-invalid-github-reference-parsing.md)
