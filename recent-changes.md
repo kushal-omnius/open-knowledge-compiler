@@ -8,8 +8,9 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2188 — `14d5668b6003`
+## Compile 2189 — `2e3da7425f9a`
 
-- **added** `pull-request/1`
+- **removed** [feature/versioning-information](feature/versioning-information.md)
+- **removed** `wiki-page/feature-versioning-information`
 
 Full chronological history: [log.md](log.md).

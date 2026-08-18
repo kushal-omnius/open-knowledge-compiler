@@ -4,6 +4,9 @@
 
 ## 2026-08-18
 
+- **Deprecation** `feature/versioning-information` (feature) — compile run 2189 (`2e3da7425f9a`).
+- **Deprecation** `wiki-page/feature-versioning-information` (wiki_page) — compile run 2189 (`2e3da7425f9a`).
+
 - **Creation** `pull-request/1` (pull_request) — compile run 2188 (`14d5668b6003`).
 
 - **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2187 (`5b489ee9f53d`).
@@ -110,5 +113,3 @@ No knowledge changes — compile run 2183 (`5367954634b6`).
 No knowledge changes — compile run 2181 (`628b86b6701d`).
 
 No knowledge changes — compile run 2180 (`eda060e499ec`).
-
-No knowledge changes — compile run 2179 (`7e2f5fbca933`).

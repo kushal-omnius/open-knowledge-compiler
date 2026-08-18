@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2188 · Commit: `14d5668b6003`
+Repo: `knowledge-compiler` · Compile run: 2189 · Commit: `2e3da7425f9a`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (95)
+## Features (94)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
@@ -176,7 +176,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Validate OKF Command](feature/validate-okf-command.md)
 - [Validate Test Command](feature/validate-test-command.md)
 - [Verify Command](feature/verify-command.md)
-- [Knowledge Compiler](feature/versioning-information.md)
 - [Write Configuration File](feature/write-configuration-file.md)
 
 ## Business Rules (8)
