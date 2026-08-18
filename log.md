@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
+
 No knowledge changes — compile run 2158 (`d77e6a290055`).
 
 No knowledge changes — compile run 2157 (`003a24cf276f`).
@@ -198,21 +200,3 @@ No knowledge changes — compile run 2151 (`72dc7bde8673`).
 - **Deprecation** `wiki-page/risk-stale-test-coverage-detection` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
 - **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
 - **Creation** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-
-- **Update** `component/knowledge-compiler-llm-provider` (component) — compile run 2149 (`e382639f3f20`).
-- **Update** `feature/azureopenaiprovider` (feature) — compile run 2149 (`e382639f3f20`).
-- **Creation** `feature/cloudflare-llm-provider` (feature) — compile run 2149 (`e382639f3f20`).
-- **Update** `feature/fake-llm-provider` (feature) — compile run 2149 (`e382639f3f20`).
-- **Update** `feature/llm-provider-interface` (feature) — compile run 2149 (`e382639f3f20`).
-- **Update** `feature/openai-provider` (feature) — compile run 2149 (`e382639f3f20`).
-- **Update** `feature/provider-factory` (feature) — compile run 2149 (`e382639f3f20`).
-- **Update** `risk/malformed-model-output-causes-unhandled-json-error` (risk) — compile run 2149 (`e382639f3f20`).
-- **Update** `risk/missing-sdk-dependency-causes-provider-construction-failure` (risk) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/feature-azureopenaiprovider` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Creation** `wiki-page/feature-cloudflare-llm-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/feature-fake-llm-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/feature-llm-provider-interface` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/feature-openai-provider` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/feature-provider-factory` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/risk-malformed-model-output-causes-unhandled-json-error` (wiki_page) — compile run 2149 (`e382639f3f20`).
-- **Update** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure` (wiki_page) — compile run 2149 (`e382639f3f20`).
