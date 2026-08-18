@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2167 (`08bf5fda2381`).
+
 - **Update** `component/knowledge-compiler-cli` (component) — compile run 2166 (`a39b058642bd`).
 - **Update** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2166 (`a39b058642bd`).
 - **Update** `feature/compile-repository` (feature) — compile run 2166 (`a39b058642bd`).
@@ -96,5 +98,3 @@ No knowledge changes — compile run 2161 (`bba797dd9fcb`).
 No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
 
 No knowledge changes — compile run 2158 (`d77e6a290055`).
-
-No knowledge changes — compile run 2157 (`003a24cf276f`).

@@ -8,34 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2166 — `a39b058642bd`
+## Compile 2167 — `08bf5fda2381`
 
-- **changed** [component/knowledge-compiler-cli](component/knowledge-compiler-cli.md)
-- **changed** [feature/command-line-interface-for-knowledge-compiler](feature/command-line-interface-for-knowledge-compiler.md)
-- **changed** [feature/compile-repository](feature/compile-repository.md)
-- **changed** [feature/initialize-repository](feature/initialize-repository.md)
-- **changed** [feature/inspect-repository-details](feature/inspect-repository-details.md)
-- **removed** [feature/knowledge-compiler-cli](feature/knowledge-compiler-cli.md)
-- **changed** [feature/serve-mcp-interface](feature/serve-mcp-interface.md)
-- **changed** [feature/test-scoring](feature/test-scoring.md)
-- **added** [feature/test-validation-command](feature/test-validation-command.md)
-- **changed** [feature/verify-compilation-state](feature/verify-compilation-state.md)
-- **removed** [risk/error-handling-in-gateway-function](risk/error-handling-in-gateway-function.md)
-- **removed** [risk/error-handling-with-compile-errors](risk/error-handling-with-compile-errors.md)
-- **removed** [risk/missing-coverage-block](risk/missing-coverage-block.md)
-- **removed** [risk/nonexistent-claims](risk/nonexistent-claims.md)
-- **added** [risk/path-traversal-risk](risk/path-traversal-risk.md)
-- **changed** [risk/repository-not-found-check](risk/repository-not-found-check.md)
-- **removed** [risk/user-input-validation](risk/user-input-validation.md)
-- **changed** `wiki-page/feature-initialize-repository`
-- **removed** `wiki-page/feature-knowledge-compiler-cli`
-- **added** `wiki-page/feature-test-validation-command`
-- **removed** `wiki-page/risk-error-handling-in-gateway-function`
-- **removed** `wiki-page/risk-error-handling-with-compile-errors`
-- **removed** `wiki-page/risk-missing-coverage-block`
-- **removed** `wiki-page/risk-nonexistent-claims`
-- **added** `wiki-page/risk-path-traversal-risk`
-- **changed** `wiki-page/risk-repository-not-found-check`
-- **removed** `wiki-page/risk-user-input-validation`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
