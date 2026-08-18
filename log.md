@@ -4,6 +4,39 @@
 
 ## 2026-08-18
 
+- **Update** `feature/compile-full` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `feature/delta-driven-embedding-updates-with-retry-semantics` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `feature/knowledge-compiler-cli` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `feature/reconcile` (feature) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `risk/compile-errors` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `risk/compile-failure-handling` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `risk/concurrent-execution-risk` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `risk/incomplete-error-handling` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `risk/jira-integration-reliability` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `risk/missing-configuration-validation` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `risk/missing-error-handling-on-github-gateway` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `risk/no-validation-of-embedder-output-length` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `risk/path-traversal-risk` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `risk/repository-initialization-error` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `risk/validation-failure` (risk) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/feature-compile-full` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/risk-compile-errors` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `wiki-page/risk-compile-failure-handling` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `wiki-page/risk-concurrent-execution-risk` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `wiki-page/risk-incomplete-error-handling` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `wiki-page/risk-jira-integration-reliability` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Creation** `wiki-page/risk-missing-error-handling-on-github-gateway` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/risk-no-validation-of-embedder-output-length` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Deprecation** `wiki-page/risk-repository-initialization-error` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2175 (`96d3a1d934ec`).
+
 No knowledge changes — compile run 2174 (`c45580ed7114`).
 
 - **Update** `feature/entity-retrieval` (feature) — compile run 2173 (`68b4347d850f`).
@@ -101,5 +134,3 @@ No knowledge changes — compile run 2167 (`08bf5fda2381`).
 - **Creation** `wiki-page/risk-path-traversal-risk` (wiki_page) — compile run 2166 (`a39b058642bd`).
 - **Update** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2166 (`a39b058642bd`).
 - **Deprecation** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2166 (`a39b058642bd`).
-
-No knowledge changes — compile run 2165 (`ab39520ca6c9`).
