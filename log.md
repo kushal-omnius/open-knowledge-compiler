@@ -4,6 +4,57 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2154 (`c5f374a124a3`).
+- **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/dependency-resolution` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/dependency-resolution-2` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/entity-query-tools` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Update** `feature/entity-retrieval` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/get-entity-details` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/identify-pr-introduction` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/identify-pr-that-introduced-changes` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Update** `feature/impact-analysis` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/knowledge-base-search` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/knowledge-base-server` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Update** `feature/knowledge-statistics` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/knowledge-statistics-2` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/list-entities` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/list-entities-2` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Update** `feature/recent-changes` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/recent-changes-logger` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/resolve-repository` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Update** `feature/test-coverage-analysis` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `feature/test-coverage-analysis-2` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `feature/test-recommendation-planning` (feature) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `risk/error-handling-for-missing-entities` (risk) — compile run 2154 (`c5f374a124a3`).
+- **Update** `risk/lookup-failure-handling` (risk) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `risk/unbounded-input-handling` (risk) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `risk/unbounded-input-in-dependency-resolution` (risk) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-dependency-resolution` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-dependency-resolution-2` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-entity-query-tools` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/feature-entity-retrieval` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-get-entity-details` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-identify-pr-introduction` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-identify-pr-that-introduced-changes` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-knowledge-base-search` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-knowledge-base-server` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-knowledge-statistics-2` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-list-entities` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-list-entities-2` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/feature-recent-changes` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-recent-changes-logger` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-resolve-repository` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/feature-test-coverage-analysis-2` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/risk-error-handling-for-missing-entities` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Creation** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+- **Deprecation** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2154 (`c5f374a124a3`).
+
 - **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2153 (`dc68b3cbc82d`).
 - **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 2153 (`dc68b3cbc82d`).
 - **Update** `feature/dependency-resolution` (feature) — compile run 2153 (`dc68b3cbc82d`).
@@ -132,33 +183,3 @@ No knowledge changes — compile run 2148 (`a148633a7b71`).
 - **Update** `wiki-page/risk-hardcoded-default-database-credentials` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
 
 No knowledge changes — compile run 2145 (`068abc045220`).
-
-- **Deprecation** `business-rule/idempotence-of-compile-runs` (business_rule) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `business-rule/unique-entity-slug` (business_rule) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `business-rule/unique-relationship-edge` (business_rule) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `business-rule/unique-repository-slug` (business_rule) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/artifact-storage` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/compile-run-and-repository-recording` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/delta-change-logging` (feature) — compile run 2144 (`9996266b96a4`).
-- **Creation** `feature/delta-relationship-change-logging` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/embedding-management` (feature) — compile run 2144 (`9996266b96a4`).
-- **Creation** `feature/entity-representation` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/fact-storage` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/llm-cache-management` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/provenance-tracking` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/relationship-management` (feature) — compile run 2144 (`9996266b96a4`).
-- **Update** `feature/repository-management` (feature) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `risk/incomplete-deletion-handling` (risk) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `risk/potential-data-inconsistency` (risk) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/business-rule-idempotence-of-compile-runs` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/business-rule-unique-entity-slug` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/business-rule-unique-relationship-edge` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/business-rule-unique-repository-slug` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Update** `wiki-page/feature-artifact-storage` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Creation** `wiki-page/feature-delta-relationship-change-logging` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Creation** `wiki-page/feature-entity-representation` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Update** `wiki-page/feature-fact-storage` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Update** `wiki-page/feature-llm-cache-management` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Update** `wiki-page/feature-relationship-management` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/risk-incomplete-deletion-handling` (wiki_page) — compile run 2144 (`9996266b96a4`).
-- **Deprecation** `wiki-page/risk-potential-data-inconsistency` (wiki_page) — compile run 2144 (`9996266b96a4`).

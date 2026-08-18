@@ -8,45 +8,57 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2153 — `dc68b3cbc82d`
+## Compile 2154 — `c5f374a124a3`
 
 - **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
 - **changed** [component/knowledge-compiler-mcp-server](component/knowledge-compiler-mcp-server.md)
-- **changed** [feature/dependency-resolution](feature/dependency-resolution.md)
-- **changed** [feature/dependency-resolution-2](feature/dependency-resolution-2.md)
-- **removed** [feature/determine-introduced-pr](feature/determine-introduced-pr.md)
-- **removed** [feature/entity-resolution](feature/entity-resolution.md)
+- **removed** [feature/dependency-resolution](feature/dependency-resolution.md)
+- **removed** [feature/dependency-resolution-2](feature/dependency-resolution-2.md)
+- **added** [feature/entity-query-tools](feature/entity-query-tools.md)
 - **changed** [feature/entity-retrieval](feature/entity-retrieval.md)
-- **changed** [feature/get-entity-details](feature/get-entity-details.md)
-- **changed** [feature/identify-pr-introduction](feature/identify-pr-introduction.md)
-- **added** [feature/impact-analysis](feature/impact-analysis.md)
-- **changed** [feature/knowledge-base-search](feature/knowledge-base-search.md)
-- **removed** [feature/knowledge-base-server](feature/knowledge-base-server.md)
+- **removed** [feature/get-entity-details](feature/get-entity-details.md)
+- **removed** [feature/identify-pr-introduction](feature/identify-pr-introduction.md)
+- **added** [feature/identify-pr-that-introduced-changes](feature/identify-pr-that-introduced-changes.md)
+- **changed** [feature/impact-analysis](feature/impact-analysis.md)
+- **removed** [feature/knowledge-base-search](feature/knowledge-base-search.md)
+- **added** [feature/knowledge-base-server](feature/knowledge-base-server.md)
 - **changed** [feature/knowledge-statistics](feature/knowledge-statistics.md)
-- **changed** [feature/knowledge-statistics-2](feature/knowledge-statistics-2.md)
-- **changed** [feature/list-entities](feature/list-entities.md)
-- **removed** [feature/list-entities-2](feature/list-entities-2.md)
+- **removed** [feature/knowledge-statistics-2](feature/knowledge-statistics-2.md)
+- **removed** [feature/list-entities](feature/list-entities.md)
+- **added** [feature/list-entities-2](feature/list-entities-2.md)
 - **changed** [feature/recent-changes](feature/recent-changes.md)
-- **changed** [feature/recent-changes-logger](feature/recent-changes-logger.md)
+- **removed** [feature/recent-changes-logger](feature/recent-changes-logger.md)
+- **added** [feature/resolve-repository](feature/resolve-repository.md)
 - **changed** [feature/test-coverage-analysis](feature/test-coverage-analysis.md)
-- **changed** [feature/test-coverage-analysis-2](feature/test-coverage-analysis-2.md)
-- **added** [risk/lookup-failure-handling](risk/lookup-failure-handling.md)
-- **removed** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
-- **changed** [risk/unbounded-input-in-dependency-resolution](risk/unbounded-input-in-dependency-resolution.md)
-- **removed** `wiki-page/feature-determine-introduced-pr`
-- **removed** `wiki-page/feature-entity-resolution`
-- **changed** `wiki-page/feature-get-entity-details`
-- **changed** `wiki-page/feature-identify-pr-introduction`
-- **added** `wiki-page/feature-impact-analysis`
-- **changed** `wiki-page/feature-knowledge-base-search`
-- **removed** `wiki-page/feature-knowledge-base-server`
+- **removed** [feature/test-coverage-analysis-2](feature/test-coverage-analysis-2.md)
+- **added** [feature/test-recommendation-planning](feature/test-recommendation-planning.md)
+- **added** [risk/error-handling-for-missing-entities](risk/error-handling-for-missing-entities.md)
+- **changed** [risk/lookup-failure-handling](risk/lookup-failure-handling.md)
+- **added** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
+- **removed** [risk/unbounded-input-in-dependency-resolution](risk/unbounded-input-in-dependency-resolution.md)
+- **removed** `wiki-page/feature-dependency-resolution`
+- **removed** `wiki-page/feature-dependency-resolution-2`
+- **added** `wiki-page/feature-entity-query-tools`
+- **changed** `wiki-page/feature-entity-retrieval`
+- **removed** `wiki-page/feature-get-entity-details`
+- **removed** `wiki-page/feature-identify-pr-introduction`
+- **added** `wiki-page/feature-identify-pr-that-introduced-changes`
+- **changed** `wiki-page/feature-impact-analysis`
+- **removed** `wiki-page/feature-knowledge-base-search`
+- **added** `wiki-page/feature-knowledge-base-server`
 - **changed** `wiki-page/feature-knowledge-statistics`
-- **changed** `wiki-page/feature-knowledge-statistics-2`
-- **removed** `wiki-page/feature-list-entities-2`
+- **removed** `wiki-page/feature-knowledge-statistics-2`
+- **removed** `wiki-page/feature-list-entities`
+- **added** `wiki-page/feature-list-entities-2`
+- **changed** `wiki-page/feature-recent-changes`
+- **removed** `wiki-page/feature-recent-changes-logger`
+- **added** `wiki-page/feature-resolve-repository`
 - **changed** `wiki-page/feature-test-coverage-analysis`
-- **changed** `wiki-page/feature-test-coverage-analysis-2`
-- **added** `wiki-page/risk-lookup-failure-handling`
-- **removed** `wiki-page/risk-unbounded-input-handling`
-- **changed** `wiki-page/risk-unbounded-input-in-dependency-resolution`
+- **removed** `wiki-page/feature-test-coverage-analysis-2`
+- **added** `wiki-page/feature-test-recommendation-planning`
+- **added** `wiki-page/risk-error-handling-for-missing-entities`
+- **changed** `wiki-page/risk-lookup-failure-handling`
+- **added** `wiki-page/risk-unbounded-input-handling`
+- **removed** `wiki-page/risk-unbounded-input-in-dependency-resolution`
 
 Full chronological history: [log.md](log.md).
