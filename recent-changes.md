@@ -8,8 +8,45 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2152 — `7ca523fee40b`
+## Compile 2153 — `dc68b3cbc82d`
 
-No knowledge changes.
+- **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
+- **changed** [component/knowledge-compiler-mcp-server](component/knowledge-compiler-mcp-server.md)
+- **changed** [feature/dependency-resolution](feature/dependency-resolution.md)
+- **changed** [feature/dependency-resolution-2](feature/dependency-resolution-2.md)
+- **removed** [feature/determine-introduced-pr](feature/determine-introduced-pr.md)
+- **removed** [feature/entity-resolution](feature/entity-resolution.md)
+- **changed** [feature/entity-retrieval](feature/entity-retrieval.md)
+- **changed** [feature/get-entity-details](feature/get-entity-details.md)
+- **changed** [feature/identify-pr-introduction](feature/identify-pr-introduction.md)
+- **added** [feature/impact-analysis](feature/impact-analysis.md)
+- **changed** [feature/knowledge-base-search](feature/knowledge-base-search.md)
+- **removed** [feature/knowledge-base-server](feature/knowledge-base-server.md)
+- **changed** [feature/knowledge-statistics](feature/knowledge-statistics.md)
+- **changed** [feature/knowledge-statistics-2](feature/knowledge-statistics-2.md)
+- **changed** [feature/list-entities](feature/list-entities.md)
+- **removed** [feature/list-entities-2](feature/list-entities-2.md)
+- **changed** [feature/recent-changes](feature/recent-changes.md)
+- **changed** [feature/recent-changes-logger](feature/recent-changes-logger.md)
+- **changed** [feature/test-coverage-analysis](feature/test-coverage-analysis.md)
+- **changed** [feature/test-coverage-analysis-2](feature/test-coverage-analysis-2.md)
+- **added** [risk/lookup-failure-handling](risk/lookup-failure-handling.md)
+- **removed** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
+- **changed** [risk/unbounded-input-in-dependency-resolution](risk/unbounded-input-in-dependency-resolution.md)
+- **removed** `wiki-page/feature-determine-introduced-pr`
+- **removed** `wiki-page/feature-entity-resolution`
+- **changed** `wiki-page/feature-get-entity-details`
+- **changed** `wiki-page/feature-identify-pr-introduction`
+- **added** `wiki-page/feature-impact-analysis`
+- **changed** `wiki-page/feature-knowledge-base-search`
+- **removed** `wiki-page/feature-knowledge-base-server`
+- **changed** `wiki-page/feature-knowledge-statistics`
+- **changed** `wiki-page/feature-knowledge-statistics-2`
+- **removed** `wiki-page/feature-list-entities-2`
+- **changed** `wiki-page/feature-test-coverage-analysis`
+- **changed** `wiki-page/feature-test-coverage-analysis-2`
+- **added** `wiki-page/risk-lookup-failure-handling`
+- **removed** `wiki-page/risk-unbounded-input-handling`
+- **changed** `wiki-page/risk-unbounded-input-in-dependency-resolution`
 
 Full chronological history: [log.md](log.md).
