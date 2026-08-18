@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2163 (`538e5c2d725a`).
+
 No knowledge changes — compile run 2162 (`98acc2153cdd`).
 
 No knowledge changes — compile run 2161 (`bba797dd9fcb`).
@@ -166,42 +168,3 @@ No knowledge changes — compile run 2156 (`89408ec668bb`).
 - **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2154 (`c5f374a124a3`).
 - **Creation** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2154 (`c5f374a124a3`).
 - **Deprecation** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2154 (`c5f374a124a3`).
-
-- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/dependency-resolution` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/dependency-resolution-2` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `feature/determine-introduced-pr` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `feature/entity-resolution` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/entity-retrieval` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/get-entity-details` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/identify-pr-introduction` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Creation** `feature/impact-analysis` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/knowledge-base-search` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `feature/knowledge-base-server` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/knowledge-statistics` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/knowledge-statistics-2` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/list-entities` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `feature/list-entities-2` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/recent-changes` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/recent-changes-logger` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/test-coverage-analysis` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `feature/test-coverage-analysis-2` (feature) — compile run 2153 (`dc68b3cbc82d`).
-- **Creation** `risk/lookup-failure-handling` (risk) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `risk/unbounded-input-handling` (risk) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `risk/unbounded-input-in-dependency-resolution` (risk) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `wiki-page/feature-determine-introduced-pr` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `wiki-page/feature-entity-resolution` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-get-entity-details` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-identify-pr-introduction` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Creation** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-knowledge-base-search` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `wiki-page/feature-knowledge-base-server` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-knowledge-statistics-2` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `wiki-page/feature-list-entities-2` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/feature-test-coverage-analysis-2` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Creation** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Deprecation** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
-- **Update** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2153 (`dc68b3cbc82d`).
