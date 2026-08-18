@@ -4,6 +4,55 @@
 
 ## 2026-08-18
 
+- **Creation** `business-rule/identity-matching-configuration` (business_rule) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `component/knowledge-compiler-collectors-jira` (component) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `component/tests-test-incremental` (component) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `feature/compile-full` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `feature/jira-issue-collector` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `feature/reconcile` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `risk/cache-file-risk` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `risk/data-handling-risk` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `risk/file-write-risks` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `risk/incomplete-compile-summary-on-failure` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `risk/llm-provider-dependency` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `risk/missing-environment-variables` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `risk/missing-repository-configuration` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `risk/repository-locking-mechanism` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `risk/rollback-on-exception` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `risk/silent-omission-of-missing-issues` (risk) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `test-coverage/tests-test-incremental-py-test-dropped-import-removes-edge-despite-target-out-of-scope` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-jira-disabled-by-default-no-facts` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-jira-facts-mint-story-and-link-to-pr` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `test-coverage/tests-test-incremental-py-test-pr-compile-produces-precise-delta` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `test-coverage/tests-test-incremental-py-test-pr-deletion-removes-only-in-scope-entities` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `test-coverage/tests-test-incremental-py-test-pr-slice-links-into-out-of-scope-components` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `test-coverage/tests-test-incremental-py-test-reconcile-processes-backlog-in-order-and-is-idempotent` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/business-rule-identity-matching-configuration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/feature-compile-full` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/feature-deterministic-facts-to-entities-normalization` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/feature-jira-issue-collector` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/feature-reconcile` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `wiki-page/risk-cache-file-risk` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `wiki-page/risk-data-handling-risk` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/risk-incomplete-compile-summary-on-failure` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `wiki-page/risk-llm-provider-dependency` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/risk-missing-environment-variables` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/risk-missing-repository-configuration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Deprecation** `wiki-page/risk-repository-locking-mechanism` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Update** `wiki-page/risk-rollback-on-exception` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+- **Creation** `wiki-page/risk-silent-omission-of-missing-issues` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
+
 - **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2154 (`c5f374a124a3`).
 - **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 2154 (`c5f374a124a3`).
 - **Deprecation** `feature/dependency-resolution` (feature) — compile run 2154 (`c5f374a124a3`).
@@ -181,5 +230,3 @@ No knowledge changes — compile run 2148 (`a148633a7b71`).
 - **Update** `wiki-page/feature-per-repository-advisory-lock-context-manager` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
 - **Deprecation** `wiki-page/risk-advisory-lock-failure-handling` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
 - **Update** `wiki-page/risk-hardcoded-default-database-credentials` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
-
-No knowledge changes — compile run 2145 (`068abc045220`).
