@@ -8,8 +8,15 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2145 — `068abc045220`
+## Compile 2146 — `71e8c5d19d02`
 
-No knowledge changes.
+- **changed** [feature/configurable-sqlalchemy-engine-creation](feature/configurable-sqlalchemy-engine-creation.md)
+- **changed** [feature/database-engine-creation](feature/database-engine-creation.md)
+- **changed** [feature/per-repository-advisory-lock-context-manager](feature/per-repository-advisory-lock-context-manager.md)
+- **removed** [risk/advisory-lock-failure-handling](risk/advisory-lock-failure-handling.md)
+- **changed** [risk/hardcoded-default-database-credentials](risk/hardcoded-default-database-credentials.md)
+- **changed** `wiki-page/feature-per-repository-advisory-lock-context-manager`
+- **removed** `wiki-page/risk-advisory-lock-failure-handling`
+- **changed** `wiki-page/risk-hardcoded-default-database-credentials`
 
 Full chronological history: [log.md](log.md).

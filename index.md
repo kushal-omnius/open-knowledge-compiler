@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2145 · Commit: `068abc045220`
+Repo: `knowledge-compiler` · Compile run: 2146 · Commit: `71e8c5d19d02`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -143,7 +143,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [LLMProvider Protocol](feature/llmprovider-protocol.md)
 - [OpenAI Embedder](feature/openai-embeddings-via-sdk.md)
 - [OpenAIProvider](feature/openai-provider.md)
-- [Repository Locking Mechanism](feature/per-repository-advisory-lock-context-manager.md)
+- [Advisory Locking Mechanism](feature/per-repository-advisory-lock-context-manager.md)
 - [Prompt Builder](feature/prompt-rendering-for-semantic-extraction.md)
 - [Provenance Tracking](feature/provenance-tracking.md)
 - [build_provider function](feature/provider-factory.md)
@@ -175,9 +175,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (47)
+## Risks (46)
 
-- [Advisory Lock Failure Handling](risk/advisory-lock-failure-handling.md)
 - [Cache File Risk](risk/cache-file-risk.md)
 - [Dangling Pages](risk/clean-page-regeneration.md)
 - [Data Handling Risk](risk/data-handling-risk.md)
@@ -191,7 +190,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
 - [Error Handling in Gateway Function](risk/error-handling-in-gateway-function.md)
-- [Potential Missing Environment Variable](risk/hardcoded-default-database-credentials.md)
+- [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [LLM Provider Dependency](risk/llm-provider-dependency.md)

@@ -4,6 +4,15 @@
 
 ## 2026-08-18
 
+- **Update** `feature/configurable-sqlalchemy-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
+- **Update** `feature/database-engine-creation` (feature) — compile run 2146 (`71e8c5d19d02`).
+- **Update** `feature/per-repository-advisory-lock-context-manager` (feature) — compile run 2146 (`71e8c5d19d02`).
+- **Deprecation** `risk/advisory-lock-failure-handling` (risk) — compile run 2146 (`71e8c5d19d02`).
+- **Update** `risk/hardcoded-default-database-credentials` (risk) — compile run 2146 (`71e8c5d19d02`).
+- **Update** `wiki-page/feature-per-repository-advisory-lock-context-manager` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
+- **Deprecation** `wiki-page/risk-advisory-lock-failure-handling` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
+- **Update** `wiki-page/risk-hardcoded-default-database-credentials` (wiki_page) — compile run 2146 (`71e8c5d19d02`).
+
 No knowledge changes — compile run 2145 (`068abc045220`).
 
 - **Deprecation** `business-rule/idempotence-of-compile-runs` (business_rule) — compile run 2144 (`9996266b96a4`).
@@ -542,5 +551,3 @@ No knowledge changes — compile run 2138 (`68ebb2190721`).
 ## 2026-08-10
 
 No knowledge changes — compile run 1923 (`8ea4d04f6971`).
-
-No knowledge changes — compile run 1922 (`8ea4d04f6971`).
