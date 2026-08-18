@@ -8,29 +8,14 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2193 — `3dc1298695ac`
+## Compile 2194 — `2070f231c419`
 
+- **changed** [component/knowledge-compiler-wiki-emitter](component/knowledge-compiler-wiki-emitter.md)
 - **changed** [component/tests-test-wiki-emitter](component/tests-test-wiki-emitter.md)
-- **changed** [feature/compile-full](feature/compile-full.md)
-- **added** [feature/emit-wiki](feature/emit-wiki.md)
 - **changed** [feature/generate-index-and-recent-changes-pages](feature/generate-index-and-recent-changes-pages.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **changed** [feature/reconcile](feature/reconcile.md)
-- **added** `pull-request/5`
-- **added** [risk/dangling-page-risk](risk/dangling-page-risk.md)
-- **changed** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
-- **added** [risk/possible-sql-injection](risk/possible-sql-injection.md)
-- **changed** [risk/sql-transaction-failure](risk/sql-transaction-failure.md)
-- **removed** [risk/uncontrolled-llm-errors](risk/uncontrolled-llm-errors.md)
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page`
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets`
-- **added** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender`
-- **added** `wiki-page/feature-emit-wiki`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **changed** `wiki-page/feature-reconcile`
-- **added** `wiki-page/risk-dangling-page-risk`
-- **added** `wiki-page/risk-possible-sql-injection`
-- **changed** `wiki-page/risk-sql-transaction-failure`
-- **removed** `wiki-page/risk-uncontrolled-llm-errors`
+- **added** `pull-request/6`
+- **changed** [risk/dangling-page-risk](risk/dangling-page-risk.md)
+- **added** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed`
+- **changed** `wiki-page/risk-dangling-page-risk`
 
 Full chronological history: [log.md](log.md).

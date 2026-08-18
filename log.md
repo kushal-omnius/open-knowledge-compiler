@@ -4,6 +4,14 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 2194 (`2070f231c419`).
+- **Update** `component/tests-test-wiki-emitter` (component) — compile run 2194 (`2070f231c419`).
+- **Update** `feature/generate-index-and-recent-changes-pages` (feature) — compile run 2194 (`2070f231c419`).
+- **Creation** `pull-request/6` (pull_request) — compile run 2194 (`2070f231c419`).
+- **Update** `risk/dangling-page-risk` (risk) — compile run 2194 (`2070f231c419`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed` (test_coverage) — compile run 2194 (`2070f231c419`).
+- **Update** `wiki-page/risk-dangling-page-risk` (wiki_page) — compile run 2194 (`2070f231c419`).
+
 - **Update** `component/tests-test-wiki-emitter` (component) — compile run 2193 (`3dc1298695ac`).
 - **Update** `feature/compile-full` (feature) — compile run 2193 (`3dc1298695ac`).
 - **Creation** `feature/emit-wiki` (feature) — compile run 2193 (`3dc1298695ac`).
@@ -120,5 +128,3 @@
 - **Deprecation** `wiki-page/risk-stale-state-handling` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
 - **Creation** `wiki-page/risk-uncontrolled-llm-errors` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
 - **Creation** `wiki-page/risk-validation-of-input-file-types` (wiki_page) — compile run 2185 (`0f3266d76fd5`).
-
-No knowledge changes — compile run 2184 (`835f9e99fbd6`).

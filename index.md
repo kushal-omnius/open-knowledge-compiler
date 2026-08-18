@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2193 · Commit: `3dc1298695ac`
+Repo: `knowledge-compiler` · Compile run: 2194 · Commit: `2070f231c419`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -194,7 +194,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 
 - [Error Handling for Repository Initialization](risk/compile-errors.md)
 - [Conformance Check Risk in Validate OKF Command](risk/conformance-check-risk-in-validate-okf-command.md)
-- [Dangling Page Risk](risk/dangling-page-risk.md)
+- [Dangling Pages Risk](risk/dangling-page-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
