@@ -8,15 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2147 — `132008ede87a`
+## Compile 2148 — `a148633a7b71`
 
-- **changed** [component/knowledge-compiler-extractors-typescript-analyzer](component/knowledge-compiler-extractors-typescript-analyzer.md)
-- **changed** [feature/deterministic-facts-to-entities-normalization](feature/deterministic-facts-to-entities-normalization.md)
-- **changed** [feature/typescript-fact-extractor](feature/typescript-fact-extractor.md)
-- **added** [risk/insufficient-handling-of-non-conformant-artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
-- **changed** [risk/potential-for-identity-conflicts](risk/potential-for-identity-conflicts.md)
-- **changed** `wiki-page/feature-typescript-fact-extractor`
-- **added** `wiki-page/risk-insufficient-handling-of-non-conformant-artifacts`
-- **changed** `wiki-page/risk-potential-for-identity-conflicts`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).

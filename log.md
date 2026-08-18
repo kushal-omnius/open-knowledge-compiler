@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2148 (`a148633a7b71`).
+
 - **Update** `component/knowledge-compiler-extractors-typescript-analyzer` (component) — compile run 2147 (`132008ede87a`).
 - **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2147 (`132008ede87a`).
 - **Update** `feature/typescript-fact-extractor` (feature) — compile run 2147 (`132008ede87a`).
@@ -554,5 +556,3 @@ No knowledge changes — compile run 2145 (`068abc045220`).
 - **Deprecation** `wiki-page/risk-validator-errors-unchecked` (wiki_page) — compile run 2140 (`99f2f418ca6c`).
 
 No knowledge changes — compile run 2139 (`bd64b07db813`).
-
-No knowledge changes — compile run 2138 (`68ebb2190721`).
