@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2165 (`ab39520ca6c9`).
+
 No knowledge changes — compile run 2164 (`b505f6486519`).
 
 No knowledge changes — compile run 2163 (`538e5c2d725a`).
@@ -70,52 +72,3 @@ No knowledge changes — compile run 2158 (`d77e6a290055`).
 No knowledge changes — compile run 2157 (`003a24cf276f`).
 
 No knowledge changes — compile run 2156 (`89408ec668bb`).
-
-- **Creation** `business-rule/identity-matching-configuration` (business_rule) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `component/knowledge-compiler-collectors-jira` (component) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `component/tests-test-incremental` (component) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `feature/compile-full` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `feature/incremental-compilation` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `feature/jira-issue-collector` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `feature/reconcile` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `risk/cache-file-risk` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `risk/data-handling-risk` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `risk/file-write-risks` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `risk/incomplete-compile-summary-on-failure` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `risk/llm-provider-dependency` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `risk/missing-environment-variables` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `risk/missing-repository-configuration` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `risk/repository-locking-mechanism` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `risk/rollback-on-exception` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `risk/silent-omission-of-missing-issues` (risk) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `test-coverage/tests-test-incremental-py-test-dropped-import-removes-edge-despite-target-out-of-scope` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-jira-disabled-by-default-no-facts` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-jira-facts-mint-story-and-link-to-pr` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `test-coverage/tests-test-incremental-py-test-pr-compile-produces-precise-delta` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `test-coverage/tests-test-incremental-py-test-pr-deletion-removes-only-in-scope-entities` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `test-coverage/tests-test-incremental-py-test-pr-slice-links-into-out-of-scope-components` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `test-coverage/tests-test-incremental-py-test-reconcile-processes-backlog-in-order-and-is-idempotent` (test_coverage) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/business-rule-identity-matching-configuration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/feature-compile-full` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/feature-deterministic-facts-to-entities-normalization` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/feature-jira-issue-collector` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/feature-reconcile` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `wiki-page/risk-cache-file-risk` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `wiki-page/risk-data-handling-risk` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/risk-incomplete-compile-summary-on-failure` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `wiki-page/risk-llm-provider-dependency` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/risk-missing-environment-variables` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/risk-missing-repository-configuration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Deprecation** `wiki-page/risk-repository-locking-mechanism` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Update** `wiki-page/risk-rollback-on-exception` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
-- **Creation** `wiki-page/risk-silent-omission-of-missing-issues` (wiki_page) — compile run 2155 (`11dbc1fd81c6`).
