@@ -8,41 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2187 — `5b489ee9f53d`
+## Compile 2188 — `14d5668b6003`
 
-- **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
-- **changed** [component/tests-test-pipeline-integration](component/tests-test-pipeline-integration.md)
-- **added** [feature/compute-coverage-for-a-component](feature/compute-coverage-for-a-component.md)
-- **changed** [feature/entity-retrieval](feature/entity-retrieval.md)
-- **added** [feature/identify-the-pull-request-introducing-a-change](feature/identify-the-pull-request-introducing-a-change.md)
-- **changed** [feature/impact-analysis](feature/impact-analysis.md)
-- **changed** [feature/knowledge-statistics](feature/knowledge-statistics.md)
-- **added** [feature/list-entities-by-type](feature/list-entities-by-type.md)
-- **added** [feature/resolve-cross-repository-dependencies](feature/resolve-cross-repository-dependencies.md)
-- **changed** [feature/resolve-repository](feature/resolve-repository.md)
-- **changed** [feature/test-recommendation-planning](feature/test-recommendation-planning.md)
-- **added** [feature/track-recent-changes-in-a-repository](feature/track-recent-changes-in-a-repository.md)
-- **changed** [risk/lookup-failure-handling](risk/lookup-failure-handling.md)
-- **changed** [risk/unbounded-input-for-dependency-resolution](risk/unbounded-input-for-dependency-resolution.md)
-- **removed** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
-- **changed** `test-coverage/tests-test-pipeline-integration-py-test-emit-only-reruns-emission-without-new-compile-run`
-- **changed** `test-coverage/tests-test-pipeline-integration-py-test-full-compile-builds-knowledge-base`
-- **changed** `test-coverage/tests-test-pipeline-integration-py-test-recompile-unchanged-repo-is-empty-delta`
-- **changed** `test-coverage/tests-test-pipeline-integration-py-test-source-change-produces-precise-delta`
-- **added** `test-coverage/tests-test-pipeline-integration-py-test-test-plan-never-recommends-testing-a-test-file`
-- **changed** `test-coverage/tests-test-pipeline-integration-py-test-two-repos-in-one-database-stay-isolated`
-- **added** `wiki-page/feature-compute-coverage-for-a-component`
-- **changed** `wiki-page/feature-entity-retrieval`
-- **added** `wiki-page/feature-identify-the-pull-request-introducing-a-change`
-- **changed** `wiki-page/feature-impact-analysis`
-- **changed** `wiki-page/feature-knowledge-statistics`
-- **added** `wiki-page/feature-list-entities-by-type`
-- **added** `wiki-page/feature-resolve-cross-repository-dependencies`
-- **changed** `wiki-page/feature-resolve-repository`
-- **changed** `wiki-page/feature-test-recommendation-planning`
-- **added** `wiki-page/feature-track-recent-changes-in-a-repository`
-- **changed** `wiki-page/risk-lookup-failure-handling`
-- **changed** `wiki-page/risk-unbounded-input-for-dependency-resolution`
-- **removed** `wiki-page/risk-unbounded-input-handling`
+- **added** `pull-request/1`
 
 Full chronological history: [log.md](log.md).
