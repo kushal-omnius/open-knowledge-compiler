@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2169 (`3fc85505c984`).
+
 - **Deprecation** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2168 (`eb04551fdedb`).
 - **Deprecation** `feature/compile-repository` (feature) — compile run 2168 (`eb04551fdedb`).
 - **Deprecation** `feature/initialize-repository` (feature) — compile run 2168 (`eb04551fdedb`).
@@ -124,5 +126,3 @@ No knowledge changes — compile run 2161 (`bba797dd9fcb`).
 - **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2160 (`025b533ee212`).
 - **Update** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2160 (`025b533ee212`).
 - **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
-
-No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
