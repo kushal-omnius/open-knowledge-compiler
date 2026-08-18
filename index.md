@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2172 · Commit: `32438d0aea0c`
+Repo: `knowledge-compiler` · Compile run: 2173 · Commit: `68b4347d850f`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -81,7 +81,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (82)
+## Features (79)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Storage](feature/artifact-storage.md)
@@ -121,17 +121,15 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Git Branch Publisher](feature/git-branch-publisher.md)
 - [Git Collector](feature/git-collector.md)
 - [Hybrid Search](feature/hybrid-search-with-reciprocal-rank-fusion.md)
-- [Identify PR that Introduced Changes](feature/identify-pr-that-introduced-changes.md)
-- [Impact Planning for Changes](feature/impact-analysis.md)
+- [Impact Analysis](feature/impact-analysis.md)
 - [Semantic Verification](feature/incremental-compilation.md)
 - [JavaScript Code Analysis](feature/javascript-code-analysis.md)
 - [Jira Issue Collector](feature/jira-issue-collector.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Base Server](feature/knowledge-base-server.md)
 - [Knowledge Compiler CLI](feature/knowledge-compiler-cli.md)
-- [Knowledge Statistics](feature/knowledge-statistics.md)
+- [Knowledge Statistics Retrieval](feature/knowledge-statistics.md)
 - [LanguageAnalyzer Protocol](feature/languageanalyzer-protocol.md)
-- [List Entities](feature/list-entities-2.md)
 - [List Merged Pull Requests](feature/list-merged-pull-requests.md)
 - [LLM Cache](feature/llm-cache.md)
 - [LLM Cache Creation](feature/llm-cache-database-migration.md)
@@ -148,7 +146,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Python Language Analysis](feature/python-language-analysis.md)
 - [Read Mutation Scores](feature/read-mutation-scores.md)
 - [Search Vector Indexing](feature/rebuild-entities-search-vector-with-dotted-name-tokenization.md)
-- [Determine Recent Changes](feature/recent-changes.md)
+- [Recent Changes Tracking](feature/recent-changes.md)
 - [PR Reconciliation](feature/reconcile.md)
 - [Load Current State](feature/rehydrate-current-ir-state-from-the-database.md)
 - [Relationship Management](feature/relationship-management.md)
@@ -160,8 +158,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Run Migrations Online](feature/run-migrations-in-online-mode.md)
 - [Semantic Search](feature/semantic-vector-search-cosine-knn.md)
 - [Publisher Protocol](feature/stage-plugin-interface-protocols.md)
-- [Coverage Analysis](feature/test-coverage-analysis.md)
-- [Test Recommendation Planning](feature/test-recommendation-planning.md)
+- [Test Recommendation Generation](feature/test-recommendation-planning.md)
 - [Test Scoring](feature/test-scoring.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
 - [Versioning Information](feature/versioning-information.md)
@@ -173,7 +170,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (48)
+## Risks (49)
 
 - [Dangling Pages](risk/clean-page-regeneration.md)
 - [Compile Errors](risk/compile-errors.md)
@@ -188,13 +185,13 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
 - [Error Handling for Missing Entities](risk/error-handling-for-missing-entities.md)
 - [Directory Traversal Risk](risk/error-handling-for-missing-type.md)
-- [File Write Risks](risk/file-write-risks.md)
+- [Hardcoded Configuration Template](risk/file-write-risks.md)
 - [Potential for Non-Existent Environment Variable](risk/hardcoded-default-database-credentials.md)
 - [Unbounded Page Retrieval](risk/incomplete-pr-coverage-due-to-fixed-page-bound.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [Insufficient Handling of Non-conformant Artifacts](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [JIRA Integration Reliability](risk/jira-integration-reliability.md)
-- [LookupError Handling](risk/lookup-failure-handling.md)
+- [Lookup Error Handling](risk/lookup-failure-handling.md)
 - [Error Handling with API Calls](risk/malformed-model-output-causes-unhandled-json-error.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Missing Environment Variables](risk/missing-environment-variables.md)
@@ -211,7 +208,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Potential for Over-splitting Entities](risk/potential-for-identity-conflicts.md)
 - [Potential for Non-Parseable Frontmatter](risk/potential-for-non-parseable-frontmatter.md)
 - [Potential Missing Imports Handling](risk/potential-missing-imports-handling.md)
-- [Database Connection Handling](risk/potential-race-condition-during-repository-registration.md)
+- [No Error Handling on Database Operations](risk/potential-race-condition-during-repository-registration.md)
 - [Publish Error Handling](risk/publish-error-handling.md)
 - [Missing Error Handling on Cache Retrieval](risk/race-on-first-write-leading-to-integrity-errors.md)
 - [Repository Initialization Error](risk/repository-initialization-error.md)
@@ -220,6 +217,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Silent Omission of Missing Issues](risk/silent-omission-of-missing-issues.md)
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
 - [Token Exposure Risk](risk/token-exposure-risk.md)
-- [Unbounded Input Handling](risk/unbounded-input-handling.md)
+- [Unbounded Input for Dependency Resolution](risk/unbounded-input-for-dependency-resolution.md)
+- [Possible KeyError for Missing Dependencies](risk/unbounded-input-handling.md)
 - [Unparsable File Handling](risk/unparsable-file-handling.md)
 - [Validation Failure](risk/validation-failure.md)

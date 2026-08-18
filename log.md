@@ -4,6 +4,34 @@
 
 ## 2026-08-18
 
+- **Update** `feature/entity-retrieval` (feature) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `feature/identify-pr-that-introduced-changes` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/impact-analysis` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/knowledge-statistics` (feature) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `feature/list-entities-2` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/recent-changes` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/resolve-repository` (feature) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `feature/test-coverage-analysis` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `feature/test-recommendation-planning` (feature) — compile run 2173 (`68b4347d850f`).
+- **Update** `risk/file-write-risks` (risk) — compile run 2173 (`68b4347d850f`).
+- **Update** `risk/lookup-failure-handling` (risk) — compile run 2173 (`68b4347d850f`).
+- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2173 (`68b4347d850f`).
+- **Creation** `risk/unbounded-input-for-dependency-resolution` (risk) — compile run 2173 (`68b4347d850f`).
+- **Update** `risk/unbounded-input-handling` (risk) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `wiki-page/feature-identify-pr-that-introduced-changes` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `wiki-page/feature-list-entities-2` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/feature-recent-changes` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Deprecation** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/risk-lookup-failure-handling` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Creation** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2173 (`68b4347d850f`).
+- **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2173 (`68b4347d850f`).
+
 No knowledge changes — compile run 2172 (`32438d0aea0c`).
 
 No knowledge changes — compile run 2171 (`06c1b369cae8`).
@@ -75,5 +103,3 @@ No knowledge changes — compile run 2167 (`08bf5fda2381`).
 No knowledge changes — compile run 2165 (`ab39520ca6c9`).
 
 No knowledge changes — compile run 2164 (`b505f6486519`).
-
-No knowledge changes — compile run 2163 (`538e5c2d725a`).

@@ -8,8 +8,34 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2172 — `32438d0aea0c`
+## Compile 2173 — `68b4347d850f`
 
-No knowledge changes.
+- **changed** [feature/entity-retrieval](feature/entity-retrieval.md)
+- **removed** [feature/identify-pr-that-introduced-changes](feature/identify-pr-that-introduced-changes.md)
+- **changed** [feature/impact-analysis](feature/impact-analysis.md)
+- **changed** [feature/knowledge-statistics](feature/knowledge-statistics.md)
+- **removed** [feature/list-entities-2](feature/list-entities-2.md)
+- **changed** [feature/recent-changes](feature/recent-changes.md)
+- **changed** [feature/repository-initialization-orchestration](feature/repository-initialization-orchestration.md)
+- **changed** [feature/resolve-repository](feature/resolve-repository.md)
+- **removed** [feature/test-coverage-analysis](feature/test-coverage-analysis.md)
+- **changed** [feature/test-recommendation-planning](feature/test-recommendation-planning.md)
+- **changed** [risk/file-write-risks](risk/file-write-risks.md)
+- **changed** [risk/lookup-failure-handling](risk/lookup-failure-handling.md)
+- **changed** [risk/potential-race-condition-during-repository-registration](risk/potential-race-condition-during-repository-registration.md)
+- **added** [risk/unbounded-input-for-dependency-resolution](risk/unbounded-input-for-dependency-resolution.md)
+- **changed** [risk/unbounded-input-handling](risk/unbounded-input-handling.md)
+- **removed** `wiki-page/feature-identify-pr-that-introduced-changes`
+- **changed** `wiki-page/feature-impact-analysis`
+- **changed** `wiki-page/feature-knowledge-statistics`
+- **removed** `wiki-page/feature-list-entities-2`
+- **changed** `wiki-page/feature-recent-changes`
+- **removed** `wiki-page/feature-test-coverage-analysis`
+- **changed** `wiki-page/feature-test-recommendation-planning`
+- **changed** `wiki-page/risk-file-write-risks`
+- **changed** `wiki-page/risk-lookup-failure-handling`
+- **changed** `wiki-page/risk-potential-race-condition-during-repository-registration`
+- **added** `wiki-page/risk-unbounded-input-for-dependency-resolution`
+- **changed** `wiki-page/risk-unbounded-input-handling`
 
 Full chronological history: [log.md](log.md).
