@@ -8,39 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2175 — `96d3a1d934ec`
+## Compile 2176 — `47529ea7a4cc`
 
-- **changed** [feature/compile-full](feature/compile-full.md)
-- **changed** [feature/delta-driven-embedding-updates-with-retry-semantics](feature/delta-driven-embedding-updates-with-retry-semantics.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **changed** [feature/knowledge-compiler-cli](feature/knowledge-compiler-cli.md)
-- **changed** [feature/llm-semantic-extraction](feature/llm-semantic-extraction.md)
-- **changed** [feature/reconcile](feature/reconcile.md)
-- **changed** [risk/compile-errors](risk/compile-errors.md)
-- **removed** [risk/compile-failure-handling](risk/compile-failure-handling.md)
-- **added** [risk/concurrent-execution-risk](risk/concurrent-execution-risk.md)
-- **added** [risk/incomplete-error-handling](risk/incomplete-error-handling.md)
-- **removed** [risk/jira-integration-reliability](risk/jira-integration-reliability.md)
-- **added** [risk/missing-configuration-validation](risk/missing-configuration-validation.md)
-- **added** [risk/missing-error-handling-on-github-gateway](risk/missing-error-handling-on-github-gateway.md)
-- **changed** [risk/no-validation-of-embedder-output-length](risk/no-validation-of-embedder-output-length.md)
-- **removed** [risk/path-traversal-risk](risk/path-traversal-risk.md)
-- **removed** [risk/repository-initialization-error](risk/repository-initialization-error.md)
-- **changed** [risk/run-termination-on-exhausted-llm-budget](risk/run-termination-on-exhausted-llm-budget.md)
-- **changed** [risk/validation-failure](risk/validation-failure.md)
-- **changed** `wiki-page/feature-compile-full`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **changed** `wiki-page/feature-reconcile`
-- **changed** `wiki-page/risk-compile-errors`
-- **removed** `wiki-page/risk-compile-failure-handling`
-- **added** `wiki-page/risk-concurrent-execution-risk`
-- **added** `wiki-page/risk-incomplete-error-handling`
-- **removed** `wiki-page/risk-jira-integration-reliability`
-- **added** `wiki-page/risk-missing-configuration-validation`
-- **added** `wiki-page/risk-missing-error-handling-on-github-gateway`
-- **changed** `wiki-page/risk-no-validation-of-embedder-output-length`
-- **removed** `wiki-page/risk-path-traversal-risk`
-- **removed** `wiki-page/risk-repository-initialization-error`
-- **changed** `wiki-page/risk-run-termination-on-exhausted-llm-budget`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
