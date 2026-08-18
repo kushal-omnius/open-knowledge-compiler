@@ -4,6 +4,57 @@
 
 ## 2026-08-18
 
+- **Update** `component/knowledge-compiler-cli` (component) — compile run 2160 (`025b533ee212`).
+- **Update** `component/knowledge-compiler-extractors-llm-extractor` (component) — compile run 2160 (`025b533ee212`).
+- **Update** `component/knowledge-compiler-retrieval-embed` (component) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/command-line-interface-for-knowledge-compiler` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/compile-full` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/compile-repository` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/delta-driven-embedding-updates-with-retry-semantics` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/initialize-repository` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/inspect-repository-details` (feature) — compile run 2160 (`025b533ee212`).
+- **Creation** `feature/knowledge-compiler-cli` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/reconcile` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/serve-mcp-interface` (feature) — compile run 2160 (`025b533ee212`).
+- **Update** `feature/verify-compilation-state` (feature) — compile run 2160 (`025b533ee212`).
+- **Creation** `risk/compile-failure-handling` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `risk/error-handling-in-gateway-function` (risk) — compile run 2160 (`025b533ee212`).
+- **Creation** `risk/error-handling-with-compile-errors` (risk) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `risk/incomplete-compile-summary-on-failure` (risk) — compile run 2160 (`025b533ee212`).
+- **Creation** `risk/jira-integration-reliability` (risk) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `risk/missing-repository-configuration` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `risk/no-validation-of-embedder-output-length` (risk) — compile run 2160 (`025b533ee212`).
+- **Creation** `risk/repository-not-found-check` (risk) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `risk/rollback-on-exception` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `risk/user-input-validation` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `risk/validation-failure` (risk) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-command-line-interface-for-knowledge-compiler` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-compile-full` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-compile-repository` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-delta-driven-embedding-updates-with-retry-semantics` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-initialize-repository` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-inspect-repository-details` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Creation** `wiki-page/feature-knowledge-compiler-cli` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-reconcile` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-serve-mcp-interface` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/feature-verify-compilation-state` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Creation** `wiki-page/risk-compile-failure-handling` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/risk-error-handling-in-gateway-function` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Creation** `wiki-page/risk-error-handling-with-compile-errors` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `wiki-page/risk-incomplete-compile-summary-on-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Creation** `wiki-page/risk-jira-integration-reliability` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `wiki-page/risk-missing-repository-configuration` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/risk-no-validation-of-embedder-output-length` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Creation** `wiki-page/risk-repository-not-found-check` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Deprecation** `wiki-page/risk-rollback-on-exception` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2160 (`025b533ee212`).
+- **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2160 (`025b533ee212`).
+
 No knowledge changes — compile run 2159 (`17cd14ea7cb0`).
 
 No knowledge changes — compile run 2158 (`d77e6a290055`).
@@ -154,49 +205,3 @@ No knowledge changes — compile run 2156 (`89408ec668bb`).
 No knowledge changes — compile run 2152 (`7ca523fee40b`).
 
 No knowledge changes — compile run 2151 (`72dc7bde8673`).
-
-- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `feature/dependency-resolution` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `feature/dependency-resolution-2` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/determine-introduced-pr` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/entity-resolution` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/entity-retrieval` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/get-entity-details` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/identify-pr-introduction` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/knowledge-base-search` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `feature/knowledge-base-server` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/knowledge-statistics` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `feature/knowledge-statistics-2` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/list-entities` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `feature/list-entities-2` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/recent-changes` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/recent-changes-logger` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/test-coverage-analysis` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `feature/test-coverage-analysis-2` (feature) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2150 (`a0f08b9b6a20`).
-- **Deprecation** `risk/stale-test-coverage-detection` (risk) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `risk/unbounded-input-handling` (risk) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `risk/unbounded-input-in-dependency-resolution` (risk) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/feature-dependency-resolution` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/feature-dependency-resolution-2` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-determine-introduced-pr` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-entity-retrieval` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-get-entity-details` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-identify-pr-introduction` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-knowledge-base-search` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/feature-knowledge-base-server` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-knowledge-statistics` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/feature-knowledge-statistics-2` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-list-entities` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/feature-list-entities-2` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-recent-changes` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-recent-changes-logger` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-repository-initialization-orchestration` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-test-coverage-analysis` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/feature-test-coverage-analysis-2` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Deprecation** `wiki-page/risk-stale-test-coverage-detection` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
-- **Creation** `wiki-page/risk-unbounded-input-in-dependency-resolution` (wiki_page) — compile run 2150 (`a0f08b9b6a20`).
