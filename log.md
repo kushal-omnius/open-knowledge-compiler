@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2152 (`7ca523fee40b`).
+
 No knowledge changes — compile run 2151 (`72dc7bde8673`).
 
 - **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 2150 (`a0f08b9b6a20`).
@@ -253,43 +255,3 @@ No knowledge changes — compile run 2145 (`068abc045220`).
 - **Deprecation** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2143 (`3c0c2dd87de7`).
 - **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2143 (`3c0c2dd87de7`).
 - **Update** `wiki-page/risk-user-input-validation` (wiki_page) — compile run 2143 (`3c0c2dd87de7`).
-
-- **Update** `component/knowledge-compiler-llm-provider` (component) — compile run 2142 (`fb31561b3f90`).
-- **Creation** `feature/azureopenaiprovider` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `feature/compile-full` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/deterministic-facts-to-entities-normalization` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `feature/entity-creation-and-relationship-management` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/fake-llm-provider` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/incremental-compilation` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/llm-provider-interface` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/llm-semantic-extraction` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/openai-provider` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/provider-factory` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `feature/verification-of-compile-state` (feature) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/malformed-model-output-causes-unhandled-json-error` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/missing-configuration-file-error` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `risk/missing-error-handling-for-unmatched-candidates` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/missing-sdk-dependency-causes-provider-construction-failure` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `risk/potential-llm-provider-failure` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Creation** `risk/rollback-on-exception` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/run-termination-on-exhausted-llm-budget` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Update** `risk/validation-failure` (risk) — compile run 2142 (`fb31561b3f90`).
-- **Creation** `wiki-page/feature-azureopenaiprovider` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `wiki-page/feature-compile-full` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `wiki-page/feature-entity-creation-and-relationship-management` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-fake-llm-provider` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-llm-provider-interface` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-llm-semantic-extraction` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-openai-provider` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/feature-provider-factory` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-malformed-model-output-causes-unhandled-json-error` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-missing-configuration-file-error` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `wiki-page/risk-missing-error-handling-for-unmatched-candidates` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-missing-sdk-dependency-causes-provider-construction-failure` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Deprecation** `wiki-page/risk-potential-llm-provider-failure` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Creation** `wiki-page/risk-rollback-on-exception` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-run-termination-on-exhausted-llm-budget` (wiki_page) — compile run 2142 (`fb31561b3f90`).
-- **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2142 (`fb31561b3f90`).
