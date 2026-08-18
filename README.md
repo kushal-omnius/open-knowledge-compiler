@@ -184,12 +184,12 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | Command | What it does |
 |---|---|
 | `kc init --slug <slug> --forge-ref <ref>` | Register a repo: run migrations, insert repo row, write `kc.toml`. Run once before first compile. |
-| `kc compile --full` | Bootstrap / escape-hatch full compilation |
+| `kc compile --full` | Full recompile against HEAD — re-extracts every file. Use for first compile, after a large restructure, or when `kc verify` reports drift. |
 | `kc compile --full -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
-| `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
+| `kc compile --pr N` | Incremental: compile one specific merged PR, idempotent |
 | `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
 | `kc compile --emit-only` | Re-render the wiki from already-compiled Knowledge IR only — no Collect/Extract/Normalize, no new compile run. The cheap OKF-spec-version rollout path ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md)) |
-| `kc reconcile` | Catch up on merged PRs and direct commits since the watermark — two-pass: PR-based then commit-fill for direct pushes and squash commits (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
+| `kc reconcile` | Catch up on merged PRs and direct commits since the last compile — only changed files are extracted, so it is much cheaper than `--full` when run frequently (1–3 PRs at a time). Preserves per-PR entity attribution. Needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`. |
 | `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
