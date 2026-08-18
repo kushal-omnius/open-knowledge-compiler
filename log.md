@@ -4,6 +4,8 @@
 
 ## 2026-08-18
 
+No knowledge changes — compile run 2181 (`628b86b6701d`).
+
 No knowledge changes — compile run 2180 (`eda060e499ec`).
 
 No knowledge changes — compile run 2179 (`7e2f5fbca933`).
@@ -256,5 +258,3 @@ No knowledge changes — compile run 2174 (`c45580ed7114`).
 - **Update** `wiki-page/risk-unbounded-input-handling` (wiki_page) — compile run 2173 (`68b4347d850f`).
 
 No knowledge changes — compile run 2172 (`32438d0aea0c`).
-
-No knowledge changes — compile run 2171 (`06c1b369cae8`).
