@@ -15,7 +15,7 @@ publish a GitHub Release from `main` (`gh release create vX.Y.Z --target main
 --title vX.Y.Z --generate-notes` — this mints the tag as part of publishing,
 so it works even where a raw `git push` of a tag ref is restricted).
 
-## [Unreleased]
+## [1.1.1] — 2026-08-20
 
 ### Added
 
@@ -54,6 +54,15 @@ QA-agent test-grounding improvements (backlog items 1, 2, 5, 6, 7, 3, 4; items
   Component entities. `coverage_for`/`test_plan` surface `low_mutation_kill`
   when declared coverage exists but the kill rate is ≤40% (ADR-012's named
   trigger). KC never executes the target repo's tests itself.
+- **`journeys_file` config key**: journey definitions can now be declared in
+  an external TOML file instead of (or alongside) inline `[[journeys]]`
+  entries. `journeys_file` accepts a single path string or an array of path
+  strings, each resolved relative to the repo directory. Useful when a
+  separate QA repo owns the journey definitions for another repo — set
+  `journeys_file = "../qa-repo/frida-journeys.toml"` in the source repo's
+  `kc.toml` and keep the canonical definitions there. Inline `[[journeys]]`
+  and `journeys_file` entries are merged (inline first). A missing or
+  unreadable file fails loudly at compile time.
 - New `user_journey` entity type + `traverses` relationship (deterministic
   V1 scope, [ADR-017](docs/decisions/ADR-017-user-journey-entity.md)):
   declare an ordered, end-to-end step list via `kc.toml [[journeys]]`.
