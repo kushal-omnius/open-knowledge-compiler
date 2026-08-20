@@ -4,6 +4,9 @@
 
 ## 2026-08-20
 
+- **Deprecation** `risk/dependency-resolution-failure` (risk) — compile run 2349 (`601d2381ae16`).
+- **Deprecation** `wiki-page/risk-dependency-resolution-failure` (wiki_page) — compile run 2349 (`601d2381ae16`).
+
 - **Creation** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 2348 (`601d2381ae16`).
 - **Update** `component/tests-test-qa-grounding` (component) — compile run 2348 (`601d2381ae16`).
 - **Update** `feature/artifact-storage` (feature) — compile run 2348 (`601d2381ae16`).
@@ -609,5 +612,3 @@ No knowledge changes — compile run 2200 (`093a5df8dd47`).
 - **Creation** `wiki-page/risk-possible-sql-injection` (wiki_page) — compile run 2193 (`3dc1298695ac`).
 - **Update** `wiki-page/risk-sql-transaction-failure` (wiki_page) — compile run 2193 (`3dc1298695ac`).
 - **Deprecation** `wiki-page/risk-uncontrolled-llm-errors` (wiki_page) — compile run 2193 (`3dc1298695ac`).
-
-- **Creation** `pull-request/4` (pull_request) — compile run 2192 (`8759e999effc`).

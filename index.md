@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2348 · Commit: `601d2381ae16`
+Repo: `knowledge-compiler` · Compile run: 2349 · Commit: `601d2381ae16`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -170,7 +170,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index File Frontmatter Limitation](business-rule/log-file-frontmatter-restriction.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (49)
+## Risks (48)
 
 - [Cache File Risk](risk/cache-file-read-failure.md)
 - [Data Handling Risk](risk/data-handling-risk.md)
@@ -179,7 +179,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
 - [Database Extension Dependency](risk/database-extension-dependency.md)
-- [Dependency Resolution Failure](risk/dependency-resolution-failure.md)
 - [Data Loss Risk](risk/destructive-column-replacement.md)
 - [Missing Publication Directory](risk/destructive-force-push.md)
 - [Dropping Column Risk](risk/dropping-column-risk.md)
