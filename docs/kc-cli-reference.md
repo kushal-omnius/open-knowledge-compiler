@@ -434,8 +434,19 @@ scores_file = "mutation-scores.json"
 # Deterministic-only V1 (ADR-017): declare an ordered, end-to-end step list
 # of already-compiled entity slugs. No [[journeys]] table means no journeys
 # are compiled — fully optional, additive.
+#
+# Inline declaration:
 # [[journeys]]
 # name = "Apply coupon at checkout"
 # steps = ["api/post-cart-add-item", "api/post-cart-apply-coupon",
 #          "api/post-checkout-submit"]
+#
+# External file(s) — resolved relative to this repo directory.
+# Useful when another repo (e.g. a QA repo) owns the journey definitions.
+# Inline [[journeys]] and journeys_file entries are merged; both may coexist.
+# journeys_file = "../qa-repo/checkout-journeys.toml"          # single
+# journeys_file = ["../qa-repo/checkout-journeys.toml",        # multiple
+#                  "../qa-repo/admin-journeys.toml"]
+# The referenced file(s) use the same [[journeys]] syntax as inline entries.
+# A missing or unreadable file fails loudly at compile time.
 ```

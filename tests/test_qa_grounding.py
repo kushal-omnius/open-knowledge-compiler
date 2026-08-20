@@ -381,6 +381,125 @@ def test_journey_satisfied_when_one_test_covers_every_step(repo):
     assert not [r for r in plan["test_recommendations"] if r["target_kind"] == "journey"]
 
 
+def _write_journey_file(path: Path, journeys: list[dict]) -> None:
+    """Write a standalone [[journeys]] TOML file (for journeys_file tests)."""
+    import json
+    lines = []
+    for j in journeys:
+        lines.append(f'\n[[journeys]]\nname = {json.dumps(j["name"])}\nsteps = {json.dumps(j["steps"])}\n')
+    path.write_text("".join(lines), encoding="utf-8")
+
+
+def _prepend_root_key(repo_dir: Path, line: str) -> None:
+    """Prepend a root-level TOML key before any [section] headers.
+
+    Bare key = value lines appended to the end of kc.toml fall inside the
+    last active table ([mutation]) rather than root. Prepending before the
+    first [section] ensures the key is parsed at root scope."""
+    existing = (repo_dir / "kc.toml").read_text(encoding="utf-8")
+    (repo_dir / "kc.toml").write_text(line + "\n" + existing, encoding="utf-8")
+
+
+def test_journeys_file_single_path_loads_external_journeys(repo, tmp_path):
+    """journeys_file = "path" loads journeys from an external TOML file."""
+    from knowledge_compiler.compiler.run import compile_full
+    from knowledge_compiler.mcp import queries
+
+    repo_dir, slug = repo
+    _add_second_covered_component(repo_dir)
+    git(repo_dir, "add", "-A")
+    git(repo_dir, "commit", "-qm", "add checkout")
+
+    ext = tmp_path / "shared-journeys.toml"
+    _write_journey_file(ext, [{"name": "Apply discount at checkout",
+                               "steps": ["component/billing-rules", "component/billing-checkout"]}])
+    # Use as_posix() for forward-slash paths — TOML literal strings preserve
+    # backslashes verbatim, so Windows paths via repr() would double them.
+    _prepend_root_key(repo_dir, f'journeys_file = "{ext.as_posix()}"')
+
+    summary = compile_full(repo_dir, llm_provider=_provider())
+    assert summary.warnings == []
+
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        journey = queries.get_entity(session, rid, "user-journey/apply-discount-at-checkout")
+
+    assert journey is not None
+    assert journey["payload"]["steps"] == ["component/billing-rules", "component/billing-checkout"]
+
+
+def test_journeys_file_array_merges_multiple_files(repo, tmp_path):
+    """journeys_file = ["a.toml", "b.toml"] merges all files."""
+    from knowledge_compiler.compiler.run import compile_full
+    from knowledge_compiler.mcp import queries
+
+    repo_dir, slug = repo
+    _add_second_covered_component(repo_dir)
+    git(repo_dir, "add", "-A")
+    git(repo_dir, "commit", "-qm", "add checkout")
+
+    file_a = tmp_path / "journeys-a.toml"
+    file_b = tmp_path / "journeys-b.toml"
+    _write_journey_file(file_a, [{"name": "Apply discount at checkout",
+                                  "steps": ["component/billing-rules", "component/billing-checkout"]}])
+    _write_journey_file(file_b, [{"name": "Discount only",
+                                  "steps": ["component/billing-rules"]}])
+    _prepend_root_key(repo_dir,
+                      f'journeys_file = ["{file_a.as_posix()}", "{file_b.as_posix()}"]')
+
+    compile_full(repo_dir, llm_provider=_provider())
+
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        j1 = queries.get_entity(session, rid, "user-journey/apply-discount-at-checkout")
+        j2 = queries.get_entity(session, rid, "user-journey/discount-only")
+
+    assert j1 is not None
+    assert j2 is not None
+
+
+def test_journeys_file_and_inline_are_merged(repo, tmp_path):
+    """Inline [[journeys]] and journeys_file entries coexist and are both compiled."""
+    from knowledge_compiler.compiler.run import compile_full
+    from knowledge_compiler.mcp import queries
+
+    repo_dir, slug = repo
+    _add_second_covered_component(repo_dir)
+    git(repo_dir, "add", "-A")
+    git(repo_dir, "commit", "-qm", "add checkout")
+
+    ext = tmp_path / "extra-journeys.toml"
+    _write_journey_file(ext, [{"name": "Discount only", "steps": ["component/billing-rules"]}])
+    _prepend_root_key(repo_dir, f'journeys_file = "{ext.as_posix()}"')
+    # Inline entry appended after sections — [[journeys]] is an array-of-tables
+    # which always starts at root scope, so appending here is safe.
+    existing = (repo_dir / "kc.toml").read_text(encoding="utf-8")
+    existing += ('\n[[journeys]]\nname = "Apply discount at checkout"\n'
+                 'steps = ["component/billing-rules", "component/billing-checkout"]\n')
+    (repo_dir / "kc.toml").write_text(existing, encoding="utf-8")
+
+    compile_full(repo_dir, llm_provider=_provider())
+
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        j1 = queries.get_entity(session, rid, "user-journey/apply-discount-at-checkout")
+        j2 = queries.get_entity(session, rid, "user-journey/discount-only")
+
+    assert j1 is not None
+    assert j2 is not None
+
+
+def test_journeys_file_missing_file_fails_loudly(repo, tmp_path):
+    """journeys_file pointing to a nonexistent file raises CompileError at compile time."""
+    from knowledge_compiler.compiler.run import compile_full, CompileError
+
+    repo_dir, _ = repo
+    _prepend_root_key(repo_dir, 'journeys_file = "does-not-exist.toml"')
+
+    with pytest.raises(CompileError, match="journeys_file not found"):
+        compile_full(repo_dir, llm_provider=_provider())
+
+
 def test_journey_step_unresolvable_slug_is_dropped_with_warning(repo):
     from knowledge_compiler.compiler.run import compile_full
     from knowledge_compiler.mcp import queries

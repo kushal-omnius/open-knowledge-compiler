@@ -577,8 +577,24 @@ def _journey_facts(ctx: dict) -> list[Fact]:
     journey traverses. Unresolvable step slugs are dropped (not failed) by
     Normalize, same DP8 "visible, never silently merge" discipline as the
     external-dependency precedent — a config typo shouldn't fail the whole
-    compile, but it should be visible (a compile warning), not silent."""
-    journeys = ctx["config"].get("journeys", [])
+    compile, but it should be visible (a compile warning), not silent.
+
+    Inline [[journeys]] and journeys_file are both supported and merged.
+    journeys_file is resolved relative to the repo directory; a missing or
+    unreadable file fails loudly (same posture as a bad Jira source)."""
+    journeys = list(ctx["config"].get("journeys", []))
+    journeys_file = ctx["config"].get("journeys_file")
+    if journeys_file:
+        paths = [journeys_file] if isinstance(journeys_file, str) else journeys_file
+        for rel in paths:
+            file_path = Path(ctx["repo_dir"]) / rel
+            try:
+                extra = tomllib.loads(file_path.read_text(encoding="utf-8"))
+            except FileNotFoundError:
+                raise CompileError(f"journeys_file not found: {file_path}")
+            except Exception as exc:
+                raise CompileError(f"journeys_file unreadable ({file_path}): {exc}")
+            journeys += extra.get("journeys", [])
     facts = []
     for j in journeys:
         payload = {"name": j["name"], "steps": list(j.get("steps", []))}
