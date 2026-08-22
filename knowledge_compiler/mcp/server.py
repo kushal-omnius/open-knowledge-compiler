@@ -109,7 +109,7 @@ def build_server(repo_dir: Path):
                     for r in results]
 
     @mcp.tool()
-    def get_entity(slug: str) -> dict:
+    def get_entity(slug: str, max_neighbors: int = 50) -> dict:
         """Full detail for one entity by its canonical slug
         (e.g. 'component/billing-rules', 'api/post-claims',
         'business_rule/discount-cap-rule').
@@ -119,6 +119,12 @@ def build_server(repo_dir: Path):
         relationships (one-hop graph edges — governs, covers, implemented_by,
         traverses, etc.), and provenance (extraction method, model, compile run).
 
+        relationships is capped at max_neighbors (default 50) — a hub entity
+        (e.g. a Project touching thousands of Components) can carry far more
+        edges than one call should return. relationship_count is the true total
+        and relationships_truncated is true whenever the cap was hit; raise
+        max_neighbors if you need the rest.
+
         For components, payload.path is the importable module path — use it to
         locate the source file. For APIs, payload includes the HTTP method, route,
         and owning component slug.
@@ -126,7 +132,8 @@ def build_server(repo_dir: Path):
         For components with cross-repo dependencies, also resolves any
         external_dependencies via kc.toml's [dependencies] map."""
         with repo_session() as (session, repo_id):
-            return (queries.get_entity(session, repo_id, slug, dep_map=dep_map)
+            return (queries.get_entity(session, repo_id, slug, dep_map=dep_map,
+                                       max_neighbors=max_neighbors)
                     or {"error": f"no entity '{slug}'"})
 
     @mcp.tool()
@@ -196,6 +203,12 @@ def build_server(repo_dir: Path):
         proves the entire chain in sequence (end-to-end coverage). Returns the
         journey's ordered steps, which components cover each step, and whether
         a journey-level gap exists.
+
+        Check `status` before trusting the result: 'complete' means every
+        declared kc.toml step resolved to a compiled entity; 'partial' or
+        'invalid' means one or more steps in `unresolved_steps` didn't resolve
+        and were dropped — `covered_end_to_end: true` on a partial journey only
+        proves the resolved portion of the chain, not the one you declared.
 
         A 'journey' recommendation in test_plan() points here when every step
         is individually covered but no single test proves the whole chain.

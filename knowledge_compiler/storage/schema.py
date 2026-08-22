@@ -49,6 +49,13 @@ class CompileRun(Base):
     started_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     finished_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))
     error: Mapped[str | None] = mapped_column(Text)
+    # Compile completeness signal (migration 0007, dogfood-review finding): NULL
+    # on rows predating this column and on emit-only reruns (no Extract stage) —
+    # distinguishes "not measured" from "measured, zero failures".
+    files_seen: Mapped[int | None] = mapped_column(Integer)
+    files_parsed: Mapped[int | None] = mapped_column(Integer)
+    files_failed: Mapped[int | None] = mapped_column(Integer)
+    failed_files: Mapped[list | None] = mapped_column(JSONB)
 
     __table_args__ = (
         # Idempotence check (ADR-002): succeeded run per (repo, pr) => re-trigger is a no-op.
