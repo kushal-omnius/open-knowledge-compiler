@@ -16,8 +16,17 @@ Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, te
 - Releases: [CHANGELOG.md](CHANGELOG.md) · multi-repo setup: [docs/cross-repo-workflows.md](docs/cross-repo-workflows.md)
 - **Example:** this repo compiling itself — [live wiki](../../tree/knowledge/wiki) (63 components, plus real business rules/features/risks from the LLM semantic layer)
 
+## North star
+
+Every design decision here should serve one question:
+
+> Given what this software does and what changed, what exactly must be verified — and how do we know the resulting test is actually trustworthy?
+
+Structural knowledge (components, APIs, dependencies) is necessary but not the differentiator — generic code-intelligence tools already do that well. What doesn't exist elsewhere is the answer to the two halves of that question: a **Behavioral Contract** model (state, transitions, and failure modes — not just structure) for *what must be verified*, and a **Test Trust Score** (mutation-kill rate, flakiness, escaped-defect history, and coverage completeness combined into one signal) for *is the resulting test trustworthy*. That pairing is the moat.
+
 ## Table of contents
 
+- [North star](#north-star)
 - [Why OKF](#why-okf)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
