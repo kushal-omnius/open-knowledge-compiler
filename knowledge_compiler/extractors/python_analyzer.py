@@ -55,10 +55,16 @@ class PythonAnalyzer:
 
     def analyze(self, artifacts: list[Artifact]) -> list[Fact]:
         facts: list[Fact] = []
+        self.files_seen = 0
+        self.failed_files: list[str] = []
         for artifact in artifacts:
             if not artifact.source_ref.endswith(".py") or artifact.content is None:
                 continue
-            facts.extend(self._analyze_file(artifact))
+            self.files_seen += 1
+            try:
+                facts.extend(self._analyze_file(artifact))
+            except Exception:  # noqa: BLE001 — skip the file, never the compile (ADR-006)
+                self.failed_files.append(artifact.source_ref)
         return facts
 
     # -- per-file ---------------------------------------------------------------

@@ -235,6 +235,12 @@ def inspect_cmd(repo_dir: str) -> None:
         delta_str = "  ".join(f"{op}:{count}" for op, count in ops) or "empty"
         ts = last_run.finished_at.strftime("%Y-%m-%d %H:%M:%S") if last_run.finished_at else "unknown"
         click.echo(f"last compile: run {last_run.id} @ {last_run.commit_sha[:12]} [{ts}] — delta {delta_str}")
+        if last_run.files_seen is not None:
+            pct = (last_run.files_parsed / last_run.files_seen * 100) if last_run.files_seen else 100.0
+            click.echo(f"knowledge completeness: {last_run.files_parsed}/{last_run.files_seen} "
+                      f"files parsed ({pct:.1f}%)")
+            if last_run.files_failed:
+                click.echo(f"  failed: {', '.join(last_run.failed_files or [])}")
 
 
 @main.command("validate-test")

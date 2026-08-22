@@ -224,18 +224,35 @@ class _Normalizer:
         minted and resolvable, not just deterministic ones. A step slug that
         doesn't resolve to anything compiled this run is dropped with a
         warning (DP8: visible, never silently merged) rather than failing
-        the whole journey or the compile."""
+        the whole journey or the compile.
+
+        Fail-closed status (dogfood-review finding): a dropped step used to be
+        visible only in the transient compile-run warning list — the journey
+        entity itself looked identical to a fully-resolved one, so a shortened
+        chain could silently pass as a complete one downstream (journey_coverage,
+        test_plan, the wiki page). `status` + `unresolved_steps` make that
+        distinction durable on the entity, not just at compile time."""
         for f in self._facts_of("user_journey_observed"):
             name = f.payload["name"]
+            declared_steps = f.payload.get("steps", [])
             resolved_steps = []
-            for step_slug in f.payload.get("steps", []):
+            unresolved_steps = []
+            for step_slug in declared_steps:
                 if step_slug in self.entities:
                     resolved_steps.append(step_slug)
                 else:
+                    unresolved_steps.append(step_slug)
                     self.warnings.append(
                         f"user_journey '{name}': step slug '{step_slug}' does not "
                         f"resolve to any compiled entity this run — dropped")
-            payload = {"name": name, "steps": resolved_steps}
+            if not unresolved_steps:
+                status = "complete"
+            elif resolved_steps:
+                status = "partial"
+            else:
+                status = "invalid"
+            payload = {"name": name, "steps": resolved_steps, "status": status,
+                      "unresolved_steps": unresolved_steps}
             self._put(self._entity("user_journey", f"user-journey/{slugify(name)}",
                                    name, payload),
                       rule="natural_key", signals={}, facts=[f])

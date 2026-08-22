@@ -139,11 +139,17 @@ class JavaScriptAnalyzer:
 
     def analyze(self, artifacts: list[Artifact]) -> list[Fact]:
         facts: list[Fact] = []
+        self.files_seen = 0
+        self.failed_files: list[str] = []
         for artifact in artifacts:
             ext = posixpath.splitext(artifact.source_ref)[1]
             if ext not in _EXTENSIONS or artifact.content is None:
                 continue
-            facts.extend(self._analyze_file(artifact, Parser(_JS_LANGUAGE)))
+            self.files_seen += 1
+            try:
+                facts.extend(self._analyze_file(artifact, Parser(_JS_LANGUAGE)))
+            except Exception:  # noqa: BLE001 — skip the file, never the compile (ADR-006)
+                self.failed_files.append(artifact.source_ref)
         return facts
 
     def _analyze_file(self, artifact: Artifact, parser: Parser) -> list[Fact]:

@@ -216,7 +216,7 @@ delta = {
 | `business_rule_candidate` | Business Rule via cascade (+ `governs`, `verified_by`) |
 | `risk_candidate` | Risk via cascade (+ `affects`) |
 | `mutation_score_observed` | Merged into the matching Component's payload (`mutation_kill_rate`, `mutation_sample`); silently skipped if the module doesn't resolve to a compiled Component (ADR-012's named trigger, surfaced in `test_plan`/`coverage_for`) |
-| `user_journey_observed` | User Journey via direct slug mint (deterministic V1 scope, ADR-017) (+ `traverses` to each resolved step; unresolvable steps are dropped with a compile warning, not a hard failure) |
+| `user_journey_observed` | User Journey via direct slug mint (deterministic V1 scope, ADR-017) (+ `traverses` to each resolved step; unresolvable steps are dropped with a compile warning, not a hard failure). The entity payload carries `status` (`complete` \| `partial` \| `invalid`) and `unresolved_steps` (the dropped slugs) so the drop is visible on the entity itself, not only in the transient compile-run warning log — additive clarification, dogfood-review finding |
 | — (derived) | Wiki Page entities are derived **by Normalize** deterministically from the entity set (identity = owning entity slug + page type); Emit only renders them. Producing them anywhere else would violate the §1 invariant that only Normalize produces Knowledge IR |
 
 Aggregation is many-facts-to-one-entity; the entity's provenance records every contributing fact (ADR-009: granularity preserved).
