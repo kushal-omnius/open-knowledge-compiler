@@ -8,9 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2349 — `601d2381ae16`
+## Compile 2446 — `601d2381ae16`
 
-- **removed** [risk/dependency-resolution-failure](risk/dependency-resolution-failure.md)
-- **removed** `wiki-page/risk-dependency-resolution-failure`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
