@@ -2,6 +2,11 @@
 
 # Log
 
+## 2026-08-24
+
+- **Creation** `component/alembic-versions-0007-compile-completeness` (component) — compile run 2447 (`b632594b2c40`).
+- **Creation** `wiki-page/component-alembic-versions-0007-compile-completeness` (wiki_page) — compile run 2447 (`b632594b2c40`).
+
 ## 2026-08-22
 
 No knowledge changes — compile run 2446 (`601d2381ae16`).
@@ -585,11 +590,3 @@ No knowledge changes — compile run 2200 (`093a5df8dd47`).
 - **Deprecation** `wiki-page/risk-unbounded-input-for-dependency-resolution` (wiki_page) — compile run 2195 (`f6adaf993f17`).
 - **Deprecation** `wiki-page/risk-unbounded-input-in-search` (wiki_page) — compile run 2195 (`f6adaf993f17`).
 - **Creation** `wiki-page/risk-unvalidated-input-for-hash-function` (wiki_page) — compile run 2195 (`f6adaf993f17`).
-
-- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 2194 (`2070f231c419`).
-- **Update** `component/tests-test-wiki-emitter` (component) — compile run 2194 (`2070f231c419`).
-- **Update** `feature/generate-index-and-recent-changes-pages` (feature) — compile run 2194 (`2070f231c419`).
-- **Creation** `pull-request/6` (pull_request) — compile run 2194 (`2070f231c419`).
-- **Update** `risk/dangling-page-risk` (risk) — compile run 2194 (`2070f231c419`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed` (test_coverage) — compile run 2194 (`2070f231c419`).
-- **Update** `wiki-page/risk-dangling-page-risk` (wiki_page) — compile run 2194 (`2070f231c419`).

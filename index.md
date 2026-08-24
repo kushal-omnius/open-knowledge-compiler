@@ -6,11 +6,11 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2446 · Commit: `601d2381ae16`
+Repo: `knowledge-compiler` · Compile run: 2447 · Commit: `b632594b2c40`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
-## Components (70)
+## Components (71)
 
 - [alembic.env](component/alembic-env.md)
 - [alembic.versions.0001_phase1_schema](component/alembic-versions-0001-phase1-schema.md)
@@ -19,6 +19,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [alembic.versions.0004_search_vector_segments](component/alembic-versions-0004-search-vector-segments.md)
 - [alembic.versions.0005_okf_spec_version](component/alembic-versions-0005-okf-spec-version.md)
 - [alembic.versions.0006_commit_timestamp](component/alembic-versions-0006-commit-timestamp.md)
+- [alembic.versions.0007_compile_completeness](component/alembic-versions-0007-compile-completeness.md)
 - [knowledge_compiler](component/knowledge-compiler.md)
 - [knowledge_compiler.cli](component/knowledge-compiler-cli.md)
 - [knowledge_compiler.collectors](component/knowledge-compiler-collectors.md)

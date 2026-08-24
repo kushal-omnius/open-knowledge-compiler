@@ -8,8 +8,9 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2446 — `601d2381ae16`
+## Compile 2447 — `b632594b2c40`
 
-No knowledge changes.
+- **added** [component/alembic-versions-0007-compile-completeness](component/alembic-versions-0007-compile-completeness.md)
+- **added** `wiki-page/component-alembic-versions-0007-compile-completeness`
 
 Full chronological history: [log.md](log.md).
