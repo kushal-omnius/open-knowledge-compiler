@@ -29,14 +29,29 @@ from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer
 from knowledge_compiler.extractors.typescript_analyzer import TypeScriptAnalyzer
 
 
-def _extract(artifacts: list[Artifact]) -> list[Fact]:
+def _extract(artifacts: list[Artifact]) -> tuple[list[Fact], dict]:
     """The deterministic Extract stage: every active analyzer over the staged
     artifacts (each filters to its own extensions). Analyzer routing by extension
-    is configuration-grade, not architecture (ADR-006)."""
+    is configuration-grade, not architecture (ADR-006).
+
+    Also aggregates a completeness signal across analyzers: `files_seen` (every
+    file claimed by an analyzer's extension), `files_failed` (files an analyzer
+    raised on and skipped), and `failed_files` (their paths). A parse failure
+    must never fail the compile (ADR-006) — but a compile that silently loses
+    coverage in, say, an auth module should not look identical to a clean one
+    (dogfood-review finding: `knowledge_stats()` previously reported entity
+    counts only, with no way to tell "nothing changed" from "half the repo
+    didn't parse")."""
     facts: list[Fact] = []
+    files_seen = 0
+    failed_files: list[str] = []
     for analyzer in (PythonAnalyzer(), TypeScriptAnalyzer(), JavaScriptAnalyzer()):
         facts.extend(analyzer.analyze(artifacts))
-    return facts
+        files_seen += analyzer.files_seen
+        failed_files.extend(analyzer.failed_files)
+    stats = {"files_seen": files_seen, "files_parsed": files_seen - len(failed_files),
+             "files_failed": len(failed_files), "failed_files": failed_files}
+    return facts, stats
 from knowledge_compiler.ir import Artifact, Extraction, Fact, content_hash
 from knowledge_compiler.storage.db import (
     DatabaseUnavailableError, check_connection, make_engine, repo_lock_key,
@@ -224,7 +239,8 @@ def verify(repo_dir: Path) -> VerifyReport:
     with _locked_session(repo_dir) as (session, repo, ctx):
         collector = GitCollector(ctx["repo_dir"])
         artifacts = collector.collect_full()
-        facts = _extract(artifacts) + _mutation_facts(ctx) + _journey_facts(ctx)
+        extracted_facts, _extract_stats = _extract(artifacts)
+        facts = extracted_facts + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
         candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))
@@ -370,7 +386,12 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         session.commit()
 
         # Extract -> staging commit 3 (deterministic first and always — ADR-006)
-        facts = _extract(artifacts) + extra_facts
+        facts, extract_stats = _extract(artifacts)
+        facts += extra_facts
+        run.files_seen = extract_stats["files_seen"]
+        run.files_parsed = extract_stats["files_parsed"]
+        run.files_failed = extract_stats["files_failed"]
+        run.failed_files = extract_stats["failed_files"]
         llm_ran, llm_warnings = _extract_semantic(session, ctx, artifacts, facts)
 
         # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
@@ -410,12 +431,13 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         raise
 
     ops = [c.op for c in delta.entity_changes]
+    parse_warnings = [f"parse failed, file skipped: {p}" for p in extract_stats["failed_files"]]
     summary = CompileSummary(
         repo_slug=ctx["repo_slug"], compile_run_id=run.id, commit_sha=commit_sha,
         entities=len(candidate.entities), relationships=len(candidate.relationships),
         added=ops.count("added"), changed=ops.count("changed"),
         removed=ops.count("removed"), moved=ops.count("moved"),
-        dirty=len(dirty), warnings=list(candidate.warnings) + llm_warnings,
+        dirty=len(dirty), warnings=parse_warnings + list(candidate.warnings) + llm_warnings,
         entity_changes=list(delta.entity_changes),
         pr_number=pr.number if pr else None,
     )

@@ -230,11 +230,23 @@ class WikiEmitter:
         """ADR-017: the ordered step list is the journey's own payload — its
         `traverses` edges (rendered generically below via _relations_section)
         are unordered, so this explicit numbered list is the only place order
-        is actually shown."""
+        is actually shown.
+
+        Fail-closed status (dogfood-review finding): a journey with dropped
+        steps used to render identically to a fully-resolved one — the warning
+        only ever reached the compile-run log, never the page a reader actually
+        looks at. Surface it here too."""
+        out: list[str] = []
+        status = e.payload.get("status", "complete")
+        unresolved = e.payload.get("unresolved_steps", [])
+        if status != "complete":
+            out += [f"> ⚠ Journey is **{status}** — {len(unresolved)} declared step(s) did not "
+                    f"resolve to a compiled entity and were dropped: "
+                    + ", ".join(f"`{s}`" for s in unresolved), ""]
         steps = e.payload.get("steps", [])
         if not steps:
-            return ["*(no steps resolved)*", ""]
-        out = ["## Steps (in order)", ""]
+            return out + ["*(no steps resolved)*", ""]
+        out += ["## Steps (in order)", ""]
         for i, step_slug in enumerate(steps, start=1):
             step = state.by_slug.get(step_slug)
             label = (f"[{step.name}]({rel_link(e.slug, step.slug)})"

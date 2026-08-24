@@ -69,7 +69,7 @@ def resolve_dependency(session: Session, coordinate: str,
 
 
 def get_entity(session: Session, repo_id: int, slug: str,
-               dep_map: dict[str, str] | None = None) -> dict | None:
+               dep_map: dict[str, str] | None = None, max_neighbors: int = 50) -> dict | None:
     entity = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug == slug)).scalar_one_or_none()
     if entity is None:
@@ -86,7 +86,9 @@ def get_entity(session: Session, repo_id: int, slug: str,
              for r in rels
              if not (id_to[r.from_entity_id].startswith("wiki-page/")
                      or id_to[r.to_entity_id].startswith("wiki-page/"))]
-    relationships = sorted(edges, key=lambda d: (d["relation"], d["from"], d["to"]))
+    relationships_all = sorted(edges, key=lambda d: (d["relation"], d["from"], d["to"]))
+    relationship_count = len(relationships_all)
+    relationships = relationships_all[:max_neighbors]
 
     prov = session.execute(select(ProvenanceRow).where(ProvenanceRow.entity_id == entity.id)
                            .order_by(ProvenanceRow.compile_run_id.desc()).limit(5)).scalars().all()
@@ -94,6 +96,12 @@ def get_entity(session: Session, repo_id: int, slug: str,
         "slug": entity.slug, "entity_type": entity.entity_type, "name": entity.name,
         "payload": entity.payload, "anchors": entity.anchors or [],
         "relationships": relationships,
+        # Hub entities (e.g. a Project touching thousands of Components) can carry
+        # far more edges than any agent needs in one call — relationship_count is
+        # the true total so a truncated response is never mistaken for the whole
+        # graph (dogfood-review finding: this endpoint previously had no limit).
+        "relationship_count": relationship_count,
+        "relationships_truncated": relationship_count > max_neighbors,
         "provenance": [{"fact_type": p.fact_type, "extraction": p.extraction,
                         "compile_run": p.compile_run_id,
                         "match_evidence": p.match_evidence} for p in prov],
@@ -330,12 +338,16 @@ def journey_coverage(session: Session, repo_id: int, journey_slug: str) -> dict 
     if journey is None:
         return None
 
+    status = journey.payload.get("status", "complete")
+    unresolved_steps = journey.payload.get("unresolved_steps", [])
+
     step_components: set[str] = set()
     for step_slug in journey.payload.get("steps", []):
         step_components |= _journey_step_components(session, repo_id, step_slug)
 
     if not step_components:
         return {"journey": journey_slug, "steps": journey.payload.get("steps", []),
+               "status": status, "unresolved_steps": unresolved_steps,
                "step_components": [], "covered_end_to_end": False, "covering_tests": []}
 
     component_ids = dict(session.execute(select(EntityRow.slug, EntityRow.id).where(
@@ -355,6 +367,7 @@ def journey_coverage(session: Session, repo_id: int, journey_slug: str) -> dict 
                       [r.slug for r in session.execute(select(EntityRow).where(
                           EntityRow.id.in_(covering_test_ids))).scalars().all()])
     return {"journey": journey_slug, "steps": journey.payload.get("steps", []),
+           "status": status, "unresolved_steps": unresolved_steps,
            "step_components": sorted(step_components),
            "covered_end_to_end": bool(covering_tests),
            "covering_tests": sorted(covering_tests)}
@@ -477,6 +490,15 @@ def knowledge_stats(session: Session, repo_id: int) -> dict:
     last = session.execute(select(CompileRun)
                            .where(CompileRun.repo_id == repo_id, CompileRun.status == "succeeded")
                            .order_by(CompileRun.id.desc()).limit(1)).scalar_one_or_none()
+    completeness = None
+    if last is not None and last.files_seen is not None:
+        completeness = {
+            "files_seen": last.files_seen, "files_parsed": last.files_parsed,
+            "files_failed": last.files_failed,
+            "parse_coverage": round(last.files_parsed / last.files_seen, 4) if last.files_seen else 1.0,
+            "failed_files": last.failed_files or [],
+        }
     return {"entity_counts": counts,
             "last_compile": None if last is None else
-            {"compile_run": last.id, "commit": last.commit_sha, "degraded": last.degraded}}
+            {"compile_run": last.id, "commit": last.commit_sha, "degraded": last.degraded},
+            "knowledge_completeness": completeness}

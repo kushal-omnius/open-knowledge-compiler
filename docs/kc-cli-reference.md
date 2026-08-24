@@ -153,7 +153,11 @@ entities: 2765
   pull_request: 1342
 relationships: 8410
 last compile: run 47 @ a3f9c1d20b12 [2026-07-18 09:14:22] — delta add:14  change:3  remove:1
+knowledge completeness: 1798/1800 files parsed (99.9%)
+  failed: legacy/scanner.py, vendor/patched_lib.py
 ```
+
+The completeness lines are omitted for compile runs that predate the signal, and for `kc compile --emit-only` reruns (no Extract stage runs).
 
 ---
 
@@ -297,7 +301,7 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 | Tool | Description |
 |------|-------------|
 | `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`, `jira_story`. |
-| `get_entity(slug)` | Full detail for one entity: payload, source anchors, relationships, provenance. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
+| `get_entity(slug, max_neighbors?)` | Full detail for one entity: payload, source anchors, relationships, provenance. `relationships` is capped at `max_neighbors` (default 50, dogfood-review finding — hub entities could otherwise return an unbounded edge set); `relationship_count`/`relationships_truncated` report the true total. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
 | `impact_plan(slug)` | One-hop impact analysis for a changed entity: what's affected in this repo, which affected components have test-coverage gaps, and what it reaches across repos. |
 | `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Each `api`/`symbols` recommendation now inlines a `context` field (governing business rules, features, and risks linked to that component — item 1/6 of the QA-agent-grounding backlog, no extra round-trip needed). Also returns `stale_retest` recommendations (a test exists but the component changed since the test was last touched — ADR-018), `low_mutation_kill` recommendations (declared coverage exists but the mutation-kill rate is ≤40%, ADR-012's named trigger, carries a `mutation_kill_rate` field), and `journey` recommendations (every step of a `kc.toml`-declared `[[journeys]]` end-to-end journey is individually covered, but no single test proves the whole chain — ADR-017). Use to drive test generation before writing tests. |
 | `resolve_dependency(coordinate)` | Resolve an external import/package coordinate to another repo compiled into the same database, via `kc.toml [dependencies]` (query-time only — [ADR-011](../docs/decisions/ADR-011-cross-repo-dependency-resolution.md)). |
@@ -306,8 +310,8 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 | `which_pr_introduced(slug)` | Which PR (or bootstrap compile) first added this entity. |
 | `coverage_for(component_slug)` | Which tests cover this component. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). |
 | `linked_context(component_slug)` | The business rules, features, and risks that govern/are-implemented-by/affect this component — the same context `test_plan` inlines, exposed standalone for direct lookups. |
-| `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. |
-| `knowledge_stats()` | Entity counts by type and last successful compile metadata. |
+| `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. Also returns `status` (`complete`\|`partial`\|`invalid`) and `unresolved_steps` — a step that didn't resolve at compile time is dropped, not failed, so `covered_end_to_end: true` on a non-`complete` journey only proves the resolved portion of the declared chain (dogfood-review finding). |
+| `knowledge_stats()` | Entity counts by type and last successful compile metadata, plus `knowledge_completeness` (`files_seen`/`files_parsed`/`files_failed`/`parse_coverage`/`failed_files` — null on compiles predating this signal, dogfood-review finding). |
 
 ---
 

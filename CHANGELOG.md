@@ -15,6 +15,29 @@ publish a GitHub Release from `main` (`gh release create vX.Y.Z --target main
 --title vX.Y.Z --generate-notes` — this mints the tag as part of publishing,
 so it works even where a raw `git push` of a tag ref is restricted).
 
+## [Unreleased]
+
+### Added
+
+- **Compile completeness signal** (dogfood-review finding): `compile_runs` gains `files_seen` /
+  `files_parsed` / `files_failed` / `failed_files` (migration 0007). A parser failure still skips
+  the file, never the compile (ADR-006) — but the three language analyzers now isolate per-file
+  exceptions themselves (previously unhandled, so a single bad file could in fact crash the whole
+  Extract stage despite the documented contract) and report what they skipped. Surfaced via
+  `knowledge_stats()`'s new `knowledge_completeness` field and a new `kc inspect` line. NULL on
+  runs predating this migration and on `kc compile --emit-only` reruns.
+- **User journey fail-closed status** (dogfood-review finding, extends ADR-017): a `user_journey`
+  entity now carries `status` (`complete` | `partial` | `invalid`) and `unresolved_steps`. A
+  `kc.toml [[journeys]]` step that doesn't resolve to a compiled entity was already dropped with a
+  compile warning, not a hard failure — but the warning only reached the transient compile-run log,
+  so the resulting journey entity looked identical to a fully-resolved one everywhere downstream.
+  `journey_coverage()` and the journey's wiki page now both surface the status and the exact
+  unresolved slugs.
+- **`get_entity` relationship limit** (dogfood-review finding): the MCP tool and underlying query
+  gain `max_neighbors` (default 50) — previously every relationship touching an entity was returned
+  with no limit, so a hub entity could return an unbounded edge set to an agent. `relationship_count`
+  and `relationships_truncated` report the true total when the cap is hit.
+
 ## [1.1.1] — 2026-08-20
 
 ### Added
