@@ -2,6 +2,65 @@
 
 # Log
 
+## 2026-08-26
+
+- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/knowledge-compiler-extractors-python-analyzer` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/knowledge-compiler-wiki-okf-conformance` (component) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `component/knowledge-compiler-wiki-okf-rules` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-incremental` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-normalize` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-okf-conformance` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-python-analyzer` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-qa-grounding` (component) — compile run 2911 (`575a64afc0d8`).
+- **Update** `component/tests-test-wiki-emitter` (component) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `state-model/knowledge-compiler-compiler-run-status` (state_model) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `state-model/knowledge-compiler-storage-persist-status` (state_model) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-bug-fix-pr-on-covered-component-records-one-covered-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-jira-bug-type-alone-classifies-as-a-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-non-bug-fix-pr-does-not-record-a-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-incremental-py-test-trust-score-populated-once-sample-size-reached` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-aggregated-from-transitions` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-models-relationship-to-owning-component` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-unresolved-module-is-silently-skipped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-okf-conformance-py-test-check-bundle-is-data-driven-not-hardcoded` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-okf-conformance-py-test-check-bundle-reserved-filename-set-is-also-data-driven` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-concept-missing-frontmatter-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-concept-missing-type-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-conformant-bundle-has-no-issues` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-index-extra-frontmatter-key-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-index-without-frontmatter-is-conformant` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-okf-conformance-py-test-log-with-frontmatter-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-python-analyzer-py-test-if-elif-else-branches-do-not-leak-into-each-other` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-python-analyzer-py-test-non-status-fields-are-ignored` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-field-scoped-per-function` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-transition-anchored-to-owning-module` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-transition-sequential-and-branch-structure` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-component-page-content` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-cross-links-are-relative-and-resolve` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-dirty-only-regeneration` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-emission-is-byte-deterministic` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-frontmatter-self-check-catches-drift` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-index-has-no-general-frontmatter` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-index-self-check-catches-drift` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-log-md-has-no-frontmatter-and-is-date-grouped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-okf-frontmatter` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-pages-written-at-slug-paths` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-changes-scoped-to-last-compile` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-caps-and-points-to-log` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-is-bounded-and-entity-scoped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Update** `test-coverage/tests-test-wiki-emitter-py-test-rel-link-helper` (test_coverage) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `wiki-page/component-knowledge-compiler-wiki-okf-rules` (wiki_page) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `wiki-page/state-model-knowledge-compiler-compiler-run-status` (wiki_page) — compile run 2911 (`575a64afc0d8`).
+- **Creation** `wiki-page/state-model-knowledge-compiler-storage-persist-status` (wiki_page) — compile run 2911 (`575a64afc0d8`).
+
 ## 2026-08-24
 
 - **Update** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 2448 (`b632594b2c40`).
@@ -550,42 +609,3 @@ No knowledge changes — compile run 2200 (`093a5df8dd47`).
 - **Deprecation** `wiki-page/risk-potential-data-loss-on-deletes` (wiki_page) — compile run 2197 (`121280c0bacf`).
 - **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2197 (`121280c0bacf`).
 - **Deprecation** `wiki-page/risk-schema-enforcement` (wiki_page) — compile run 2197 (`121280c0bacf`).
-
-- **Update** `component/knowledge-compiler-collectors-jira` (component) — compile run 2196 (`ff056d40fda9`).
-- **Update** `feature/compile-process-management` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `feature/error-handling-for-compilation` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `feature/gateway-factory` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `feature/incremental-compilation` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Update** `feature/jira-issue-collector` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Update** `feature/repository-initialization-orchestration` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `feature/semantic-extraction-capability` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `feature/verification-of-compilation-state` (feature) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `pull-request/8` (pull_request) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `risk/cache-file-read-failure` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `risk/error-handling-for-http-requests` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `risk/file-write-risks` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `risk/incomplete-commit-handling` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Update** `risk/missing-configuration-validation` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Update** `risk/missing-environment-variables` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `risk/possible-sql-injection` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Update** `risk/potential-race-condition-during-repository-registration` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `risk/silent-omission-of-missing-issues` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `risk/sql-transaction-failure` (risk) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/feature-error-handling-for-compilation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/feature-gateway-factory` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/feature-jira-issue-collector` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/feature-repository-initialization-orchestration` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/feature-semantic-extraction-capability` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/risk-cache-file-read-failure` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/risk-error-handling-for-http-requests` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/risk-file-write-risks` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Creation** `wiki-page/risk-incomplete-commit-handling` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/risk-missing-configuration-validation` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/risk-missing-environment-variables` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/risk-possible-sql-injection` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Update** `wiki-page/risk-potential-race-condition-during-repository-registration` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/risk-silent-omission-of-missing-issues` (wiki_page) — compile run 2196 (`ff056d40fda9`).
-- **Deprecation** `wiki-page/risk-sql-transaction-failure` (wiki_page) — compile run 2196 (`ff056d40fda9`).

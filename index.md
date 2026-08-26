@@ -6,11 +6,11 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 2448 · Commit: `b632594b2c40`
+Repo: `knowledge-compiler` · Compile run: 2911 · Commit: `575a64afc0d8`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
-## Components (71)
+## Components (72)
 
 - [alembic.env](component/alembic-env.md)
 - [alembic.versions.0001_phase1_schema](component/alembic-versions-0001-phase1-schema.md)
@@ -59,6 +59,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [knowledge_compiler.wiki](component/knowledge-compiler-wiki.md)
 - [knowledge_compiler.wiki.emitter](component/knowledge-compiler-wiki-emitter.md)
 - [knowledge_compiler.wiki.okf_conformance](component/knowledge-compiler-wiki-okf-conformance.md)
+- [knowledge_compiler.wiki.okf_rules](component/knowledge-compiler-wiki-okf-rules.md)
 - [knowledge_compiler.wiki.publisher](component/knowledge-compiler-wiki-publisher.md)
 - [tests.conftest](component/tests-conftest.md)
 - [tests.test_commit_reconcile](component/tests-test-commit-reconcile.md)
@@ -228,3 +229,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unhandled File Parsing Failures](risk/unhandled-file-parsing-failures.md)
 - [Unparseable Input Handling](risk/unparsable-file-handling.md)
 - [Validation Errors on LLM Output](risk/validation-failure.md)
+
+## State Models (2)
+
+- [knowledge_compiler.compiler.run status](state-model/knowledge-compiler-compiler-run-status.md)
+- [knowledge_compiler.storage.persist status](state-model/knowledge-compiler-storage-persist-status.md)
