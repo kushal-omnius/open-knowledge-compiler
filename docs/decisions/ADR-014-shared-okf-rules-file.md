@@ -2,11 +2,11 @@
 
 ## Status
 
-Proposed — **not implemented**. Recorded to hold the design and its rationale; no code exists for it yet.
+Accepted — **implemented 2026-08-26, as Option A**, with one resolution to an Open Question this ADR left explicit: **the shared rules file is a Python module of frozen dataclasses (`knowledge_compiler/wiki/okf_rules.py`), not an external JSON/TOML file.** This still gives one single-loaded source of truth both `emitter.py` and `okf_conformance.py` import — the actual goal — without the packaging risk of a data file needing `package_data`/`importlib.resources` wiring to survive a built wheel (a real, if boring, failure mode for a project this ADR itself frames under ADR-007's boring-infra principle). Revisit only if the rule set grows complex enough to need a non-Python-native shape, per this ADR's own Assumptions.
 
 ## Date
 
-2026-08-06
+2026-08-06 (proposed) — 2026-08-26 (implemented)
 
 ## Context
 
@@ -74,16 +74,16 @@ Generalize far enough that adding a new OKF concept type requires zero emitter c
 
 ## Decision
 
-**Not yet decided for implementation — this ADR records Option A as the recommended design, Proposed status, explicitly unbuilt.** Option A is preferred over B (B leaves the real drift risk unaddressed, relying on test coverage as the only guard) and over C (C generalizes past any concrete, current need). If and when this is implemented, the scope is Option A exactly as described: structural reserved-filename and required-field rules shared between emitter and validator; concept-type-specific schemas (Option C's scope) remain future work, gated on KC actually needing them.
+**Option A, implemented as described.** Preferred over B (B leaves the real drift risk unaddressed, relying on test coverage as the only guard) and over C (C generalizes past any concrete, current need). Scope is exactly Option A: structural reserved-filename and required-field rules shared between emitter and validator; concept-type-specific schemas (Option C's scope) remain future work, gated on KC actually needing them.
 
-## Architectural Invariants (if implemented)
+## Architectural Invariants
 
 - Reserved-filename frontmatter constraints exist in exactly one place — the shared rules file — never independently re-encoded in emitter rendering logic or validator checks.
 - The emitter self-checks required fields against the same rules file it would share with the validator; a missing required field is a loud failure at emission time, not merely a downstream conformance-check finding.
 - Content-value computation (mapping an `Entity` to actual field values) remains outside the rules file — the file describes structure and presence, never how to derive a value.
 - Type-specific concept schemas (e.g. `Attested Computation`) are added to the rules file only alongside actual emitter support for that concept type — never speculatively ahead of it.
 
-## Consequences (if implemented)
+## Consequences
 
 ### Positive
 
@@ -96,11 +96,11 @@ Generalize far enough that adding a new OKF concept type requires zero emitter c
 - A real refactor of currently-working, currently-tested code — genuine regression risk that has to be managed with the existing test suite (`test_okf_conformance.py`, `test_wiki_emitter.py`) as the safety net during the change.
 - One more small file-format contract (the rules file's own shape) to get right and maintain.
 
-### Tradeoffs Accepted (if implemented)
+### Tradeoffs Accepted
 
 - Scope discipline: structural rules only, explicitly not type-specific schemas — deliberately leaves `Attested Computation` and any other future concept-type work fully out of scope, to avoid building for a need that doesn't exist yet.
 
-## Failure Modes (if implemented)
+## Failure Modes
 
 | Failure | Effect | Handling |
 |---|---|---|
@@ -119,7 +119,7 @@ Generalize far enough that adding a new OKF concept type requires zero emitter c
 - Whether `kc.toml` should let a repo pin a specific OKF spec version to validate/emit against, or whether the compiler's own `OKF_SPEC_VERSION` constant should always be the sole source of truth.
 - Whether this warrants versioning the rules-file format itself, separately from the OKF spec version it encodes.
 
-## Impact (if implemented)
+## Impact
 
 Affected code:
 
@@ -129,28 +129,40 @@ Affected code:
 
 Affected documents:
 
-- `docs/okf-conformance.md` — "Known gaps" section, until implemented
+- `docs/okf-conformance.md` — the "Architectural note, not a gap" paragraph (updated to reflect implementation)
 - `docs/decisions/index.md` — this ADR's entry
 
 ## Alternatives Rejected
 
-Not rejected — **not yet decided**. Options B and C are recorded above with honest tradeoffs; this ADR does not commit to Option A over them, only recommends it as the best-understood path if/when this work is picked up.
+Option B (rely on tests alone) was rejected because it leaves the real drift risk unaddressed — tests are a safety net over two independent implementations, not a structural guarantee they can't diverge. Option C (full schema-driven template engine) was rejected as premature generalization for concept types (`Attested Computation` and others) KC has no concrete plan to emit.
 
 ## Future Reconsideration
 
-Revisit when either: (a) someone picks this up for implementation, at which point the open questions above need answers first, or (b) OKF's evolution reveals the structural-rules-only scope is insufficient (e.g. type-specific schemas become unavoidable because KC starts emitting a typed concept like `Attested Computation`), at which point Option C's tradeoffs should be re-evaluated against real, not speculative, need.
+Revisit if OKF's evolution reveals the structural-rules-only scope is insufficient (e.g. type-specific schemas become unavoidable because KC starts emitting a typed concept like `Attested Computation`), at which point Option C's tradeoffs should be re-evaluated against real, not speculative, need. Revisit the Python-module-over-JSON-file format choice only if the rule set grows complex enough that a data-only format becomes clearly preferable.
+
+## Implementation Notes (2026-08-26)
+
+What shipped, resolving the Open Questions this ADR left explicit:
+
+- **Rules-file format:** a Python module (`knowledge_compiler/wiki/okf_rules.py`) of two frozen dataclasses — `ReservedFileRule` (a filename's `allowed_keys`; empty means no frontmatter permitted at all) and `OKFRules` (`spec_version`, `reserved_files: dict[str, ReservedFileRule]`, `concept_required_fields: tuple[str, ...]`), plus one instance, `OKF_V0_2_RULES`, encoding today's actual rules (`log.md`: no frontmatter; `index.md`: only `okf_version`; every other concept page: non-empty `type`). Not the JSON/TOML file the Open Questions section considered — see Status for why.
+- **`okf_conformance.py`'s `check_bundle()`** takes `rules: OKFRules = OKF_V0_2_RULES` and contains no filename or field name literals in its control flow — reserved-filename handling and required-field checks are both fully data-driven, verified directly by two new tests (`test_check_bundle_is_data_driven_not_hardcoded`, `test_check_bundle_reserved_filename_set_is_also_data_driven`) that pass a synthetic `OKFRules` object naming neither `type` nor `index.md`/`log.md` and confirm the checker still enforces it correctly.
+- **`emitter.py`'s three consultation points**, each a real, enforced check, not a comment-only promise: `_frontmatter()` builds a `fields` dict and raises `ValueError` before rendering if any of `OKF_V0_2_RULES.concept_required_fields` is missing/empty; `_render_index()` raises if the key it's about to write (`okf_version`) isn't in `index.md`'s `allowed_keys`; `_render_log()` raises if `log.md`'s `allowed_keys` is ever made non-empty (since the function itself would need updating to actually emit something, not just be told it's allowed to). All three are exercised by monkeypatching `OKF_V0_2_RULES` to a drifted version in `test_frontmatter_self_check_catches_drift`/`test_index_self_check_catches_drift`, proving these are live checks that actually fire, not decorative code that merely imports the shared module without consulting it.
+- **What did not change:** content-value computation (how `type`, `title`, `files`, `generated` get their actual values from an `Entity`) — exactly as scoped, this stays `emitter.py`'s own domain logic, untouched.
+- **Not built:** `kc validate-okf --spec-version` (validating against a pinned prior version) — Option A's Pros list this as an enabled *possibility*, not a requirement; only one rules version (`OKF_V0_2_RULES`) exists today because only one OKF spec version is targeted, so multi-version selection has no real use case yet.
+- `docs/okf-conformance.md`'s architectural note on this exact drift risk has been updated to reflect implementation.
+- **Verified end-to-end:** a real fixture repo compiled and passed `kc validate-okf` (CONFORMANT) against the refactored emitter+validator pair, in addition to the full existing `test_okf_conformance.py`/`test_wiki_emitter.py` suites (26 tests, all passing, zero behavior change on the non-drifted path).
 
 ## References
 
 - [ADR-013](ADR-013-open-source-okf-conformance.md) — OKF spec-version tracking and the emitter/validator split this ADR proposes unifying
-- [ADR-007](ADR-007-plugin-architecture.md) — boring-infra principle motivating the structural-rules-only scope
-- `knowledge_compiler/wiki/okf_conformance.py`, `knowledge_compiler/wiki/emitter.py` — the two currently-independent encodings this ADR concerns
-- `docs/okf-conformance.md` — "Known gaps" section
+- [ADR-007](ADR-007-plugin-architecture.md) — boring-infra principle motivating the structural-rules-only scope and the Python-module-over-JSON-file format resolution
+- `knowledge_compiler/wiki/okf_rules.py` (the shared rules), `knowledge_compiler/wiki/okf_conformance.py` (`check_bundle`, the generic interpreter), `knowledge_compiler/wiki/emitter.py` (`_frontmatter`/`_render_index`/`_render_log`, the three self-checks)
+- `docs/okf-conformance.md` — "Known gaps" section (not yet updated to reflect this ADR's implementation)
 
 ## Self-Review
 
 - **Truly architectural?** Yes — it concerns whether two subsystems' shared assumptions live in one place or two, which is exactly the kind of boundary decision this project records as an ADR.
-- **Already made?** No — explicitly not decided for implementation; this ADR exists to hold the design, not announce a shipped change.
-- **Reversible?** Fully — nothing has been built; adopting or discarding this design later costs nothing beyond the analysis already captured here.
-- **Dependent future documents:** `docs/okf-conformance.md` (once implemented), this ADR's own status line (Proposed → Accepted or Rejected, once someone actually decides to build or explicitly declines to).
-- **Exposes unresolved decisions:** rules-file format, `kc.toml` version-pinning, rules-file-format versioning — all listed as open questions above.
+- **Already made?** Yes — implemented 2026-08-26, Option A exactly as scoped.
+- **Reversible?** Fully — the shared rules module and three self-checks are additive/refactor-only; both consumers' externally-observable behavior is unchanged on the non-drifted path (verified by the full existing test suite passing unmodified), so reverting costs nothing beyond re-inlining the same three checks by hand.
+- **Dependent future documents:** `docs/okf-conformance.md` — updated.
+- **Exposes unresolved decisions:** `kc.toml` version-pinning and rules-file-format versioning remain open, now genuinely low-priority since only one rules version currently exists.

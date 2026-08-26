@@ -2,11 +2,11 @@
 
 ## Status
 
-Proposed
+Accepted — **the Option A mechanism (item 2: OKF spec-version conformance and migration) is implemented**, verified directly against code on 2026-08-26 while auditing the remaining ADR backlog: `OKF_SPEC_VERSION = "0.2"` (`knowledge_compiler/__init__.py`), `compile_runs.okf_spec_version` (a real column, `storage/schema.py`), bundle-root `index.md`'s `okf_version` frontmatter field (`wiki/emitter.py`'s `_render_index`), and the `kc compile --emit-only` re-render path (`cli.py`, wired to `compiler/run.py`'s `emit_only`) all exist and match this ADR's normative details exactly. The specific v0.1→v0.2 conformance bugs this ADR committed to fixing before release (`index.md` frontmatter restricted to `okf_version` only, `generated.at` replacing the old `timestamp` field, `log.md`'s date-grouped prose structure) are also already fixed in the current emitter — confirmed by direct reading, not assumed. **Item 1 (the open-source release itself — licensing, scrubbing internal references, community docs) remains untouched and was never this ADR's scope** — its own Context section explicitly tracks that outside this decision record. Status was flipped from Proposed without any code change; this is a documentation correction recording work that had already shipped, most likely alongside the OKF v0.2 conformance fixes bundled into earlier dogfooding passes, without the ADR's status line being updated at the time.
 
 ## Date
 
-2026-08-05
+2026-08-05 (proposed) — 2026-08-26 (status corrected to Accepted; mechanism was already implemented)
 
 ## Context
 
@@ -266,9 +266,7 @@ and turns out to change how Emit-stage re-rendering is invoked.
 
 - **Truly architectural?** Yes — it fixes how KC relates to an external, independently-versioned
   format spec going forward, and commits to a migration mechanism, not just a point-in-time fix.
-- **Already made?** Partially — ADR-010 already established the wiki-as-disposable-artifact
-  invariant this ADR's migration story depends on; this ADR is the first to name OKF-spec-version
-  tracking explicitly and to record the v0.1→v0.2 discovery.
+- **Already made?** Yes, for this ADR's actual scope (item 2, the spec-version mechanism) — verified implemented 2026-08-26. ADR-010 already established the wiki-as-disposable-artifact invariant this ADR's migration story depends on; this ADR was the first to name OKF-spec-version tracking explicitly and to record the v0.1→v0.2 discovery, and its mechanism has since been built. Item 1 (the open-source release itself) remains separately unmade and out of this ADR's scope.
 - **Reversible?** The tracking mechanism is low-cost and reversible (just a constant + a column);
   the underlying assumption (spec changes are re-renderable, not migratory) would need
   revisiting only if OKF started requiring genuinely new Knowledge IR data on a breaking bump.

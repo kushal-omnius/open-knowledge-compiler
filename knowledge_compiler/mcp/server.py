@@ -17,7 +17,7 @@ from knowledge_compiler.retrieval.search import search as retrieval_search
 from knowledge_compiler.storage.db import check_connection, make_engine
 
 ENTITY_TYPES_HINT = ("component, api, business_rule, feature, risk, test_coverage, "
-                     "pull_request, project")
+                     "pull_request, project, user_journey, state_model")
 
 
 def build_server(repo_dir: Path):
@@ -78,7 +78,8 @@ def build_server(repo_dir: Path):
                      "Call `knowledge_stats()` for entity counts and last compile "
                      "timestamp. Call `list_entities(entity_type)` to enumerate all "
                      "entities of one type (component, api, business_rule, feature, "
-                     "risk, test_coverage, pull_request, project, user_journey).\n\n"
+                     "risk, test_coverage, pull_request, project, user_journey, "
+                     "state_model).\n\n"
                      "**Slug format:** every entity has a canonical slug of the form "
                      "`<entity_type>/<identifier>` (e.g. `component/billing-rules`, "
                      "`api/post-claims`, `business_rule/discount-cap-rule`). Slugs are "
@@ -96,7 +97,7 @@ def build_server(repo_dir: Path):
 
         entity_type filters results to one kind — pass it to reduce noise:
         component, api, business_rule, feature, risk, test_coverage,
-        pull_request, project, user_journey.
+        pull_request, project, user_journey, state_model.
 
         Typical next step: pass the returned slug to test_plan(), get_entity(),
         linked_context(), or coverage_for() for structured detail."""
@@ -162,16 +163,26 @@ def build_server(repo_dir: Path):
         Each 'api'/'symbols' recommendation inlines a 'context' field (the
         governing business rules, features, and risks linked to that
         component — see linked_context) so no separate lookup is needed.
-        Also returns three additional recommendation kinds, each tagged via
+        Also returns four additional recommendation kinds, each tagged via
         'target_kind': 'stale_retest' (a test exists but the component
         changed more recently than the test was last touched, ADR-018),
         'low_mutation_kill' (declared coverage exists but the mutation-kill
         rate is <=40%, carries a 'mutation_kill_rate' field, ADR-012's named
         trigger — only populated when the repo's kc.toml [mutation] section
-        is enabled), and 'journey' (every step of a kc.toml-declared
+        is enabled), 'journey' (every step of a kc.toml-declared
         [[journeys]] end-to-end journey is individually covered, but no
         single test proves the whole chain — ADR-017; only populated when
-        the repo declares [[journeys]])."""
+        the repo declares [[journeys]]), 'transition_gap' (the
+        component has a compiled state_model — states plus structurally-
+        inferred transitions, ADR-023, Python only — listing each known
+        transition with a 'confidence' field; a review surface, not a
+        per-edge covered/uncovered verdict), and 'low_escaped_defect_trust'
+        (ADR-020: bug-fix PRs on this component kept landing on code that
+        was already 'covered' — an outcome-based signal, distinct from
+        every proxy above, carrying 'escaped_defect_trust_score' and
+        'escaped_defect_fix_count'; only populated on PR-triggered
+        compiles, withheld below a minimum fix-count sample; informational
+        only, never a hard gate)."""
         with repo_session() as (session, repo_id):
             return (queries.test_plan(session, repo_id, slug, dep_map=dep_map)
                     or {"error": f"no entity '{slug}'"})
@@ -230,7 +241,8 @@ def build_server(repo_dir: Path):
     def list_entities(entity_type: str, limit: int = 200) -> list[dict]:
         """List all entities of one type. Valid entity_type values: component,
         api, business_rule, feature, risk, test_coverage, pull_request, project,
-        user_journey. Returns slug, name, and summary payload for each entity.
+        user_journey, state_model. Returns slug, name, and summary payload for
+        each entity.
 
         Use this for enumeration and discovery — e.g. list all business rules,
         all user journeys, or all APIs. For full detail on one entity, follow
@@ -263,7 +275,12 @@ def build_server(repo_dir: Path):
         was last touched — the test may not exercise the new behaviour, ADR-018)
         and, when kc.toml's [mutation] section is enabled, 'mutation_kill_rate'
         and 'low_mutation_kill' (true when kill rate <= 40%, meaning the test
-        passes but misses many code mutations — ADR-012).
+        passes but misses many code mutations — ADR-012). Also returns
+        'escaped_defect_fix_count', 'escaped_defect_trust_score', and
+        'low_escaped_defect_trust' (ADR-020): whether bug-fix PRs on this
+        component found it already covered — an outcome-based signal,
+        populated only on PR-triggered compiles, trust_score null below a
+        minimum fix-count sample.
 
         Use this to check whether writing a new test would duplicate existing
         coverage, or whether an existing test just needs updating (stale=true)."""

@@ -370,6 +370,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
             extra_facts += _jira_facts(ctx, issue_keys, pr.number)
+            extra_facts += _escaped_defect_facts(extra_facts)
         else:
             live_paths = list(commit.files)
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
@@ -549,6 +550,7 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
 
 
 _ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
+_BUG_FIX_RE = re.compile(r"\b(fix(es|ed)?|bug(fix)?|hotfix|regression)\b", re.IGNORECASE)
 
 
 def _pr_facts(pr: MergedPR) -> list[Fact]:
@@ -619,11 +621,46 @@ def _journey_facts(ctx: dict) -> list[Fact]:
             journeys += extra.get("journeys", [])
     facts = []
     for j in journeys:
+        if "name" not in j:
+            # Likely caused by placing `journeys_file = ...` inside a [[journeys]]
+            # block rather than at the root level of kc.toml.
+            raise CompileError(
+                f"journey entry is missing 'name' — got keys {list(j.keys())}. "
+                "If you are using journeys_file, ensure it is a root-level key "
+                "in kc.toml, placed before any [[journeys]] blocks."
+            )
         payload = {"name": j["name"], "steps": list(j.get("steps", []))}
         facts.append(Fact(fact_type="user_journey_observed", payload=payload,
                           artifact_refs=(f"kc.toml:journeys:{j['name']}",),
                           extraction=_JOURNEY_EXTRACTION, content_hash=content_hash(payload)))
     return facts
+
+
+def _escaped_defect_facts(facts: list[Fact]) -> list[Fact]:
+    """ADR-020: classify whether this compile's PR is a bug fix — title/body
+    regex OR a linked Jira issue typed 'Bug' — deterministic, no DB lookup
+    (the "was it already covered" check needs `current` state and is
+    Normalize's job, not Extract's, per ADR-009's boundary). A PR-triggered
+    compile only: bug-fix classification needs PR title/body, which a
+    direct-commit compile doesn't carry."""
+    pr_fact = next((f for f in facts if f.fact_type == "pr_observed"), None)
+    if pr_fact is None:
+        return []
+    title, body = pr_fact.payload.get("title") or "", pr_fact.payload.get("body") or ""
+    reasons = []
+    if _BUG_FIX_RE.search(f"{title}\n{body}"):
+        reasons.append("title_or_body")
+    jira_bug_keys = sorted({f.payload["key"] for f in facts if f.fact_type == "jira_observed"
+                            and (f.payload.get("issue_type") or "").lower() == "bug"})
+    if jira_bug_keys:
+        reasons.append("jira_issue_type")
+    if not reasons:
+        return []
+    payload = {"pr_number": pr_fact.payload["number"], "reasons": reasons,
+              "jira_bug_keys": jira_bug_keys, "changed_files": pr_fact.payload["files"]}
+    return [Fact(fact_type="escaped_defect_observed", payload=payload,
+                artifact_refs=(f"pr:{pr_fact.payload['number']}",),
+                extraction=_FORGE_EXTRACTION, content_hash=content_hash(payload))]
 
 
 def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None) -> list[Fact]:

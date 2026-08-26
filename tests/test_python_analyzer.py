@@ -116,3 +116,61 @@ def test_broken_source_degrades_gracefully():
 def test_grammar_version_recorded():
     facts = facts_for("a.py", "x = 1\n")
     assert facts[0].extraction.grammar_version  # ADR-006: pinned + recorded
+
+
+# -- ADR-023: state_transition_observed --------------------------------------
+
+JOB_PY = '''\
+def _run(job):
+    job.status = "running"
+    try:
+        job.status = "succeeded"
+    except Exception:
+        job.status = "failed"
+'''
+
+
+def test_state_transition_sequential_and_branch_structure():
+    facts = by_type(facts_for("pkg/jobs.py", JOB_PY), "state_transition_observed")
+    edges = [(f.payload["from_state"], f.payload["to_state"]) for f in facts]
+    assert edges == [(None, "running"), ("running", "succeeded"), ("running", "failed")]
+    assert all(f.payload["confidence"] == "structural" for f in facts)
+    assert all(f.payload["field"] == "status" for f in facts)
+    # never a false edge between the two mutually-exclusive branch outcomes
+    assert ("succeeded", "failed") not in edges
+    assert ("failed", "succeeded") not in edges
+
+
+def test_state_transition_anchored_to_owning_module():
+    facts = by_type(facts_for("pkg/jobs.py", JOB_PY), "state_transition_observed")
+    assert all(f.anchors[0].symbol_path == "pkg.jobs" for f in facts)
+    assert all(f.anchors[0].file_path == "pkg/jobs.py" for f in facts)
+
+
+def test_state_field_scoped_per_function():
+    # a second function's assignments must not see the first function's state
+    source = JOB_PY + '\ndef _activate(target):\n    target.status = "active"\n'
+    facts = by_type(facts_for("pkg/jobs.py", source), "state_transition_observed")
+    last = facts[-1]
+    assert last.payload == {"field": "status", "from_state": None, "to_state": "active",
+                            "confidence": "structural", "file": "pkg/jobs.py"}
+
+
+def test_non_status_fields_are_ignored():
+    facts = by_type(facts_for("a.py", 'x.color = "red"\n'), "state_transition_observed")
+    assert facts == []
+
+
+def test_if_elif_else_branches_do_not_leak_into_each_other():
+    source = '''\
+def f(x):
+    if a:
+        x.status = "a"
+    elif b:
+        x.status = "b"
+    else:
+        x.status = "c"
+'''
+    facts = by_type(facts_for("m.py", source), "state_transition_observed")
+    edges = {(f.payload["from_state"], f.payload["to_state"]) for f in facts}
+    assert edges == {(None, "a"), (None, "b"), (None, "c")}

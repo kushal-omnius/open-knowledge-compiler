@@ -63,7 +63,7 @@ Facts are **per-compile staging**, not durable knowledge (ADR-009). See §4 for 
 |---|---|
 | `id` PK (surrogate), `repo_id` | |
 | `slug` | unique per `(repo_id)`; ADR-004 dedup suffixes applied at insert |
-| `entity_type` | the ten canonical types plus `user_journey` (ADR-017, additive) |
+| `entity_type` | the ten canonical types plus `user_journey` (ADR-017, additive) and `state_model` (ADR-023, additive) |
 | `name` | display name; may change without identity change |
 | `payload` JSONB | per-type schema (ir.md §3.2) |
 | `content_hash` | payload-only (dirty rule additionally consults relationship changes — ir.md §3.4) |
