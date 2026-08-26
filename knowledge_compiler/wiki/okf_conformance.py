@@ -1,14 +1,19 @@
-"""OKF v0.2 conformance check over an already-emitted wiki bundle (ADR-013).
+"""OKF conformance check over an already-emitted wiki bundle (ADR-013).
 
 Never compiles — a downstream check over disk state, same posture as
 `kc validate-test` (BRAINSTORM-test-generation-mechanism.md): the compiler's
 job ends at emission; conformance checking is a consumer, not a stage.
 
 Deliberately not a full YAML parser (ADR-007 boring-infra: PyYAML is not a
-project dependency) — frontmatter here is checked at exactly the level OKF
-v0.2's own conformance rules (SPEC.md §11) require: presence, a non-empty
-`type` key for concept files, and the absence/restriction of frontmatter on
-the two reserved filenames (`index.md`, `log.md`).
+project dependency) — frontmatter here is checked at exactly the level OKF's
+own conformance rules (SPEC.md §11) require: presence, non-empty required
+fields for concept files, and the absence/restriction of frontmatter on
+reserved filenames.
+
+`check_bundle()` is a generic interpreter over `okf_rules.OKFRules` (ADR-014)
+— it hard-codes no filenames or field names itself; every structural fact it
+checks comes from the shared rules object also consulted by `emitter.py`, so
+the two can no longer silently drift out of sync with each other.
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from knowledge_compiler import OKF_SPEC_VERSION
+from knowledge_compiler.wiki.okf_rules import OKF_V0_2_RULES, OKFRules
 
 _FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 _KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*)$")
@@ -59,11 +65,12 @@ def _top_level_pairs(block: str) -> dict[str, str]:
     return pairs
 
 
-def check_bundle(wiki_dir: Path) -> ConformanceReport:
-    """Check every `.md` file in `wiki_dir` against OKF v0.2's conformance
-    rules (SPEC.md §11): non-reserved files need parseable frontmatter with a
-    non-empty `type`; `index.md` may carry only `okf_version`; `log.md` may
-    carry no frontmatter at all."""
+def check_bundle(wiki_dir: Path, rules: OKFRules = OKF_V0_2_RULES) -> ConformanceReport:
+    """Check every `.md` file in `wiki_dir` against `rules` (ADR-014;
+    defaults to the current OKF v0.2 structural rules, SPEC.md §11): a
+    reserved filename's frontmatter is checked against its declared
+    `allowed_keys`; every other file needs parseable frontmatter carrying
+    all of `rules.concept_required_fields`, non-empty."""
     report = ConformanceReport(okf_spec_version=OKF_SPEC_VERSION)
     for path in sorted(wiki_dir.rglob("*.md")):
         rel = str(path.relative_to(wiki_dir))
@@ -71,21 +78,20 @@ def check_bundle(wiki_dir: Path) -> ConformanceReport:
         text = path.read_text(encoding="utf-8")
         block = _frontmatter_block(text)
 
-        if path.name == "log.md":
-            if block is not None:
+        reserved = rules.reserved_files.get(path.name)
+        if reserved is not None:
+            if reserved.allowed_keys:
+                if block is not None:
+                    extra = sorted(set(_top_level_pairs(block)) - reserved.allowed_keys)
+                    if extra:
+                        report.issues.append(ConformanceIssue(
+                            rel, f"{path.name}-frontmatter",
+                            f"{path.name} may carry only {sorted(reserved.allowed_keys)} "
+                            f"in frontmatter, found extra: {extra} (SPEC.md §8)"))
+            elif block is not None:
                 report.issues.append(ConformanceIssue(
-                    rel, "log.md-frontmatter",
-                    "log.md is a reserved filename and must carry no frontmatter (SPEC.md §9)"))
-            continue
-
-        if path.name == "index.md":
-            if block is not None:
-                extra = [k for k in _top_level_pairs(block) if k != "okf_version"]
-                if extra:
-                    report.issues.append(ConformanceIssue(
-                        rel, "index.md-frontmatter",
-                        f"index.md may carry only 'okf_version' in frontmatter, "
-                        f"found: {extra} (SPEC.md §8)"))
+                    rel, f"{path.name}-frontmatter",
+                    f"{path.name} is a reserved filename and must carry no frontmatter (SPEC.md §9)"))
             continue
 
         if block is None:
@@ -95,9 +101,11 @@ def check_bundle(wiki_dir: Path) -> ConformanceReport:
                 "block (SPEC.md §11 rule 1)"))
             continue
 
-        if not _top_level_pairs(block).get("type"):
-            report.issues.append(ConformanceIssue(
-                rel, "missing-type",
-                "frontmatter has no non-empty 'type' field (SPEC.md §11 rule 2)"))
+        pairs = _top_level_pairs(block)
+        for required in rules.concept_required_fields:
+            if not pairs.get(required):
+                report.issues.append(ConformanceIssue(
+                    rel, f"missing-{required}",
+                    f"frontmatter has no non-empty '{required}' field (SPEC.md §11 rule 2)"))
 
     return report

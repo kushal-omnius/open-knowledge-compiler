@@ -2,7 +2,7 @@
 
 Emits (ir.md §2.3): component_observed, symbol_observed, dependency_observed,
 api_endpoint_observed (FastAPI/Flask decorator patterns), test_case_observed,
-test_target_observed.
+test_target_observed, state_transition_observed (ADR-023).
 
 Parse failures skip the file and are reported as warnings, never compile failures
 (ADR-006). Unparseable regions degrade gracefully — tree-sitter is error-tolerant.
@@ -34,6 +34,14 @@ _ROUTE_VERB = re.compile(
 )
 _ROUTE_FLASK = re.compile(r"@\s*[\w.]+\.route\s*\(\s*[\"']([^\"']+)[\"'](.*)", re.DOTALL)
 _FLASK_METHODS = re.compile(r"methods\s*=\s*\[([^\]]*)\]")
+
+# ADR-023: attribute names treated as state fields. `<anything>.<field> = "literal"`
+# assignments to these are extracted as state_transition_observed facts, owned by
+# the enclosing module (not the mutated object's class — real code, e.g.
+# `model_cls`-parameterized helpers, mutates dynamically-typed objects that
+# static analysis can't resolve to a class; module granularity matches every
+# other cross-cutting signal in this IR, e.g. mutation_kill_rate).
+_STATE_FIELDS = frozenset({"status", "state"})
 
 
 def _module_path(source_ref: str) -> str:
@@ -148,7 +156,113 @@ class PythonAnalyzer:
 
         body = node.child_by_field_name("body")
         if body is not None:
+            if kind in ("function", "method"):
+                self._walk_state_block(list(body.children), {}, artifact, module, fact)
             self._walk(body, artifact, module, fact, imports, qualified, is_test)
+
+    # -- ADR-023: state_model extraction -----------------------------------------
+    #
+    # Per-function structural scan: sequential same-level `<x>.<field> = "lit"`
+    # assignments chain from_state -> to_state in source order. Branch constructs
+    # (if/elif/else, try/except) run each branch from an independent copy of the
+    # pre-branch state, so branches never see each other's assignments — after
+    # the branch construct, any field touched in ANY branch resets to unknown
+    # (None) rather than guessing which branch ran (never fabricate a transition
+    # between two mutually-exclusive branch outcomes). Loops/`with` bodies are
+    # walked sequentially without a branch reset — a known imprecision, accepted
+    # for V1 rather than building general control-flow analysis.
+
+    def _walk_state_block(self, stmts: list[Node], last_state: dict[str, str | None],
+                          artifact: Artifact, module: str, fact) -> None:
+        for stmt in stmts:
+            if stmt.type == "if_statement":
+                self._branch_state(self._if_branches(stmt), last_state, artifact, module, fact)
+            elif stmt.type == "try_statement":
+                self._branch_state(self._try_branches(stmt), last_state, artifact, module, fact)
+            elif stmt.type in ("with_statement", "for_statement", "while_statement"):
+                inner = stmt.child_by_field_name("body")
+                if inner is not None:
+                    self._walk_state_block(list(inner.children), last_state, artifact, module, fact)
+            elif stmt.type == "expression_statement" and stmt.children:
+                self._maybe_state_assignment(stmt.children[0], last_state, artifact, module, fact)
+
+    def _branch_state(self, branches: list[list[Node]], last_state: dict[str, str | None],
+                      artifact: Artifact, module: str, fact) -> None:
+        touched: dict[str, str | None] = {}
+        for branch_stmts in branches:
+            branch_state = dict(last_state)
+            self._walk_state_block(branch_stmts, branch_state, artifact, module, fact)
+            for field_name, value in branch_state.items():
+                if last_state.get(field_name) != value:
+                    touched[field_name] = None  # divergent across branches -> unknown after merge
+        last_state.update(touched)
+
+    @staticmethod
+    def _if_branches(node: Node) -> list[list[Node]]:
+        branches = []
+        consequence = node.child_by_field_name("consequence")
+        if consequence is not None:
+            branches.append(list(consequence.children))
+        for child in node.children:
+            if child.type == "elif_clause":
+                inner = child.child_by_field_name("consequence")
+                if inner is not None:
+                    branches.append(list(inner.children))
+            elif child.type == "else_clause":
+                inner = child.child_by_field_name("body")
+                if inner is not None:
+                    branches.append(list(inner.children))
+        return branches
+
+    @staticmethod
+    def _try_branches(node: Node) -> list[list[Node]]:
+        branches = []
+        body = node.child_by_field_name("body")
+        if body is not None:
+            branches.append(list(body.children))
+        for child in node.children:
+            if child.type == "except_clause":
+                inner = next((c for c in child.children if c.type == "block"), None)
+                if inner is not None:
+                    branches.append(list(inner.children))
+        return branches
+
+    def _maybe_state_assignment(self, node: Node, last_state: dict[str, str | None],
+                                artifact: Artifact, module: str, fact) -> None:
+        if node.type != "assignment":
+            return
+        left = node.child_by_field_name("left")
+        right = node.child_by_field_name("right")
+        if left is None or right is None or left.type != "attribute" or right.type != "string":
+            return
+        attr_node = left.child_by_field_name("attribute")
+        if attr_node is None:
+            return
+        field_name = attr_node.text.decode("utf-8")
+        if field_name not in _STATE_FIELDS:
+            return
+        to_state = self._string_literal_value(right)
+        if to_state is None:
+            return
+        from_state = last_state.get(field_name)
+        span = (node.start_point[0] + 1, node.end_point[0] + 1)
+        fact("state_transition_observed", {
+            "field": field_name, "from_state": from_state, "to_state": to_state,
+            "confidence": "structural", "file": artifact.source_ref,
+        }, anchors=(Anchor(file_path=artifact.source_ref, symbol_path=module, span=span),))
+        last_state[field_name] = to_state
+
+    @staticmethod
+    def _string_literal_value(node: Node) -> str | None:
+        if any(c.type == "interpolation" for c in node.children):
+            return None  # f-string with interpolation: not a literal, skip
+        content = next((c for c in node.children if c.type == "string_content"), None)
+        if content is not None:
+            return content.text.decode("utf-8")
+        text = node.text.decode("utf-8")
+        if len(text) >= 2 and text[0] == text[-1] and text[0] in ("'", '"'):
+            return text[1:-1]
+        return None
 
     def _routes(self, decorated: Node, artifact: Artifact, module: str, fact) -> None:
         for child in decorated.children:

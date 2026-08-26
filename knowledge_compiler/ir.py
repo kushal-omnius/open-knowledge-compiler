@@ -24,6 +24,10 @@ ENTITY_TYPES = frozenset({
     # hand-written E2E test headers are explicitly deferred future work
     # (ADR-017's Option A extraction-source list), not attempted here.
     "user_journey",
+    # state_model (ADR-023): a resource's own lifecycle (states + structurally-
+    # inferred transitions), owned by the Component whose code mutates the
+    # field — deterministic V1 scope, Python analyzer only.
+    "state_model",
 })
 
 # LLM-derived types go through the match-then-mint cascade (ADR-004).
@@ -33,6 +37,7 @@ RELATION_TYPES = frozenset({
     "implemented_by", "exposes", "governs", "verified_by", "covers",
     "defined_in", "depends_on", "contains", "affects", "motivates", "documents",
     "traverses",  # user_journey -> each step entity (ADR-017); order lives in payload, not here
+    "models",  # state_model -> component (ADR-023)
 })
 
 DETERMINISTIC_FACT_TYPES = frozenset({
@@ -40,6 +45,7 @@ DETERMINISTIC_FACT_TYPES = frozenset({
     "api_endpoint_observed", "test_case_observed", "test_target_observed",
     "source_change_observed", "pr_observed", "jira_observed",
     "doc_section_observed", "mutation_score_observed", "user_journey_observed",
+    "state_transition_observed", "escaped_defect_observed",
 })
 
 LLM_CANDIDATE_FACT_TYPES = frozenset({

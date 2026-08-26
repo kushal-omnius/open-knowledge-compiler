@@ -220,11 +220,26 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
     mutation_kill_rate = component.payload.get("mutation_kill_rate")
     low_mutation_kill = (bool(tests) and mutation_kill_rate is not None
                         and mutation_kill_rate <= 0.4)
+    # Escaped-defect trust score (ADR-020): a forward-looking, outcome-based
+    # signal, distinct from every proxy above — of the bug-fix PRs that have
+    # landed on this component, what fraction happened while it already had
+    # compiled test coverage (the `covers` relationship; the kc-covers:
+    # declared-coverage header is never durably compiled, so it cannot be
+    # this signal's basis — see ADR-020's Impact section). Withheld (None)
+    # below a minimum sample size (compiler/normalize.py's
+    # _MIN_ESCAPED_DEFECT_SAMPLE) per the ADR's own sparse-sample caveat.
+    escaped_defect_fix_count = component.payload.get("escaped_defect_fix_count", 0)
+    escaped_defect_trust_score = component.payload.get("escaped_defect_trust_score")
+    low_escaped_defect_trust = (bool(tests) and escaped_defect_trust_score is not None
+                               and escaped_defect_trust_score <= 0.5)
     return {"component": component_slug,
             "covered": bool(tests),
             "stale": bool(test_list) and all(t["stale"] for t in test_list),
             "mutation_kill_rate": mutation_kill_rate,
             "low_mutation_kill": low_mutation_kill,
+            "escaped_defect_fix_count": escaped_defect_fix_count,
+            "escaped_defect_trust_score": escaped_defect_trust_score,
+            "low_escaped_defect_trust": low_escaped_defect_trust,
             "tests": test_list}
 
 
@@ -292,6 +307,11 @@ def impact_plan(session: Session, repo_id: int, slug: str,
         # invariant (item 2, ADR-012's trigger condition).
         "low_mutation_kill": sorted(t for t, cov in coverage.items()
                                     if cov and cov["covered"] and not cov["stale"] and cov["low_mutation_kill"]),
+        # Distinct again (ADR-020): covered, fresh, mutation-kill fine — but
+        # bug-fix history says coverage has repeatedly failed to prevent a
+        # regression on this component. Outcome-based, not a proxy.
+        "low_escaped_defect_trust": sorted(t for t, cov in coverage.items()
+                                           if cov and cov["covered"] and cov["low_escaped_defect_trust"]),
         "coverage_detail": coverage,
         "cross_repo_dependencies": entity.get("cross_repo_dependencies", []),
     }
@@ -462,6 +482,21 @@ def test_plan(session: Session, repo_id: int, slug: str,
             "context": linked_context(session, repo_id, weak_slug),
         })
 
+    # Low-trust recommendations (ADR-020): a sixth, distinct condition — an
+    # outcome-based signal (did coverage ever prevent a real regression),
+    # unlike every proxy above. Informational only, per the ADR's own
+    # gate-later stance — never claims a specific test is at fault, only
+    # that this component's fix history warrants review.
+    for weak_slug in plan["low_escaped_defect_trust"]:
+        cov = plan["coverage_detail"][weak_slug]
+        recommendations.append({
+            "component": weak_slug, "target_kind": "low_escaped_defect_trust",
+            "targets": [t["slug"] for t in cov["tests"]],
+            "escaped_defect_trust_score": cov["escaped_defect_trust_score"],
+            "escaped_defect_fix_count": cov["escaped_defect_fix_count"],
+            "context": linked_context(session, repo_id, weak_slug),
+        })
+
     # Journey-level recommendations (items 3+4, ADR-017): a fourth, distinct
     # condition from all of the above — every step of a journey can be
     # individually covered (even fresh, even high-mutation-kill) while no
@@ -479,6 +514,33 @@ def test_plan(session: Session, repo_id: int, slug: str,
             "targets": jc["step_components"],
             "steps": jc["steps"],
         })
+
+    # State-model transition recommendations (ADR-023): a fifth, distinct
+    # condition from all of the above — this component has a lifecycle
+    # (states/transitions structurally inferred from source), which
+    # component/api/symbols-level recommendations can't see. test_plan
+    # cannot verify per-edge coverage (that needs semantic test-body
+    # analysis, out of scope for V1) — this surfaces the known transition
+    # set explicitly for review, not a precise covered/uncovered verdict
+    # per edge (see the `confidence` field: "structural" inference only).
+    target_component_id = slug_to_id.get(slug)
+    if plan["entity_type"] == "component" and target_component_id is not None:
+        state_models = session.execute(
+            select(EntityRow)
+            .join(RelationshipRow, RelationshipRow.from_entity_id == EntityRow.id)
+            .where(RelationshipRow.repo_id == repo_id,
+                   RelationshipRow.relation_type == "models",
+                   RelationshipRow.to_entity_id == target_component_id)
+            .order_by(EntityRow.slug)).scalars().all()
+        for sm in state_models:
+            if not sm.payload.get("transitions"):
+                continue
+            recommendations.append({
+                "component": sm.slug, "target_kind": "transition_gap",
+                "targets": [{"from": t["from"], "to": t["to"], "confidence": t["confidence"]}
+                           for t in sm.payload["transitions"]],
+                "context": linked_context(session, repo_id, slug),
+            })
 
     return {**plan, "test_recommendations": recommendations}
 

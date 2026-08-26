@@ -2,11 +2,11 @@
 
 ## Status
 
-Proposed — **not implemented** (explicitly out of scope for the 2026-08-08 QA-grounding-improvements PR, which covered backlog items 1–7 only; this is item 10)
+Accepted — **implemented 2026-08-26, PR-triggered compiles only**, with one implementation-time resolution to the design below: **the "covered" check is against the compiled `covers` relationship, not the `kc-covers:` declared-coverage header.** The header is never durably compiled — `kc validate-test`'s `score_test` (`validation.py`) is a stateless computation invoked from the CLI with no persistence path (verified: no `validate_test`/declared-coverage table exists anywhere in `data-model.md`, and `score_test` only reads via `queries.test_plan`/`queries.get_entity`, never writes). The compiled `covers` edge (a real `Test Coverage` entity actually targeting the component, from `test_target_observed`/`test_case_observed`) is the only durable coverage signal this IR has, and is what "covered as of the preceding compile" resolves against. This ADR's own Context anticipated this choice as open ("an implementation-time choice, not fixed by this ADR").
 
 ## Date
 
-2026-08-08
+2026-08-08 (proposed) — 2026-08-26 (implemented)
 
 ## Context
 
@@ -96,8 +96,21 @@ Option B (full historical-bug-replay) was rejected for the same cost and corpus-
 
 If, after sufficient longitudinal data accumulates, entities with high trust scores are still found to ship regressions at a rate indistinguishable from low-trust entities, that would indicate the correlation this ADR relies on is too weak to be useful — at that point, either the bug-fix classification heuristic needs tightening (Assumptions) or the full replay harness (Option B) should be revisited with the benefit of knowing exactly how much signal the cheaper approach was missing.
 
+## Implementation Notes (2026-08-26)
+
+What shipped, resolving the choices this ADR left open:
+
+- **Bug-fix classification** (`compiler/run.py`'s `_escaped_defect_facts`): a merged PR is classified as a bug fix if its title/body matches `\b(fix(es|ed)?|bug(fix)?|hotfix|regression)\b` (case-insensitive) **or** any of its linked Jira issues has `issue_type` (case-insensitively) `"Bug"`. Either condition alone is sufficient — the two are independent, not combined into a stronger/weaker signal. This runs entirely from already-collected `pr_observed`/`jira_observed` facts; no new collector was needed.
+- **PR-triggered compiles only.** Full and direct-commit compiles don't carry PR title/body, so `escaped_defect_observed` facts are only emitted on the `pr is not None` path in `_compile_one`. This is a real, accepted scope limit, not an oversight — a repo compiled only via direct commits (no PR workflow) gets no escaped-defect signal, same as it gets no `pr_observed`/`jira_observed` facts at all today.
+- **Aggregation granularity is Component**, matching `mutation_kill_rate`'s existing precedent — a fix's `changed_files` (from `pr_observed.files`) resolve to Components the same way `_mutation_scores`/`_state_models` do; an unresolved file is silently skipped.
+- **Cumulative, not per-compile.** `escaped_defect_fix_count` and `escaped_defect_covered_fix_count` carry forward from the Component's *prior* compiled payload (read via `self.current`, Normalize's snapshot of state immediately preceding this compile) and increment — a rolling count across every compile since the signal started running, not reset each time.
+- **Trust score formula:** `escaped_defect_trust_score = round(1 - covered_fix_count / fix_count, 4)`, populated only once `fix_count >= 3` (`_MIN_ESCAPED_DEFECT_SAMPLE` in `compiler/normalize.py`), resolving this ADR's Failure Modes sparse-sample caveat with a concrete number. A score of `0.0` means every observed fix landed on code that was already "covered" — coverage never caught any of them; `1.0` would mean every fix landed on genuinely uncovered code (a different, less alarming condition — coverage simply didn't exist yet, not that it existed and failed).
+- **Surfaced via** `coverage_for`/`test_plan` (`mcp/queries.py`): `coverage_for` gains `escaped_defect_fix_count`/`escaped_defect_trust_score`/`low_escaped_defect_trust` (true when covered and `trust_score <= 0.5`); `test_plan` gains a sixth `target_kind`, `low_escaped_defect_trust`, informational only per this ADR's own Open Questions recommendation — it does not reorder or gate any other recommendation. No standalone `escaped_defects_for` MCP tool was added; `coverage_for`/`get_entity` already surface the same data without a new tool surface.
+- **Verified against real PR-triggered compiles** (`tests/test_incremental.py`): a single bug-fix PR on an already-covered component records one covered fix with `trust_score: null` (below sample size); three consecutive bug-fix PRs cross the threshold and produce `trust_score: 0.0`; a non-bug-fix PR (no "fix" wording, no linked Bug-typed Jira issue) adds no `escaped_defect_*` fields at all; and the Jira-issue-type classification path was verified independently of the title/body regex path.
+
 ## References
 
 - `BRAINSTORM-test-generation-eval.md` (Option E — historical-bug-replay — and the cost/corpus-size reasoning this ADR explicitly does not re-litigate)
 - ADR-002 (PR-triggered compile model this fits within), ADR-012 (measure-first, informational-not-gating precedent), ADR-018 (sibling query-time signal; no-schema-change precedent), ADR-019 (sibling sparse-sample caveat precedent)
 - pipeline.md §3.1 (existing PR↔Jira issue-key extraction this reuses)
+- `knowledge_compiler/compiler/run.py` (`_escaped_defect_facts`), `knowledge_compiler/compiler/normalize.py` (`_escaped_defects`), `knowledge_compiler/mcp/queries.py` (`coverage_for`/`test_plan`'s `low_escaped_defect_trust`)
