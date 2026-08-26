@@ -17,8 +17,32 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-08-26
+
 ### Added
 
+- **`state_model` entity** (ADR-023): closes the "Behavioral Contract" gap named in this project's
+  north star — a new deterministic entity type representing one resource's own lifecycle (states
+  plus structurally-inferred transitions), distinct from a static invariant (`business_rule`) or a
+  cross-resource traversal (`user_journey`). Python analyzer only for V1. New
+  `state_transition_observed` fact type and `models` relationship; `test_plan` gains a
+  `transition_gap` recommendation kind. Extraction never fabricates a transition across two
+  mutually-exclusive branch outcomes — `if`/`elif`/`else` and `try`/`except` branches reset to
+  unknown (`from_state: null`) after the branch construct rather than merging — verified against a
+  real state machine in dogfood code (a job-status lifecycle) and pinned by a regression test.
+- **Escaped-defect trust score** (ADR-020): a new, forward-looking, PR-triggered, outcome-based
+  test-quality signal — correlates bug-fix PRs (title/body regex, or a linked Jira issue typed
+  `Bug`) against whether the component they touched already had compiled test coverage at the time.
+  Cumulative per-component `escaped_defect_fix_count` / `escaped_defect_covered_fix_count` /
+  `escaped_defect_trust_score`, surfaced via `coverage_for`/`test_plan`'s new
+  `low_escaped_defect_trust`, informational only (never gates anything). PR-triggered compiles only
+  — resolves against the compiled `covers` relationship, not the `kc-covers:` declared-coverage
+  header, which is never durably persisted.
+- **Shared OKF rules file** (ADR-014): a new `wiki/okf_rules.py` module is now the single source of
+  truth both `okf_conformance.py`'s validator and `emitter.py`'s renderer consult, closing a
+  previously-latent drift risk between the two independently hard-coded encodings. Three points in
+  the emitter now self-check against the same rules and fail loudly at emission time on drift,
+  instead of only being caught downstream by a separate `kc validate-okf` run.
 - **Compile completeness signal** (dogfood-review finding): `compile_runs` gains `files_seen` /
   `files_parsed` / `files_failed` / `failed_files` (migration 0007). A parser failure still skips
   the file, never the compile (ADR-006) — but the three language analyzers now isolate per-file
@@ -37,6 +61,13 @@ so it works even where a raw `git push` of a tag ref is restricted).
   gain `max_neighbors` (default 50) — previously every relationship touching an entity was returned
   with no limit, so a hub entity could return an unbounded edge set to an agent. `relationship_count`
   and `relationships_truncated` report the true total when the cap is hit.
+
+### Fixed
+
+- **ADR-013's status corrected** from Proposed to Accepted — no code change; an audit found its
+  OKF spec-version-tracking mechanism (`OKF_SPEC_VERSION`, `compile_runs.okf_spec_version`,
+  `index.md`'s `okf_version` field, `kc compile --emit-only`) was already fully implemented, only
+  the ADR's own status line was stale.
 
 ## [1.1.1] — 2026-08-20
 
