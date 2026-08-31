@@ -6,14 +6,20 @@ PR association comes from the forge, never commit parentage — squash/rebase sa
 implementation. Tests use an in-memory fake — the reconciliation semantics are
 forge-independent.
 
-Configuration (never hardcoded): token from KC_GITHUB_TOKEN or GITHUB_TOKEN;
-API base from KC_GITHUB_API (default https://api.github.com, override for GHE).
+Configuration (never hardcoded): token from KC_GITHUB_TOKEN or GITHUB_TOKEN,
+falling back to `gh auth token` if neither is set and the gh CLI is locally
+authenticated. That fallback is an interactive-developer convenience only —
+there's no non-interactive credential behind the gh CLI's own auth store
+(same reasoning as ADR-021's Jira file-gateway scoping), so CI must keep
+setting the env var explicitly. API base from KC_GITHUB_API (default
+https://api.github.com, override for GHE).
 """
 
 from __future__ import annotations
 
 import json
 import os
+import subprocess
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -65,15 +71,35 @@ class ForgeError(Exception):
     pass
 
 
+def _gh_cli_token() -> str | None:
+    """Last-resort token source: the local gh CLI's own stored credential.
+    Interactive-developer convenience only — a machine with `gh auth login`
+    already done shouldn't also need a separately-provisioned PAT just to
+    unblock `kc reconcile`. Never the primary source: CI has no gh CLI
+    session to read, so it must keep setting KC_GITHUB_TOKEN/GITHUB_TOKEN
+    as a secret regardless of this fallback existing."""
+    try:
+        result = subprocess.run(["gh", "auth", "token"], capture_output=True,
+                                text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    token = result.stdout.strip()
+    return token if result.returncode == 0 and token else None
+
+
 class GitHubGateway:
     """Reference implementation (REST, stdlib urllib — no extra dependency)."""
 
     def __init__(self, owner: str, repo: str) -> None:
         self.owner, self.repo = owner, repo
         self.base = os.environ.get("KC_GITHUB_API", "https://api.github.com").rstrip("/")
-        self.token = os.environ.get("KC_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
+        self.token = (os.environ.get("KC_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
+                     or _gh_cli_token())
         if not self.token:
-            raise ForgeError("no forge token: set KC_GITHUB_TOKEN (or GITHUB_TOKEN)")
+            raise ForgeError(
+                "no forge token: set KC_GITHUB_TOKEN (or GITHUB_TOKEN), or run "
+                "`gh auth login` — KC falls back to `gh auth token` when neither "
+                "env var is set")
 
     def _get(self, path: str) -> object:
         req = urllib.request.Request(

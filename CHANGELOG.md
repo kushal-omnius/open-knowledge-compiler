@@ -19,6 +19,14 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Added
 
+- **`gh` CLI token fallback** for the forge gateway: `GitHubGateway` now tries `gh auth token`
+  when neither `KC_GITHUB_TOKEN` nor `GITHUB_TOKEN` is set, so a machine with `gh auth login`
+  already done doesn't also need a separately-provisioned PAT to unblock `kc reconcile`/
+  `kc compile --pr`. Interactive-developer convenience only — there's no non-interactive
+  credential behind the `gh` CLI's own auth store, so CI must keep setting the env var
+  explicitly (same reasoning as ADR-021's Jira file-gateway scoping). Explicit env vars still
+  take precedence and skip the `gh` call entirely. 4 new tests in `tests/test_forge_gateway.py`.
+
 - **Commit-fill reconcile** (ADR-002 addendum): `kc reconcile` now runs two passes — the existing
   PR-based pass, then a commit-fill pass (`ForgeGateway.list_commits`) for direct pushes, squash
   commits, and repos without a PR workflow. New `CommitInfo` dataclass `(sha, timestamp, message,
