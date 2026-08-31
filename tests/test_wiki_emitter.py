@@ -264,3 +264,38 @@ def test_emission_is_byte_deterministic(state, tmp_path):
 def test_rel_link_helper():
     assert rel_link("api/get-x", "component/y") == "../component/y.md"
     assert rel_link("component/a", "component/b") == "b.md"
+
+
+# --- ADR-014: emitter self-checks against the shared rules file -----------------
+
+
+def test_frontmatter_self_check_catches_drift(state, tmp_path, monkeypatch):
+    """If okf_rules.py ever gains a required concept field this emitter
+    doesn't populate, emission must fail loudly here — not silently produce
+    non-conformant pages only `kc validate-okf` would catch downstream."""
+    from knowledge_compiler.wiki import emitter as emitter_mod
+    from knowledge_compiler.wiki.okf_rules import OKFRules
+
+    drifted = OKFRules(spec_version="0.2", reserved_files={},
+                       concept_required_fields=("type", "provenance"))
+    monkeypatch.setattr(emitter_mod, "OKF_V0_2_RULES", drifted)
+
+    with pytest.raises(ValueError, match="missing required field"):
+        emit_all(state, tmp_path)
+
+
+def test_index_self_check_catches_drift(state, tmp_path, monkeypatch):
+    """If okf_rules.py ever stops allowing 'okf_version' on index.md, the
+    renderer that still writes it must fail loudly, not silently emit a key
+    the validator would then reject."""
+    from knowledge_compiler.wiki import emitter as emitter_mod
+    from knowledge_compiler.wiki.okf_rules import OKFRules, ReservedFileRule
+
+    drifted = OKFRules(spec_version="0.2",
+                       reserved_files={"index.md": ReservedFileRule(allowed_keys=frozenset()),
+                                       "log.md": ReservedFileRule(allowed_keys=frozenset())},
+                       concept_required_fields=("type",))
+    monkeypatch.setattr(emitter_mod, "OKF_V0_2_RULES", drifted)
+
+    with pytest.raises(ValueError, match="not in okf_rules.py's allowed set"):
+        emit_all(state, tmp_path)

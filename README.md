@@ -4,7 +4,8 @@
 
 [![CI](https://github.com/kushal-omnius/open-knowledge-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/kushal-omnius/open-knowledge-compiler/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+[![OKF BundleDex](https://bundledex.net/static-badge.svg)](https://bundledex.net)
 
 Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
 
@@ -15,8 +16,17 @@ Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, te
 - Releases: [CHANGELOG.md](CHANGELOG.md) · multi-repo setup: [docs/cross-repo-workflows.md](docs/cross-repo-workflows.md)
 - **Example:** this repo compiling itself — [live wiki](../../tree/knowledge/wiki) (63 components, plus real business rules/features/risks from the LLM semantic layer)
 
+## North star
+
+Every design decision here should serve one question:
+
+> Given what this software does and what changed, what exactly must be verified — and how do we know the resulting test is actually trustworthy?
+
+Structural knowledge (components, APIs, dependencies) is necessary but not the differentiator — generic code-intelligence tools already do that well. What doesn't exist elsewhere is the answer to the two halves of that question: a **Behavioral Contract** model (state, transitions, and failure modes — not just structure) for *what must be verified*, and a **Test Trust Score** (mutation-kill rate, flakiness, escaped-defect history, and coverage completeness combined into one signal) for *is the resulting test trustworthy*. That pairing is the moat.
+
 ## Table of contents
 
+- [North star](#north-star)
 - [Why OKF](#why-okf)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
@@ -183,12 +193,12 @@ No API keys required — the deterministic compiler produces components, APIs, d
 | Command | What it does |
 |---|---|
 | `kc init --slug <slug> --forge-ref <ref>` | Register a repo: run migrations, insert repo row, write `kc.toml`. Run once before first compile. |
-| `kc compile --full` | Bootstrap / escape-hatch full compilation |
+| `kc compile --full` | Full recompile against HEAD — re-extracts every file. Use for first compile, after a large restructure, or when `kc verify` reports drift. |
 | `kc compile --full -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
-| `kc compile --pr N` | Incremental: reconciles missed merged PRs first, in merge order, exactly once |
+| `kc compile --pr N` | Incremental: compile one specific merged PR, idempotent |
 | `kc compile --no-llm` | Deterministic pass only; uses tree-sitter, run marked degraded; semantic entities are never removed |
 | `kc compile --emit-only` | Re-render the wiki from already-compiled Knowledge IR only — no Collect/Extract/Normalize, no new compile run. The cheap OKF-spec-version rollout path ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md)) |
-| `kc reconcile` | Catch up on merged PRs and direct commits since the watermark — two-pass: PR-based then commit-fill for direct pushes and squash commits (needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`) |
+| `kc reconcile` | Catch up on merged PRs and direct commits since the last compile — only changed files are extracted, so it is much cheaper than `--full` when run frequently (1–3 PRs at a time). Preserves per-PR entity attribution. Needs `KC_GITHUB_TOKEN` or `GITHUB_TOKEN`. |
 | `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |

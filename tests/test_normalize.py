@@ -230,3 +230,54 @@ def test_candidate_without_anchors_is_rejected_loudly():
     state = normalize(facts, CurrentState(), CFG, repo_slug="repo-a")
     assert not rule_entity_in(state)
     assert any("missing anchors" in w for w in state.warnings)
+
+
+# --- ADR-023: state_model -------------------------------------------------------
+
+
+def _job_facts():
+    files = {
+        "pkg/__init__.py": "",
+        "pkg/jobs.py": (
+            'def _run(job):\n    job.status = "running"\n'
+            '    try:\n        job.status = "succeeded"\n'
+            '    except Exception:\n        job.status = "failed"\n'
+        ),
+    }
+    artifacts = [Artifact(artifact_type="source_file", source_ref=ref,
+                          content_hash=content_hash({"c": c}), content=c)
+                 for ref, c in files.items()]
+    return PythonAnalyzer().analyze(artifacts)
+
+
+def test_state_model_aggregated_from_transitions():
+    state = normalize(_job_facts(), CurrentState(), CFG, repo_slug="repo-a")
+    by_slug = {e.slug: e for e in state.entities}
+    sm = by_slug["state-model/pkg-jobs-status"]
+    assert sm.entity_type == "state_model"
+    assert sm.payload["owner_component"] == "pkg.jobs"
+    assert sm.payload["field"] == "status"
+    assert sm.payload["states"] == ["failed", "running", "succeeded"]
+    assert sm.payload["terminal_states"] == ["failed", "succeeded"]  # never a `from`
+    edges = {(t["from"], t["to"]) for t in sm.payload["transitions"]}
+    assert edges == {(None, "running"), ("running", "succeeded"), ("running", "failed")}
+    assert all(t["confidence"] == "structural" for t in sm.payload["transitions"])
+
+
+def test_state_model_models_relationship_to_owning_component():
+    state = normalize(_job_facts(), CurrentState(), CFG, repo_slug="repo-a")
+    rels = {(r.from_slug, r.relation_type, r.to_slug) for r in state.relationships}
+    assert ("state-model/pkg-jobs-status", "models", "component/pkg-jobs") in rels
+
+
+def test_state_model_unresolved_module_is_silently_skipped():
+    # a state_transition_observed fact whose module never got a component_observed
+    # fact this compile (out-of-scope PR slice) must not mint a dangling state_model
+    stray = Fact(fact_type="state_transition_observed",
+                payload={"field": "status", "from_state": None, "to_state": "x",
+                        "confidence": "structural", "file": "ghost/mod.py"},
+                artifact_refs=("ghost/mod.py",), extraction=_LLM_EXTRACTION,
+                content_hash=content_hash({"x": 1}),
+                anchors=(Anchor(file_path="ghost/mod.py", symbol_path="ghost.mod"),))
+    state = normalize([stray], CurrentState(), CFG, repo_slug="repo-a")
+    assert not [e for e in state.entities if e.entity_type == "state_model"]

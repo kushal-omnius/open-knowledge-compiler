@@ -101,3 +101,36 @@ def test_log_with_frontmatter_flagged(tmp_path):
     report = check_bundle(tmp_path)
     assert not report.conformant
     assert report.issues[0].rule == "log.md-frontmatter"
+
+
+# --- ADR-014: check_bundle is a generic interpreter, not per-filename logic -----
+
+
+def test_check_bundle_is_data_driven_not_hardcoded(tmp_path):
+    """A custom OKFRules with a required field the checker was never told
+    about by name ('provenance', not 'type') still gets enforced correctly
+    — proving check_bundle interprets whatever rules object it's given,
+    rather than having 'type' baked into its control flow."""
+    from knowledge_compiler.wiki.okf_rules import OKFRules, ReservedFileRule
+
+    custom_rules = OKFRules(spec_version="9.9", reserved_files={},
+                            concept_required_fields=("provenance",))
+    _write(tmp_path, "component/billing.md", CONCEPT_OK)  # has 'type', not 'provenance'
+    report = check_bundle(tmp_path, rules=custom_rules)
+    assert not report.conformant
+    assert report.issues[0].rule == "missing-provenance"
+
+
+def test_check_bundle_reserved_filename_set_is_also_data_driven(tmp_path):
+    """A filename ('changelog.md') that OKF v0.2 doesn't reserve is treated
+    as an ordinary reserved file once the rules object says so — 'index.md'
+    and 'log.md' are not special-cased in the interpreter itself."""
+    from knowledge_compiler.wiki.okf_rules import OKFRules, ReservedFileRule
+
+    custom_rules = OKFRules(spec_version="9.9",
+                            reserved_files={"changelog.md": ReservedFileRule(allowed_keys=frozenset())},
+                            concept_required_fields=())
+    _write(tmp_path, "changelog.md", "---\nsomething: yes\n---\n\n# changelog\n")
+    report = check_bundle(tmp_path, rules=custom_rules)
+    assert not report.conformant
+    assert report.issues[0].rule == "changelog.md-frontmatter"

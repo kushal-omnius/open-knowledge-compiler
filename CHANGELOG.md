@@ -17,6 +17,60 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-08-26
+
+### Added
+
+- **`state_model` entity** (ADR-023): closes the "Behavioral Contract" gap named in this project's
+  north star — a new deterministic entity type representing one resource's own lifecycle (states
+  plus structurally-inferred transitions), distinct from a static invariant (`business_rule`) or a
+  cross-resource traversal (`user_journey`). Python analyzer only for V1. New
+  `state_transition_observed` fact type and `models` relationship; `test_plan` gains a
+  `transition_gap` recommendation kind. Extraction never fabricates a transition across two
+  mutually-exclusive branch outcomes — `if`/`elif`/`else` and `try`/`except` branches reset to
+  unknown (`from_state: null`) after the branch construct rather than merging — verified against a
+  real state machine in dogfood code (a job-status lifecycle) and pinned by a regression test.
+- **Escaped-defect trust score** (ADR-020): a new, forward-looking, PR-triggered, outcome-based
+  test-quality signal — correlates bug-fix PRs (title/body regex, or a linked Jira issue typed
+  `Bug`) against whether the component they touched already had compiled test coverage at the time.
+  Cumulative per-component `escaped_defect_fix_count` / `escaped_defect_covered_fix_count` /
+  `escaped_defect_trust_score`, surfaced via `coverage_for`/`test_plan`'s new
+  `low_escaped_defect_trust`, informational only (never gates anything). PR-triggered compiles only
+  — resolves against the compiled `covers` relationship, not the `kc-covers:` declared-coverage
+  header, which is never durably persisted.
+- **Shared OKF rules file** (ADR-014): a new `wiki/okf_rules.py` module is now the single source of
+  truth both `okf_conformance.py`'s validator and `emitter.py`'s renderer consult, closing a
+  previously-latent drift risk between the two independently hard-coded encodings. Three points in
+  the emitter now self-check against the same rules and fail loudly at emission time on drift,
+  instead of only being caught downstream by a separate `kc validate-okf` run.
+- **Compile completeness signal** (dogfood-review finding): `compile_runs` gains `files_seen` /
+  `files_parsed` / `files_failed` / `failed_files` (migration 0007). A parser failure still skips
+  the file, never the compile (ADR-006) — but the three language analyzers now isolate per-file
+  exceptions themselves (previously unhandled, so a single bad file could in fact crash the whole
+  Extract stage despite the documented contract) and report what they skipped. Surfaced via
+  `knowledge_stats()`'s new `knowledge_completeness` field and a new `kc inspect` line. NULL on
+  runs predating this migration and on `kc compile --emit-only` reruns.
+- **User journey fail-closed status** (dogfood-review finding, extends ADR-017): a `user_journey`
+  entity now carries `status` (`complete` | `partial` | `invalid`) and `unresolved_steps`. A
+  `kc.toml [[journeys]]` step that doesn't resolve to a compiled entity was already dropped with a
+  compile warning, not a hard failure — but the warning only reached the transient compile-run log,
+  so the resulting journey entity looked identical to a fully-resolved one everywhere downstream.
+  `journey_coverage()` and the journey's wiki page now both surface the status and the exact
+  unresolved slugs.
+- **`get_entity` relationship limit** (dogfood-review finding): the MCP tool and underlying query
+  gain `max_neighbors` (default 50) — previously every relationship touching an entity was returned
+  with no limit, so a hub entity could return an unbounded edge set to an agent. `relationship_count`
+  and `relationships_truncated` report the true total when the cap is hit.
+
+### Fixed
+
+- **ADR-013's status corrected** from Proposed to Accepted — no code change; an audit found its
+  OKF spec-version-tracking mechanism (`OKF_SPEC_VERSION`, `compile_runs.okf_spec_version`,
+  `index.md`'s `okf_version` field, `kc compile --emit-only`) was already fully implemented, only
+  the ADR's own status line was stale.
+
+## [1.1.1] — 2026-08-20
+
 ### Added
 
 - **`gh` CLI token fallback** for the forge gateway: `GitHubGateway` now tries `gh auth token`
@@ -62,6 +116,15 @@ QA-agent test-grounding improvements (backlog items 1, 2, 5, 6, 7, 3, 4; items
   Component entities. `coverage_for`/`test_plan` surface `low_mutation_kill`
   when declared coverage exists but the kill rate is ≤40% (ADR-012's named
   trigger). KC never executes the target repo's tests itself.
+- **`journeys_file` config key**: journey definitions can now be declared in
+  an external TOML file instead of (or alongside) inline `[[journeys]]`
+  entries. `journeys_file` accepts a single path string or an array of path
+  strings, each resolved relative to the repo directory. Useful when a
+  separate QA repo owns the journey definitions for another repo — set
+  `journeys_file = "../qa-repo/frida-journeys.toml"` in the source repo's
+  `kc.toml` and keep the canonical definitions there. Inline `[[journeys]]`
+  and `journeys_file` entries are merged (inline first). A missing or
+  unreadable file fails loudly at compile time.
 - New `user_journey` entity type + `traverses` relationship (deterministic
   V1 scope, [ADR-017](docs/decisions/ADR-017-user-journey-entity.md)):
   declare an ordered, end-to-end step list via `kc.toml [[journeys]]`.
@@ -126,6 +189,20 @@ Jira collector: second gateway backend, `[jira] source = "rest" | "file"`
   by including both calls in the shadow compile; the invariant (the shadow
   compile must include every fact source the real compile uses) is now
   documented in `pipeline.md` §7.
+- Every DB-touching entry point (`init`, `compile`/`reconcile`/`verify`/
+  `--emit-only`, `inspect`, `validate-test`, `serve`) would either hang
+  indefinitely or surface a raw driver traceback when Postgres was
+  unreachable (Docker not running, wrong `KC_DATABASE_URL`, network
+  black-hole) — no bounded wait, no actionable message. `storage/db.py`
+  gains a `connect_timeout` (`KC_DB_CONNECT_TIMEOUT_SECONDS`, default 120s)
+  applied via `psycopg`'s `connect_args`, shared with `alembic/env.py` so
+  `kc init`'s migration step gets the same bound, plus a
+  `check_connection()` helper that fails fast with `is Docker running? Try:
+  docker compose up -d` instead of a bare `OperationalError`. Every entry
+  point above now calls it before doing any real work and translates the
+  result into its existing exception idiom (`CompileError` /
+  `click.ClickException`). `kc serve` checks at startup rather than on the
+  first tool call.
 - `GitHubGateway`'s error message for a 404 from the GitHub API (`kc reconcile`
   / `kc compile --pr`) just echoed the raw `HTTPError`, which reads as "this
   repo doesn't exist" — but GitHub returns 404, not 403, for a repo the token

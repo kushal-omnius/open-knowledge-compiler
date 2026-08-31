@@ -158,6 +158,8 @@ class _Normalizer:
         rename_map = self._p1_rename_map()
         self._p2_deterministic_entities()
         self._mutation_scores()
+        self._state_models()
+        self._escaped_defects()
         self._p3_p4_candidates(rename_map)
         self._user_journeys()
         self._p5_relationships()
@@ -224,18 +226,35 @@ class _Normalizer:
         minted and resolvable, not just deterministic ones. A step slug that
         doesn't resolve to anything compiled this run is dropped with a
         warning (DP8: visible, never silently merged) rather than failing
-        the whole journey or the compile."""
+        the whole journey or the compile.
+
+        Fail-closed status (dogfood-review finding): a dropped step used to be
+        visible only in the transient compile-run warning list — the journey
+        entity itself looked identical to a fully-resolved one, so a shortened
+        chain could silently pass as a complete one downstream (journey_coverage,
+        test_plan, the wiki page). `status` + `unresolved_steps` make that
+        distinction durable on the entity, not just at compile time."""
         for f in self._facts_of("user_journey_observed"):
             name = f.payload["name"]
+            declared_steps = f.payload.get("steps", [])
             resolved_steps = []
-            for step_slug in f.payload.get("steps", []):
+            unresolved_steps = []
+            for step_slug in declared_steps:
                 if step_slug in self.entities:
                     resolved_steps.append(step_slug)
                 else:
+                    unresolved_steps.append(step_slug)
                     self.warnings.append(
                         f"user_journey '{name}': step slug '{step_slug}' does not "
                         f"resolve to any compiled entity this run — dropped")
-            payload = {"name": name, "steps": resolved_steps}
+            if not unresolved_steps:
+                status = "complete"
+            elif resolved_steps:
+                status = "partial"
+            else:
+                status = "invalid"
+            payload = {"name": name, "steps": resolved_steps, "status": status,
+                      "unresolved_steps": unresolved_steps}
             self._put(self._entity("user_journey", f"user-journey/{slugify(name)}",
                                    name, payload),
                       rule="natural_key", signals={}, facts=[f])
@@ -335,6 +354,113 @@ class _Normalizer:
             self._put(self._entity("component", slug, component.name, payload,
                                    anchors=component.anchors),
                       rule="natural_key", signals={}, facts=[f])
+
+    def _state_models(self) -> None:
+        """ADR-023: aggregate state_transition_observed facts (python_analyzer,
+        structural transition heuristic) into one state_model entity per
+        (owning module, field) — deterministic identity, Component granularity
+        (not the mutated object's class: real code mutates dynamically-typed
+        objects — e.g. a `model_cls`-parameterized helper — that static
+        analysis can't resolve to a class). A transition whose module doesn't
+        resolve to a compiled Component this compile is silently skipped, same
+        class as the mutation-score precedent above."""
+        component_paths = {e.payload["path"] for e in self.entities.values()
+                           if e.entity_type == "component"}
+        by_key: dict[tuple[str, str], list[Fact]] = {}
+        for f in self._facts_of("state_transition_observed"):
+            module = f.anchors[0].symbol_path if f.anchors else None
+            if module is None or module not in component_paths:
+                continue
+            by_key.setdefault((module, f.payload["field"]), []).append(f)
+
+        for module_path, field_name in sorted(by_key):
+            group = by_key[(module_path, field_name)]
+            states: set[str] = set()
+            transitions: list[dict] = []
+            seen_edges: set[tuple[str | None, str]] = set()
+            for f in group:
+                from_state, to_state = f.payload["from_state"], f.payload["to_state"]
+                states.add(to_state)
+                if from_state is not None:
+                    states.add(from_state)
+                edge = (from_state, to_state)
+                if edge not in seen_edges:
+                    seen_edges.add(edge)
+                    transitions.append({"from": from_state, "to": to_state,
+                                        "confidence": f.payload["confidence"]})
+            transitions.sort(key=lambda t: (t["from"] or "", t["to"]))
+            froms = {t["from"] for t in transitions if t["from"] is not None}
+            terminal_states = sorted(states - froms)
+            name = f"{module_path} {field_name}"
+            slug = f"state-model/{slugify(name)}"
+            payload = {
+                "owner_component": module_path, "field": field_name,
+                "states": sorted(states), "transitions": transitions,
+                "terminal_states": terminal_states,
+            }
+            self._put(self._entity("state_model", slug, name, payload),
+                      "natural_key", {}, group)
+
+    _MIN_ESCAPED_DEFECT_SAMPLE = 3  # ADR-020 Failure Modes: withhold below this, sparse-sample noise
+
+    def _escaped_defects(self) -> None:
+        """ADR-020: forward-looking, PR-triggered correlation between bug-fix
+        PRs and whether the component(s) they touched already had compiled
+        Test Coverage (a `covers` relationship) as of `self.current` — the
+        state immediately preceding this compile, by construction (ADR-003).
+        Deliberately NOT the `kc-covers:` declared-coverage header: that is
+        never durably compiled (validation.py's score_test is a stateless
+        CLI computation with no persistence path), so the only durable
+        coverage signal this IR actually has is the compiled `covers` edge —
+        an implementation-time resolution of a choice ADR-020 left open.
+        Cumulative counts carry forward via self.current's prior Component
+        payload, same re-merge pattern as _mutation_scores; a fix touching a
+        file whose component isn't resolved this compile is silently
+        skipped, same class as that precedent too."""
+        component_paths = {e.payload["path"]: e.slug for e in self.entities.values()
+                           if e.entity_type == "component"}
+        covered_before_cache: dict[str, bool] = {}
+
+        def was_covered_before(slug: str) -> bool:
+            if slug not in covered_before_cache:
+                covered_before_cache[slug] = any(
+                    r.relation_type == "covers" and r.to_slug == slug
+                    for r in self.current.relationships)
+            return covered_before_cache[slug]
+
+        facts_by_component: dict[str, list[Fact]] = {}
+        covered_hits: dict[str, int] = {}
+        for f in self._facts_of("escaped_defect_observed"):
+            touched: set[str] = set()
+            for file_path in f.payload["changed_files"]:
+                module = _file_to_module(file_path)
+                resolved = self._resolve_internal(module, set(component_paths))
+                if resolved:
+                    touched.add(component_paths[resolved])
+            for slug in touched:
+                facts_by_component.setdefault(slug, []).append(f)
+                if was_covered_before(slug):
+                    covered_hits[slug] = covered_hits.get(slug, 0) + 1
+
+        for slug, contributing in facts_by_component.items():
+            component = self.entities.get(slug)
+            if component is None:
+                continue
+            prior = next((e for e in self.current.entities if e.slug == slug), None)
+            prior_fix_count = prior.payload.get("escaped_defect_fix_count", 0) if prior else 0
+            prior_covered_count = (prior.payload.get("escaped_defect_covered_fix_count", 0)
+                                   if prior else 0)
+            fix_count = prior_fix_count + len(contributing)
+            covered_count = prior_covered_count + covered_hits.get(slug, 0)
+            trust_score = (round(1 - covered_count / fix_count, 4)
+                          if fix_count >= self._MIN_ESCAPED_DEFECT_SAMPLE else None)
+            payload = {**component.payload,
+                      "escaped_defect_fix_count": fix_count,
+                      "escaped_defect_covered_fix_count": covered_count,
+                      "escaped_defect_trust_score": trust_score}
+            self._put(self._entity("component", slug, component.name, payload,
+                                   anchors=component.anchors),
+                      rule="natural_key", signals={}, facts=contributing)
 
     @staticmethod
     def _resolve_internal(dep: str, internal: set[str]) -> str | None:
@@ -579,6 +705,10 @@ class _Normalizer:
                 for step_slug in e.payload["steps"]:
                     if step_slug in self.entities:
                         self.relationships.add((e.slug, "traverses", step_slug))
+            elif e.entity_type == "state_model":
+                owner_path = e.payload["owner_component"]
+                if owner_path in components:
+                    self.relationships.add((e.slug, "models", components[owner_path]))
             elif e.entity_type == "jira_story":
                 # ir.md §3.3: motivates | Jira Story -> Feature | Pull Request.
                 pr_slug = f"pull-request/{e.payload.get('linked_pr')}"
@@ -596,7 +726,7 @@ class _Normalizer:
     def _p6_wiki_pages(self) -> None:
         owners = [e for e in self.entities.values()
                   if e.entity_type in ("component", "api", "feature", "business_rule",
-                                       "risk", "user_journey")]
+                                       "risk", "user_journey", "state_model")]
         for owner in sorted(owners, key=lambda e: e.slug):
             slug = f"wiki-page/{slugify(owner.slug)}"
             payload = {"owner_slug": owner.slug, "page_type": "entity"}

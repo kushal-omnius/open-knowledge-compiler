@@ -105,6 +105,8 @@ Emitted by language analyzers and deterministic extractors:
 | `doc_section_observed` | doc path, section heading, content ref — consumed as context input by LLM extractors and as provenance for candidates; produces no entity directly (§4.1) | README/doc collector |
 | `mutation_score_observed` | dotted module path, killed/survived/timeout counts | `[mutation]` collector (opt-in, ADR-012's named trigger — reads a CI-produced JSON summary, never executes the target repo's tests itself) |
 | `user_journey_observed` | name, ordered step slugs (`kc.toml` `[[journeys]]`, additive per ADR-017) | `[[journeys]]` config (deterministic-only V1 scope; LLM-candidate and E2E-header/Jira-epic extraction sources from ADR-017's Option A are explicitly deferred, not built) |
+| `state_transition_observed` | field name (`status`/`state`), from_state (nullable), to_state, confidence (`"structural"`), anchor (module-scoped) | Python analyzer only, ADR-023 (V1 scope): `<anything>.<field> = "literal"` assignments, chained in source order per function scope; if/elif/else and try/except branches never leak state into each other — a field touched in any branch resets to unknown (`from_state: null`) after the branch construct rather than fabricating a cross-branch edge |
+| `escaped_defect_observed` | pr_number, reasons (`title_or_body` \| `jira_issue_type`), jira_bug_keys, changed_files | Deterministic classification of a merged PR (ADR-020, PR-triggered compiles only): title/body regex OR a linked Jira issue typed `Bug`. Whether each changed file's component was already covered as of the *preceding* compile is a Normalize-only lookup (needs `current` state) — not carried in this fact |
 | `jira_feature_link_observed` | jira_key, feature_names (list of feature entity names this story motivates) | Jira→Feature enrichment LLM pass (run.py `_jira_feature_enrichment_facts`): runs after `_extract_semantic` so feature candidates are available; uses LLM cache (ADR-008); skipped when LLM or Jira disabled. Normalize resolves feature names to slugs via `_jira_stories()` + `_p5_relationships()` to emit `motivates` → Feature edges. |
 
 ### 2.4 LLM candidate facts
@@ -130,7 +132,7 @@ Candidates propose *content only*. Whether a candidate becomes a new entity or a
 | Field | Meaning |
 |---|---|
 | `slug` | Stable identity (ADR-004); also the wiki filename/anchor |
-| `entity_type` | One of the ten canonical types plus `user_journey` (ADR-017, additive) |
+| `entity_type` | One of the ten canonical types plus `user_journey` (ADR-017, additive) and `state_model` (ADR-023, additive) |
 | `repo_id` | Multi-repo scoping ([ADR-001](decisions/ADR-001-postgresql.md) invariant) |
 | `name` | Human-readable display name (may change without identity change) |
 | `payload` | Type-specific content |
@@ -154,6 +156,7 @@ Identity classes per ADR-004's categorization:
 | Risk | LLM-derived | match-then-mint cascade |
 | Wiki Page | derived | owning entity slug + page type |
 | User Journey | deterministic (V1 scope) | `kc.toml` `[[journeys]]` name, slugified (ADR-017 — LLM-derived identity class deferred along with the LLM-candidate extraction source) |
+| State Model | deterministic | owning Component path + field name (ADR-023 — Python analyzer only, V1 scope) |
 
 **API key note:** the natural key is *always* method + normalized route — route parameters are positional, with names elided (`GET /users/{}`), so `/users/{id}` and `/users/{user_id}` are the same API. OpenAPI `operationId` is an **alias attribute**, never identity: adding operationIds to an existing spec must not churn API identity. API kinds beyond HTTP (GraphQL, gRPC, CLI) are a future vocabulary extension, not an abstraction to build now.
 
@@ -179,6 +182,7 @@ Relationships are explicit, typed, and compiled — never inferred at query time
 | `motivates` | Jira Story → Feature \| Pull Request (Feature linkage is LLM-derived via `jira_feature_link_observed`; PR linkage is deterministic from `jira_observed.linked_pr`) |
 | `documents` | Wiki Page → any entity |
 | `traverses` | User Journey → API \| Component \| Business Rule \| Feature \| Risk (ADR-017, additive) |
+| `models` | State Model → Component (ADR-023, additive) |
 
 Relationship additions are non-breaking (they extend the vocabulary like fact types); changing the semantics of an existing relationship is breaking (§5).
 
@@ -216,7 +220,9 @@ delta = {
 | `business_rule_candidate` | Business Rule via cascade (+ `governs`, `verified_by`) |
 | `risk_candidate` | Risk via cascade (+ `affects`) |
 | `mutation_score_observed` | Merged into the matching Component's payload (`mutation_kill_rate`, `mutation_sample`); silently skipped if the module doesn't resolve to a compiled Component (ADR-012's named trigger, surfaced in `test_plan`/`coverage_for`) |
-| `user_journey_observed` | User Journey via direct slug mint (deterministic V1 scope, ADR-017) (+ `traverses` to each resolved step; unresolvable steps are dropped with a compile warning, not a hard failure) |
+| `user_journey_observed` | User Journey via direct slug mint (deterministic V1 scope, ADR-017) (+ `traverses` to each resolved step; unresolvable steps are dropped with a compile warning, not a hard failure). The entity payload carries `status` (`complete` \| `partial` \| `invalid`) and `unresolved_steps` (the dropped slugs) so the drop is visible on the entity itself, not only in the transient compile-run warning log — additive clarification, dogfood-review finding |
+| `state_transition_observed` | State Model via direct slug mint, keyed by (owning Component path, field) — deterministic identity (ADR-023) (+ `models` to the owning Component). A fact whose module doesn't resolve to a compiled Component this compile is silently skipped, same class as `mutation_score_observed`'s unresolved-module precedent. Payload aggregates the fact group's distinct states, deduplicated transitions, and `terminal_states` (states that never appear as a `from`) |
+| `escaped_defect_observed` | Merged into the matching Component's payload (`escaped_defect_fix_count`, `escaped_defect_covered_fix_count`, `escaped_defect_trust_score`, ADR-020), same merge pattern as `mutation_score_observed`. Counts are cumulative across compiles (read from `current`'s prior payload, not recomputed from scratch); "covered as of the preceding compile" is read from `current.relationships`' `covers` edges, since the `kc-covers:` declared-coverage header is never durably compiled. `escaped_defect_trust_score` is `null` below a minimum sample size (sparse-sample caveat, same shape as ADR-019's) |
 | — (derived) | Wiki Page entities are derived **by Normalize** deterministically from the entity set (identity = owning entity slug + page type); Emit only renders them. Producing them anywhere else would violate the §1 invariant that only Normalize produces Knowledge IR |
 
 Aggregation is many-facts-to-one-entity; the entity's provenance records every contributing fact (ADR-009: granularity preserved).

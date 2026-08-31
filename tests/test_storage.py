@@ -76,3 +76,32 @@ def test_init_is_idempotent():
     id1 = register_repository("kc-test-repo", "github.com/test/repo", "main", "kc.toml")
     id2 = register_repository("kc-test-repo", "github.com/test/repo2", "main", "kc.toml")
     assert id1 == id2  # same slug => same repo, refs updated, no duplicate
+
+
+def test_connect_timeout_defaults_and_respects_env(monkeypatch):
+    monkeypatch.delenv("KC_DB_CONNECT_TIMEOUT_SECONDS", raising=False)
+    assert kcdb.connect_timeout_seconds() == kcdb.DEFAULT_CONNECT_TIMEOUT_SECONDS == 120
+    assert kcdb.connect_args() == {"connect_timeout": 120}
+
+    monkeypatch.setenv("KC_DB_CONNECT_TIMEOUT_SECONDS", "5")
+    assert kcdb.connect_timeout_seconds() == 5
+    assert kcdb.connect_args() == {"connect_timeout": 5}
+
+
+def test_check_connection_raises_clear_error_when_unreachable(monkeypatch):
+    # Nothing listens on this port. Whether that fails fast (refused) or hangs
+    # (e.g. a privileged/filtered port on some OSes — the exact real-world
+    # hazard connect_timeout exists to bound) is platform-dependent, so pin
+    # the timeout short here rather than assume instant refusal.
+    monkeypatch.setenv("KC_DB_CONNECT_TIMEOUT_SECONDS", "2")
+    bogus = kcdb.make_engine("postgresql+psycopg://kc:kc@localhost:1/kc_wiki")
+    with pytest.raises(kcdb.DatabaseUnavailableError) as exc_info:
+        kcdb.check_connection(bogus)
+    message = str(exc_info.value)
+    assert "Docker" in message
+    assert "docker compose up -d" in message
+
+
+@requires_db
+def test_check_connection_succeeds_against_real_db():
+    kcdb.check_connection(kcdb.make_engine())  # must not raise

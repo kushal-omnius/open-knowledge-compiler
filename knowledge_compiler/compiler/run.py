@@ -29,16 +29,33 @@ from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer
 from knowledge_compiler.extractors.typescript_analyzer import TypeScriptAnalyzer
 
 
-def _extract(artifacts: list[Artifact]) -> list[Fact]:
+def _extract(artifacts: list[Artifact]) -> tuple[list[Fact], dict]:
     """The deterministic Extract stage: every active analyzer over the staged
     artifacts (each filters to its own extensions). Analyzer routing by extension
-    is configuration-grade, not architecture (ADR-006)."""
+    is configuration-grade, not architecture (ADR-006).
+
+    Also aggregates a completeness signal across analyzers: `files_seen` (every
+    file claimed by an analyzer's extension), `files_failed` (files an analyzer
+    raised on and skipped), and `failed_files` (their paths). A parse failure
+    must never fail the compile (ADR-006) — but a compile that silently loses
+    coverage in, say, an auth module should not look identical to a clean one
+    (dogfood-review finding: `knowledge_stats()` previously reported entity
+    counts only, with no way to tell "nothing changed" from "half the repo
+    didn't parse")."""
     facts: list[Fact] = []
+    files_seen = 0
+    failed_files: list[str] = []
     for analyzer in (PythonAnalyzer(), TypeScriptAnalyzer(), JavaScriptAnalyzer()):
         facts.extend(analyzer.analyze(artifacts))
-    return facts
+        files_seen += analyzer.files_seen
+        failed_files.extend(analyzer.failed_files)
+    stats = {"files_seen": files_seen, "files_parsed": files_seen - len(failed_files),
+             "files_failed": len(failed_files), "failed_files": failed_files}
+    return facts, stats
 from knowledge_compiler.ir import Artifact, Extraction, Fact, content_hash
-from knowledge_compiler.storage.db import make_engine, repo_lock_key
+from knowledge_compiler.storage.db import (
+    DatabaseUnavailableError, check_connection, make_engine, repo_lock_key,
+)
 from knowledge_compiler.storage.persist import load_current_state, persist_compile
 from knowledge_compiler.storage.schema import ArtifactRow, CompileRun, FactRow, Repository
 
@@ -222,7 +239,8 @@ def verify(repo_dir: Path) -> VerifyReport:
     with _locked_session(repo_dir) as (session, repo, ctx):
         collector = GitCollector(ctx["repo_dir"])
         artifacts = collector.collect_full()
-        facts = _extract(artifacts) + _mutation_facts(ctx) + _journey_facts(ctx)
+        extracted_facts, _extract_stats = _extract(artifacts)
+        facts = extracted_facts + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
         candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))
@@ -275,7 +293,12 @@ def _locked_session(repo_dir: Path):
         "wiki_dir": repo_dir / config.get("wiki", {}).get("output_dir", "kc-wiki"),
         "config": config,
     }
-    with Session(make_engine()) as session:
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise CompileError(str(exc)) from exc
+    with Session(engine) as session:
         session.execute(text("SELECT pg_advisory_lock(:k)"), {"k": repo_lock_key(repo_slug)})
         try:
             repo = session.execute(
@@ -347,6 +370,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
             extra_facts += _jira_facts(ctx, issue_keys, pr.number)
+            extra_facts += _escaped_defect_facts(extra_facts)
         else:
             live_paths = list(commit.files)
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
@@ -363,7 +387,12 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         session.commit()
 
         # Extract -> staging commit 3 (deterministic first and always — ADR-006)
-        facts = _extract(artifacts) + extra_facts
+        facts, extract_stats = _extract(artifacts)
+        facts += extra_facts
+        run.files_seen = extract_stats["files_seen"]
+        run.files_parsed = extract_stats["files_parsed"]
+        run.files_failed = extract_stats["files_failed"]
+        run.failed_files = extract_stats["failed_files"]
         llm_ran, llm_warnings = _extract_semantic(session, ctx, artifacts, facts)
 
         # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
@@ -403,12 +432,13 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         raise
 
     ops = [c.op for c in delta.entity_changes]
+    parse_warnings = [f"parse failed, file skipped: {p}" for p in extract_stats["failed_files"]]
     summary = CompileSummary(
         repo_slug=ctx["repo_slug"], compile_run_id=run.id, commit_sha=commit_sha,
         entities=len(candidate.entities), relationships=len(candidate.relationships),
         added=ops.count("added"), changed=ops.count("changed"),
         removed=ops.count("removed"), moved=ops.count("moved"),
-        dirty=len(dirty), warnings=list(candidate.warnings) + llm_warnings,
+        dirty=len(dirty), warnings=parse_warnings + list(candidate.warnings) + llm_warnings,
         entity_changes=list(delta.entity_changes),
         pr_number=pr.number if pr else None,
     )
@@ -520,6 +550,7 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
 
 
 _ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
+_BUG_FIX_RE = re.compile(r"\b(fix(es|ed)?|bug(fix)?|hotfix|regression)\b", re.IGNORECASE)
 
 
 def _pr_facts(pr: MergedPR) -> list[Fact]:
@@ -570,15 +601,66 @@ def _journey_facts(ctx: dict) -> list[Fact]:
     journey traverses. Unresolvable step slugs are dropped (not failed) by
     Normalize, same DP8 "visible, never silently merge" discipline as the
     external-dependency precedent — a config typo shouldn't fail the whole
-    compile, but it should be visible (a compile warning), not silent."""
-    journeys = ctx["config"].get("journeys", [])
+    compile, but it should be visible (a compile warning), not silent.
+
+    Inline [[journeys]] and journeys_file are both supported and merged.
+    journeys_file is resolved relative to the repo directory; a missing or
+    unreadable file fails loudly (same posture as a bad Jira source)."""
+    journeys = list(ctx["config"].get("journeys", []))
+    journeys_file = ctx["config"].get("journeys_file")
+    if journeys_file:
+        paths = [journeys_file] if isinstance(journeys_file, str) else journeys_file
+        for rel in paths:
+            file_path = Path(ctx["repo_dir"]) / rel
+            try:
+                extra = tomllib.loads(file_path.read_text(encoding="utf-8"))
+            except FileNotFoundError:
+                raise CompileError(f"journeys_file not found: {file_path}")
+            except Exception as exc:
+                raise CompileError(f"journeys_file unreadable ({file_path}): {exc}")
+            journeys += extra.get("journeys", [])
     facts = []
     for j in journeys:
+        if "name" not in j:
+            # Likely caused by placing `journeys_file = ...` inside a [[journeys]]
+            # block rather than at the root level of kc.toml.
+            raise CompileError(
+                f"journey entry is missing 'name' — got keys {list(j.keys())}. "
+                "If you are using journeys_file, ensure it is a root-level key "
+                "in kc.toml, placed before any [[journeys]] blocks."
+            )
         payload = {"name": j["name"], "steps": list(j.get("steps", []))}
         facts.append(Fact(fact_type="user_journey_observed", payload=payload,
                           artifact_refs=(f"kc.toml:journeys:{j['name']}",),
                           extraction=_JOURNEY_EXTRACTION, content_hash=content_hash(payload)))
     return facts
+
+
+def _escaped_defect_facts(facts: list[Fact]) -> list[Fact]:
+    """ADR-020: classify whether this compile's PR is a bug fix — title/body
+    regex OR a linked Jira issue typed 'Bug' — deterministic, no DB lookup
+    (the "was it already covered" check needs `current` state and is
+    Normalize's job, not Extract's, per ADR-009's boundary). A PR-triggered
+    compile only: bug-fix classification needs PR title/body, which a
+    direct-commit compile doesn't carry."""
+    pr_fact = next((f for f in facts if f.fact_type == "pr_observed"), None)
+    if pr_fact is None:
+        return []
+    title, body = pr_fact.payload.get("title") or "", pr_fact.payload.get("body") or ""
+    reasons = []
+    if _BUG_FIX_RE.search(f"{title}\n{body}"):
+        reasons.append("title_or_body")
+    jira_bug_keys = sorted({f.payload["key"] for f in facts if f.fact_type == "jira_observed"
+                            and (f.payload.get("issue_type") or "").lower() == "bug"})
+    if jira_bug_keys:
+        reasons.append("jira_issue_type")
+    if not reasons:
+        return []
+    payload = {"pr_number": pr_fact.payload["number"], "reasons": reasons,
+              "jira_bug_keys": jira_bug_keys, "changed_files": pr_fact.payload["files"]}
+    return [Fact(fact_type="escaped_defect_observed", payload=payload,
+                artifact_refs=(f"pr:{pr_fact.payload['number']}",),
+                extraction=_FORGE_EXTRACTION, content_hash=content_hash(payload))]
 
 
 def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None) -> list[Fact]:

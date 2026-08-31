@@ -69,7 +69,7 @@ def resolve_dependency(session: Session, coordinate: str,
 
 
 def get_entity(session: Session, repo_id: int, slug: str,
-               dep_map: dict[str, str] | None = None) -> dict | None:
+               dep_map: dict[str, str] | None = None, max_neighbors: int = 50) -> dict | None:
     entity = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug == slug)).scalar_one_or_none()
     if entity is None:
@@ -86,7 +86,9 @@ def get_entity(session: Session, repo_id: int, slug: str,
              for r in rels
              if not (id_to[r.from_entity_id].startswith("wiki-page/")
                      or id_to[r.to_entity_id].startswith("wiki-page/"))]
-    relationships = sorted(edges, key=lambda d: (d["relation"], d["from"], d["to"]))
+    relationships_all = sorted(edges, key=lambda d: (d["relation"], d["from"], d["to"]))
+    relationship_count = len(relationships_all)
+    relationships = relationships_all[:max_neighbors]
 
     prov = session.execute(select(ProvenanceRow).where(ProvenanceRow.entity_id == entity.id)
                            .order_by(ProvenanceRow.compile_run_id.desc()).limit(5)).scalars().all()
@@ -94,6 +96,12 @@ def get_entity(session: Session, repo_id: int, slug: str,
         "slug": entity.slug, "entity_type": entity.entity_type, "name": entity.name,
         "payload": entity.payload, "anchors": entity.anchors or [],
         "relationships": relationships,
+        # Hub entities (e.g. a Project touching thousands of Components) can carry
+        # far more edges than any agent needs in one call — relationship_count is
+        # the true total so a truncated response is never mistaken for the whole
+        # graph (dogfood-review finding: this endpoint previously had no limit).
+        "relationship_count": relationship_count,
+        "relationships_truncated": relationship_count > max_neighbors,
         "provenance": [{"fact_type": p.fact_type, "extraction": p.extraction,
                         "compile_run": p.compile_run_id,
                         "match_evidence": p.match_evidence} for p in prov],
@@ -212,11 +220,26 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
     mutation_kill_rate = component.payload.get("mutation_kill_rate")
     low_mutation_kill = (bool(tests) and mutation_kill_rate is not None
                         and mutation_kill_rate <= 0.4)
+    # Escaped-defect trust score (ADR-020): a forward-looking, outcome-based
+    # signal, distinct from every proxy above — of the bug-fix PRs that have
+    # landed on this component, what fraction happened while it already had
+    # compiled test coverage (the `covers` relationship; the kc-covers:
+    # declared-coverage header is never durably compiled, so it cannot be
+    # this signal's basis — see ADR-020's Impact section). Withheld (None)
+    # below a minimum sample size (compiler/normalize.py's
+    # _MIN_ESCAPED_DEFECT_SAMPLE) per the ADR's own sparse-sample caveat.
+    escaped_defect_fix_count = component.payload.get("escaped_defect_fix_count", 0)
+    escaped_defect_trust_score = component.payload.get("escaped_defect_trust_score")
+    low_escaped_defect_trust = (bool(tests) and escaped_defect_trust_score is not None
+                               and escaped_defect_trust_score <= 0.5)
     return {"component": component_slug,
             "covered": bool(tests),
             "stale": bool(test_list) and all(t["stale"] for t in test_list),
             "mutation_kill_rate": mutation_kill_rate,
             "low_mutation_kill": low_mutation_kill,
+            "escaped_defect_fix_count": escaped_defect_fix_count,
+            "escaped_defect_trust_score": escaped_defect_trust_score,
+            "low_escaped_defect_trust": low_escaped_defect_trust,
             "tests": test_list}
 
 
@@ -284,6 +307,11 @@ def impact_plan(session: Session, repo_id: int, slug: str,
         # invariant (item 2, ADR-012's trigger condition).
         "low_mutation_kill": sorted(t for t, cov in coverage.items()
                                     if cov and cov["covered"] and not cov["stale"] and cov["low_mutation_kill"]),
+        # Distinct again (ADR-020): covered, fresh, mutation-kill fine — but
+        # bug-fix history says coverage has repeatedly failed to prevent a
+        # regression on this component. Outcome-based, not a proxy.
+        "low_escaped_defect_trust": sorted(t for t, cov in coverage.items()
+                                           if cov and cov["covered"] and cov["low_escaped_defect_trust"]),
         "coverage_detail": coverage,
         "cross_repo_dependencies": entity.get("cross_repo_dependencies", []),
     }
@@ -330,12 +358,16 @@ def journey_coverage(session: Session, repo_id: int, journey_slug: str) -> dict 
     if journey is None:
         return None
 
+    status = journey.payload.get("status", "complete")
+    unresolved_steps = journey.payload.get("unresolved_steps", [])
+
     step_components: set[str] = set()
     for step_slug in journey.payload.get("steps", []):
         step_components |= _journey_step_components(session, repo_id, step_slug)
 
     if not step_components:
         return {"journey": journey_slug, "steps": journey.payload.get("steps", []),
+               "status": status, "unresolved_steps": unresolved_steps,
                "step_components": [], "covered_end_to_end": False, "covering_tests": []}
 
     component_ids = dict(session.execute(select(EntityRow.slug, EntityRow.id).where(
@@ -355,6 +387,7 @@ def journey_coverage(session: Session, repo_id: int, journey_slug: str) -> dict 
                       [r.slug for r in session.execute(select(EntityRow).where(
                           EntityRow.id.in_(covering_test_ids))).scalars().all()])
     return {"journey": journey_slug, "steps": journey.payload.get("steps", []),
+           "status": status, "unresolved_steps": unresolved_steps,
            "step_components": sorted(step_components),
            "covered_end_to_end": bool(covering_tests),
            "covering_tests": sorted(covering_tests)}
@@ -449,6 +482,21 @@ def test_plan(session: Session, repo_id: int, slug: str,
             "context": linked_context(session, repo_id, weak_slug),
         })
 
+    # Low-trust recommendations (ADR-020): a sixth, distinct condition — an
+    # outcome-based signal (did coverage ever prevent a real regression),
+    # unlike every proxy above. Informational only, per the ADR's own
+    # gate-later stance — never claims a specific test is at fault, only
+    # that this component's fix history warrants review.
+    for weak_slug in plan["low_escaped_defect_trust"]:
+        cov = plan["coverage_detail"][weak_slug]
+        recommendations.append({
+            "component": weak_slug, "target_kind": "low_escaped_defect_trust",
+            "targets": [t["slug"] for t in cov["tests"]],
+            "escaped_defect_trust_score": cov["escaped_defect_trust_score"],
+            "escaped_defect_fix_count": cov["escaped_defect_fix_count"],
+            "context": linked_context(session, repo_id, weak_slug),
+        })
+
     # Journey-level recommendations (items 3+4, ADR-017): a fourth, distinct
     # condition from all of the above — every step of a journey can be
     # individually covered (even fresh, even high-mutation-kill) while no
@@ -467,6 +515,33 @@ def test_plan(session: Session, repo_id: int, slug: str,
             "steps": jc["steps"],
         })
 
+    # State-model transition recommendations (ADR-023): a fifth, distinct
+    # condition from all of the above — this component has a lifecycle
+    # (states/transitions structurally inferred from source), which
+    # component/api/symbols-level recommendations can't see. test_plan
+    # cannot verify per-edge coverage (that needs semantic test-body
+    # analysis, out of scope for V1) — this surfaces the known transition
+    # set explicitly for review, not a precise covered/uncovered verdict
+    # per edge (see the `confidence` field: "structural" inference only).
+    target_component_id = slug_to_id.get(slug)
+    if plan["entity_type"] == "component" and target_component_id is not None:
+        state_models = session.execute(
+            select(EntityRow)
+            .join(RelationshipRow, RelationshipRow.from_entity_id == EntityRow.id)
+            .where(RelationshipRow.repo_id == repo_id,
+                   RelationshipRow.relation_type == "models",
+                   RelationshipRow.to_entity_id == target_component_id)
+            .order_by(EntityRow.slug)).scalars().all()
+        for sm in state_models:
+            if not sm.payload.get("transitions"):
+                continue
+            recommendations.append({
+                "component": sm.slug, "target_kind": "transition_gap",
+                "targets": [{"from": t["from"], "to": t["to"], "confidence": t["confidence"]}
+                           for t in sm.payload["transitions"]],
+                "context": linked_context(session, repo_id, slug),
+            })
+
     return {**plan, "test_recommendations": recommendations}
 
 
@@ -477,6 +552,15 @@ def knowledge_stats(session: Session, repo_id: int) -> dict:
     last = session.execute(select(CompileRun)
                            .where(CompileRun.repo_id == repo_id, CompileRun.status == "succeeded")
                            .order_by(CompileRun.id.desc()).limit(1)).scalar_one_or_none()
+    completeness = None
+    if last is not None and last.files_seen is not None:
+        completeness = {
+            "files_seen": last.files_seen, "files_parsed": last.files_parsed,
+            "files_failed": last.files_failed,
+            "parse_coverage": round(last.files_parsed / last.files_seen, 4) if last.files_seen else 1.0,
+            "failed_files": last.failed_files or [],
+        }
     return {"entity_counts": counts,
             "last_compile": None if last is None else
-            {"compile_run": last.id, "commit": last.commit_sha, "degraded": last.degraded}}
+            {"compile_run": last.id, "commit": last.commit_sha, "degraded": last.degraded},
+            "knowledge_completeness": completeness}

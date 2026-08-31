@@ -36,6 +36,7 @@
 | `fact_vocabulary_version`, `knowledge_model_version`, `okf_spec_version` | per ir.md §5; `okf_spec_version` records the OKF spec version this run's wiki emission targeted — a historical record of what was targeted at that compile, not a live pointer (ADR-013). Nullable: rows predating ADR-013 have none. |
 | `started_at`, `finished_at`, `error` | |
 | `degraded` | boolean; `true` when compiled with `--no-llm` (pipeline.md §6.1) |
+| `files_seen`, `files_parsed`, `files_failed`, `failed_files` | Compile completeness signal (migration 0007, dogfood-review finding): a parser failure skips the file, never the compile (ADR-006) — these make that skip visible instead of a clean-looking compile silently losing coverage. Populated by the Extract stage on every full/PR/commit run; NULL on rows predating this migration and on `kc compile --emit-only` reruns (no Extract stage). Surfaced via `knowledge_stats()`'s `knowledge_completeness` and `kc inspect` |
 
 Idempotence check (ADR-002): a `succeeded` run for `(repo_id, pr_number)` makes a re-trigger a no-op.
 
@@ -62,7 +63,7 @@ Facts are **per-compile staging**, not durable knowledge (ADR-009). See §4 for 
 |---|---|
 | `id` PK (surrogate), `repo_id` | |
 | `slug` | unique per `(repo_id)`; ADR-004 dedup suffixes applied at insert |
-| `entity_type` | the ten canonical types plus `user_journey` (ADR-017, additive) |
+| `entity_type` | the ten canonical types plus `user_journey` (ADR-017, additive) and `state_model` (ADR-023, additive) |
 | `name` | display name; may change without identity change |
 | `payload` JSONB | per-type schema (ir.md §3.2) |
 | `content_hash` | payload-only (dirty rule additionally consults relationship changes — ir.md §3.4) |

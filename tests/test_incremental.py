@@ -71,7 +71,8 @@ def env(tmp_path: Path):
 
     counter = {"n": 0}
 
-    def merge_pr(number: int, changes: dict[str, str | None], renames: dict[str, str] | None = None):
+    def merge_pr(number: int, changes: dict[str, str | None], renames: dict[str, str] | None = None,
+                title: str | None = None, body: str = ""):
         """Apply changes ({path: content or None=delete}), commit, return MergedPR."""
         pr_files = []
         for old, new in (renames or {}).items():
@@ -89,7 +90,7 @@ def env(tmp_path: Path):
                 pr_files.append(PRFile(path=path, change="modified" if existed else "added"))
         git(repo, "commit", "-qm", f"PR {number}")
         counter["n"] += 1
-        return MergedPR(number=number, title=f"pr {number}",
+        return MergedPR(number=number, title=title or f"pr {number}", body=body,
                         merged_at=T0 + timedelta(minutes=counter["n"]),
                         merge_commit_sha=git(repo, "rev-parse", "HEAD"),
                         files=tuple(pr_files))
@@ -259,3 +260,101 @@ def test_jira_disabled_by_default_no_facts(env):
     compile_pr(repo, FakeForge(prs=[pr]), expect_pr=602)
 
     assert "jira-story/dca-99" not in current_slugs(slug)
+
+
+# --- ADR-020: escaped-defect trust score ----------------------------------------
+
+
+def entity_payload(slug: str, entity_slug: str) -> dict:
+    from knowledge_compiler.storage.schema import EntityRow, Repository
+
+    with Session(kcdb.make_engine()) as session:
+        repo_id = session.execute(select(Repository.id).where(Repository.slug == slug)).scalar_one()
+        return session.execute(select(EntityRow.payload).where(
+            EntityRow.repo_id == repo_id, EntityRow.slug == entity_slug)).scalar_one()
+
+
+def test_bug_fix_pr_on_covered_component_records_one_covered_fix(env):
+    from knowledge_compiler.compiler.run import compile_pr
+
+    repo, slug, merge_pr = env
+    # billing/rules.py is already covered by tests/test_rules.py in the baseline
+    pr = merge_pr(301, {"billing/rules.py":
+                        "def apply_discount(pct):\n    return min(pct, 25)\n"},
+                 title="fix: discount cap was off by one")
+    compile_pr(repo, FakeForge(prs=[pr]), expect_pr=301)
+
+    payload = entity_payload(slug, "component/billing-rules")
+    assert payload["escaped_defect_fix_count"] == 1
+    assert payload["escaped_defect_covered_fix_count"] == 1
+    # below the minimum sample size (3) — withheld, not a misleadingly confident score
+    assert payload["escaped_defect_trust_score"] is None
+
+
+def test_non_bug_fix_pr_does_not_record_a_fix(env):
+    """A PR with no 'fix'/'bug' wording and no linked Jira issue is not
+    classified as a bug fix — the component's payload gains no
+    escaped_defect_* fields at all (distinct from fix_count == 0, which
+    would imply the signal ran and found nothing)."""
+    from knowledge_compiler.compiler.run import compile_pr
+
+    repo, slug, merge_pr = env
+    pr = merge_pr(302, {"billing/rules.py":
+                        "def apply_discount(pct):\n    return min(pct, 29)\n"},
+                 title="refactor: extract discount helper")
+    compile_pr(repo, FakeForge(prs=[pr]), expect_pr=302)
+
+    payload = entity_payload(slug, "component/billing-rules")
+    assert "escaped_defect_fix_count" not in payload
+
+
+def test_trust_score_populated_once_sample_size_reached(env):
+    """Three bug-fix PRs, all landing on an already-covered component: the
+    trust score should appear only on the third (crossing _MIN_ESCAPED_DEFECT_SAMPLE),
+    and equal 0.0 — every fix happened on code that was already 'covered',
+    i.e. coverage never caught any of them (ADR-020's motivating framing)."""
+    from knowledge_compiler.compiler.run import compile_pr
+
+    repo, slug, merge_pr = env
+    for i, pct in enumerate((25, 26, 27), start=1):
+        pr = merge_pr(400 + i, {"billing/rules.py":
+                                f"def apply_discount(pct):\n    return min(pct, {pct})\n"},
+                     title=f"fix #{i}: discount cap regression")
+        compile_pr(repo, FakeForge(prs=[pr]), expect_pr=400 + i)
+
+    payload = entity_payload(slug, "component/billing-rules")
+    assert payload["escaped_defect_fix_count"] == 3
+    assert payload["escaped_defect_covered_fix_count"] == 3
+    assert payload["escaped_defect_trust_score"] == 0.0
+
+
+def test_jira_bug_type_alone_classifies_as_a_fix(env):
+    """A PR with a plain, non-'fix'-worded title still counts as a bug fix
+    when its linked Jira issue is typed 'Bug' — the second, independent
+    classification path ADR-020 names."""
+    from dataclasses import replace
+
+    from knowledge_compiler.collectors.jira import FakeJira, JiraIssue
+    from knowledge_compiler.compiler.run import compile_pr
+
+    repo, slug, merge_pr = env
+    config_text = (repo / "kc.toml").read_text(encoding="utf-8")
+    (repo / "kc.toml").write_text(
+        config_text.replace(
+            "never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.\nenabled = false",
+            "never this file: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN.\nenabled = true"),
+        encoding="utf-8")
+
+    pr = merge_pr(501, {"billing/rules.py":
+                        "def apply_discount(pct):\n    return min(pct, 28)\n"},
+                 title="DCA-77: adjust cap")
+    pr = replace(pr, body="See DCA-77.")
+
+    fake_jira = FakeJira(issues={"DCA-77": JiraIssue(
+        key="DCA-77", summary="Discount cap wrong", status="Done",
+        description="", issue_type="Bug")})
+
+    compile_pr(repo, FakeForge(prs=[pr]), expect_pr=501, jira_gateway=fake_jira)
+
+    payload = entity_payload(slug, "component/billing-rules")
+    assert payload["escaped_defect_fix_count"] == 1

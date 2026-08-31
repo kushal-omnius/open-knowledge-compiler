@@ -77,9 +77,24 @@ kc reconcile --dir /path/to/repo
 
 Output: one summary line per PR compiled, or `"up to date — no merged PRs after the watermark"`.
 
-**When to use `reconcile` vs `--full`:**
-- Normal steady-state (PRs merged to main, direct pushes, or squash commits): `kc reconcile`
-- First compile or suspected drift: `kc compile --full`
+**`kc compile` requires exactly one of `--full`, `--pr`, or `--emit-only` — there is no bare incremental mode.**
+
+**When to use `reconcile` vs `compile --full`:**
+
+Both produce the same final entity state. The difference is cost and history:
+
+| | `kc reconcile` | `kc compile --full` |
+|---|---|---|
+| Files extracted | Only files changed in each PR | Every file in the repo, every time |
+| LLM calls (1–3 PRs, 5–10 files) | ~5–10 calls | ~50+ calls |
+| LLM calls (20 accumulated PRs) | More expensive — same files hit once per touching commit | Always ~50+ calls |
+| PR attribution | Preserved — `which_pr_introduced` works, delta history per-PR | Lost — only current state recorded |
+| Design intent | Run after every merge (CI-triggered, ADR-002) | First compile, suspected drift, or big restructure |
+
+**Rule of thumb:**
+- Run `kc reconcile` frequently — ideally after every merge. At that cadence (1–3 PRs at a time) it is 5–10× cheaper than `--full` because it only touches changed files.
+- If reconcile has accumulated many commits (10+), `--full` becomes comparably cheaper and gives a cleaner baseline — but you lose per-PR lineage for those commits.
+- Use `--full` for: first compile, after a large restructure, or when `kc verify` reports drift.
 
 ---
 
@@ -138,7 +153,11 @@ entities: 2765
   pull_request: 1342
 relationships: 8410
 last compile: run 47 @ a3f9c1d20b12 [2026-07-18 09:14:22] — delta add:14  change:3  remove:1
+knowledge completeness: 1798/1800 files parsed (99.9%)
+  failed: legacy/scanner.py, vendor/patched_lib.py
 ```
+
+The completeness lines are omitted for compile runs that predate the signal, and for `kc compile --emit-only` reruns (no Extract stage runs).
 
 ---
 
@@ -281,18 +300,18 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 
 | Tool | Description |
 |------|-------------|
-| `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`, `jira_story`. |
-| `get_entity(slug)` | Full detail for one entity: payload, source anchors, relationships, provenance. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
+| `search_knowledge(query, entity_type?, limit?)` | Hybrid keyword+semantic search (falls back to keyword-only without embeddings). `entity_type` filters to one of: `component`, `api`, `business_rule`, `feature`, `risk`, `test_coverage`, `pull_request`, `project`, `jira_story`, `user_journey`, `state_model`. |
+| `get_entity(slug, max_neighbors?)` | Full detail for one entity: payload, source anchors, relationships, provenance. `relationships` is capped at `max_neighbors` (default 50, dogfood-review finding — hub entities could otherwise return an unbounded edge set); `relationship_count`/`relationships_truncated` report the true total. Resolves cross-repo dependencies via `kc.toml [dependencies]`. |
 | `impact_plan(slug)` | One-hop impact analysis for a changed entity: what's affected in this repo, which affected components have test-coverage gaps, and what it reaches across repos. |
-| `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Each `api`/`symbols` recommendation now inlines a `context` field (governing business rules, features, and risks linked to that component — item 1/6 of the QA-agent-grounding backlog, no extra round-trip needed). Also returns `stale_retest` recommendations (a test exists but the component changed since the test was last touched — ADR-018), `low_mutation_kill` recommendations (declared coverage exists but the mutation-kill rate is ≤40%, ADR-012's named trigger, carries a `mutation_kill_rate` field), and `journey` recommendations (every step of a `kc.toml`-declared `[[journeys]]` end-to-end journey is individually covered, but no single test proves the whole chain — ADR-017). Use to drive test generation before writing tests. |
+| `test_plan(slug)` | Everything `impact_plan` returns, plus concrete test targets (APIs or symbols) for each coverage gap. Each `api`/`symbols` recommendation now inlines a `context` field (governing business rules, features, and risks linked to that component — item 1/6 of the QA-agent-grounding backlog, no extra round-trip needed). Also returns `stale_retest` recommendations (a test exists but the component changed since the test was last touched — ADR-018), `low_mutation_kill` recommendations (declared coverage exists but the mutation-kill rate is ≤40%, ADR-012's named trigger, carries a `mutation_kill_rate` field), `journey` recommendations (every step of a `kc.toml`-declared `[[journeys]]` end-to-end journey is individually covered, but no single test proves the whole chain — ADR-017), `transition_gap` recommendations (the component has a compiled `state_model` — a lifecycle with states and structurally-inferred transitions, ADR-023 — listing each known transition with a `confidence` field; a review surface, not a per-edge covered/uncovered verdict, since that needs semantic test-body analysis out of V1 scope), and `low_escaped_defect_trust` recommendations (declared coverage exists, but bug-fix PR history says it has repeatedly failed to prevent a regression — ADR-020's outcome-based signal, carries `escaped_defect_trust_score`/`escaped_defect_fix_count`, withheld below a minimum sample size; informational only, per the ADR's gate-later stance). Use to drive test generation before writing tests. |
 | `resolve_dependency(coordinate)` | Resolve an external import/package coordinate to another repo compiled into the same database, via `kc.toml [dependencies]` (query-time only — [ADR-011](../docs/decisions/ADR-011-cross-repo-dependency-resolution.md)). |
 | `list_entities(entity_type, limit?)` | List all entities of one type. |
 | `recent_changes(runs?)` | Knowledge deltas of the N most recent compiles: what was added, changed, removed, or moved. |
 | `which_pr_introduced(slug)` | Which PR (or bootstrap compile) first added this entity. |
-| `coverage_for(component_slug)` | Which tests cover this component. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). |
+| `coverage_for(component_slug)` | Which tests cover this component. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). Also reports `escaped_defect_fix_count`/`escaped_defect_trust_score`/`low_escaped_defect_trust` (ADR-020): whether bug-fix PRs landing on this component found it already "covered" — an outcome-based signal, populated only on PR-triggered compiles, `trust_score` withheld (`null`) below a minimum fix-count sample. |
 | `linked_context(component_slug)` | The business rules, features, and risks that govern/are-implemented-by/affect this component — the same context `test_plan` inlines, exposed standalone for direct lookups. |
-| `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. |
-| `knowledge_stats()` | Entity counts by type and last successful compile metadata. |
+| `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. Also returns `status` (`complete`\|`partial`\|`invalid`) and `unresolved_steps` — a step that didn't resolve at compile time is dropped, not failed, so `covered_end_to_end: true` on a non-`complete` journey only proves the resolved portion of the declared chain (dogfood-review finding). |
+| `knowledge_stats()` | Entity counts by type and last successful compile metadata, plus `knowledge_completeness` (`files_seen`/`files_parsed`/`files_failed`/`parse_coverage`/`failed_files` — null on compiles predating this signal, dogfood-review finding). |
 
 ---
 
@@ -357,6 +376,12 @@ kc validate-test tests/test_billing.py --for-entity component/billing-rules
 | `CF_ACCOUNT_ID` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
 | `CF_API_TOKEN` | `kc compile` (LLM stage) | Required when `[llm] provider = "cloudflare"`. |
 | `KC_DATABASE_URL` | all commands | Postgres connection string. Default: `postgresql+psycopg://kc:kc@localhost:5432/kc_wiki`. |
+| `KC_DB_CONNECT_TIMEOUT_SECONDS` | all commands | How long to wait for Postgres before failing (default: 120s). |
+| `JIRA_BASE_URL` | `kc compile` (Jira collector) | Atlassian Cloud base URL, e.g. `https://your-org.atlassian.net`. Required when `[jira] source = "rest"`. |
+| `JIRA_EMAIL` | `kc compile` (Jira collector) | Atlassian account email for API token auth. |
+| `JIRA_API_TOKEN` | `kc compile` (Jira collector) | Atlassian API token (generate at account settings → Security → API tokens). |
+
+For provider setup guides and the Jira collector how-to, see [docs/integrations.md](integrations.md).
 
 ---
 
@@ -413,8 +438,19 @@ scores_file = "mutation-scores.json"
 # Deterministic-only V1 (ADR-017): declare an ordered, end-to-end step list
 # of already-compiled entity slugs. No [[journeys]] table means no journeys
 # are compiled — fully optional, additive.
+#
+# Inline declaration:
 # [[journeys]]
 # name = "Apply coupon at checkout"
 # steps = ["api/post-cart-add-item", "api/post-cart-apply-coupon",
 #          "api/post-checkout-submit"]
+#
+# External file(s) — resolved relative to this repo directory.
+# Useful when another repo (e.g. a QA repo) owns the journey definitions.
+# Inline [[journeys]] and journeys_file entries are merged; both may coexist.
+# journeys_file = "../qa-repo/checkout-journeys.toml"          # single
+# journeys_file = ["../qa-repo/checkout-journeys.toml",        # multiple
+#                  "../qa-repo/admin-journeys.toml"]
+# The referenced file(s) use the same [[journeys]] syntax as inline entries.
+# A missing or unreadable file fails loudly at compile time.
 ```
