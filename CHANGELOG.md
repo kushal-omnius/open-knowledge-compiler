@@ -30,15 +30,17 @@ so it works even where a raw `git push` of a tag ref is restricted).
   by `kc compile`/`kc reconcile`; a multi-PR `kc reconcile`/`kc compile --pr` run also prints a
   grand total across every item walked, not just the last one.
 
-### Fixed
-
-- **`gh` CLI token fallback now targets the right host for GHE**: the fallback added in 1.1.1
-  called `gh auth token` unconditionally, which returns the token for `gh`'s *default* host —
-  silently wrong (or empty) whenever `KC_GITHUB_API` pointed at a GitHub Enterprise instance
-  instead of `api.github.com`. `GitHubGateway` now parses the hostname out of `KC_GITHUB_API`
-  and passes `gh auth token --hostname <host>` whenever it isn't the default, matching how `gh`
-  itself scopes multi-host authentication (`gh auth login --hostname`). No change for the
-  default `api.github.com` case. New test `test_falls_back_to_gh_cli_token_for_ghe_host`.
+- **`gh` CLI token fallback** for the forge gateway: `GitHubGateway` now tries `gh auth token`
+  when neither `KC_GITHUB_TOKEN` nor `GITHUB_TOKEN` is set, so a machine with `gh auth login`
+  already done doesn't also need a separately-provisioned PAT to unblock `kc reconcile`/
+  `kc compile --pr`. Interactive-developer convenience only — there's no non-interactive
+  credential behind the `gh` CLI's own auth store, so CI must keep setting the env var
+  explicitly (same reasoning as ADR-021's Jira file-gateway scoping). Explicit env vars still
+  take precedence and skip the `gh` call entirely. Correctly targets non-default hosts too:
+  `GitHubGateway` parses the hostname out of `KC_GITHUB_API` and passes
+  `gh auth token --hostname <host>` whenever it isn't `api.github.com`, matching how `gh` itself
+  scopes multi-host authentication (`gh auth login --hostname`) — needed for GitHub Enterprise.
+  5 new tests in `tests/test_forge_gateway.py`.
 
 ## [1.2.0] — 2026-08-26
 
@@ -95,14 +97,6 @@ so it works even where a raw `git push` of a tag ref is restricted).
 ## [1.1.1] — 2026-08-20
 
 ### Added
-
-- **`gh` CLI token fallback** for the forge gateway: `GitHubGateway` now tries `gh auth token`
-  when neither `KC_GITHUB_TOKEN` nor `GITHUB_TOKEN` is set, so a machine with `gh auth login`
-  already done doesn't also need a separately-provisioned PAT to unblock `kc reconcile`/
-  `kc compile --pr`. Interactive-developer convenience only — there's no non-interactive
-  credential behind the `gh` CLI's own auth store, so CI must keep setting the env var
-  explicitly (same reasoning as ADR-021's Jira file-gateway scoping). Explicit env vars still
-  take precedence and skip the `gh` call entirely. 4 new tests in `tests/test_forge_gateway.py`.
 
 - **Commit-fill reconcile** (ADR-002 addendum): `kc reconcile` now runs two passes — the existing
   PR-based pass, then a commit-fill pass (`ForgeGateway.list_commits`) for direct pushes, squash
