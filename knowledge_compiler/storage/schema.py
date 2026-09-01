@@ -56,6 +56,14 @@ class CompileRun(Base):
     files_parsed: Mapped[int | None] = mapped_column(Integer)
     files_failed: Mapped[int | None] = mapped_column(Integer)
     failed_files: Mapped[list | None] = mapped_column(JSONB)
+    # Real LLM/embedding spend (migration 0008): NULL on rows predating this column
+    # and on emit-only reruns (no Extract/Embed stage runs) — same "not measured"
+    # convention as files_seen above. Cache hits cost nothing and aren't counted.
+    llm_calls: Mapped[int | None] = mapped_column(Integer)
+    llm_input_tokens: Mapped[int | None] = mapped_column(Integer)
+    llm_output_tokens: Mapped[int | None] = mapped_column(Integer)
+    embedding_calls: Mapped[int | None] = mapped_column(Integer)
+    embedding_input_tokens: Mapped[int | None] = mapped_column(Integer)
 
     __table_args__ = (
         # Idempotence check (ADR-002): succeeded run per (repo, pr) => re-trigger is a no-op.
