@@ -4,6 +4,92 @@
 
 ## 2026-09-01
 
+- **Deprecation** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-extractors-python-analyzer` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-ir` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-mcp-queries` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-mcp-server` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-wiki-okf-conformance` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/knowledge-compiler-wiki-okf-rules` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-incremental` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-normalize` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-okf-conformance` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-python-analyzer` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-qa-grounding` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-smoke` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `component/tests-test-wiki-emitter` (component) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/compile-process-management` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/deterministic-content-hashing-utility` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `feature/emit-wiki-updates` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `feature/entity-and-relationship-model-definitions` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `feature/entity-lookup-and-management-tools` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `feature/entity-management` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `feature/entity-resolution` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/generate-index-and-recent-changes-pages` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/impact-analysis` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `feature/journey-coverage` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/normalization-of-facts` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/python-language-analysis` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/test-coverage-assessment` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/test-plan-recommendations` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `feature/verification-of-compilation-state` (feature) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `pull-request/18` (pull_request) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/dangling-pages` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/database-connection-failure` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/data-inconsistency-risk` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/dependency-issues` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `risk/frontmatter-drift-detection` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `risk/idempotence-checking` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/input-handling` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `risk/missing-configuration-file-handling` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/missing-configuration-files` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/missing-configuration-files-2` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `risk/potential-data-loss-in-normalization` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/repository-lookup-failure` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `risk/session-management-risks` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/stale-test-coverage` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/stale-test-coverage-detection` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `risk/unparsable-file-handling` (risk) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component` (test_coverage) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/business-rule-identity-matching-threshold-for-names` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-deterministic-content-hashing-utility` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/feature-emit-wiki-updates` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/feature-entity-and-relationship-model-definitions` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/feature-entity-lookup-and-management-tools` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/feature-entity-management` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/feature-entity-resolution` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/feature-journey-coverage` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-normalization-of-facts` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-python-language-analysis` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-test-coverage-assessment` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-test-plan-recommendations` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-dangling-pages` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-database-connection-failure` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-data-inconsistency-risk` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-dependency-issues` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/risk-frontmatter-drift-detection` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/risk-idempotence-checking` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-input-handling` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/risk-missing-configuration-file-handling` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-missing-configuration-files` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-missing-configuration-files-2` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Creation** `wiki-page/risk-potential-data-loss-in-normalization` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-repository-lookup-failure` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Deprecation** `wiki-page/risk-session-management-risks` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-stale-test-coverage` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-stale-test-coverage-detection` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+- **Update** `wiki-page/risk-unparsable-file-handling` (wiki_page) — compile run 3742 (`8994ec91f4c8`).
+
 - **Update** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 3741 (`b632594b2c40`).
 - **Update** `component/alembic-versions-0007-compile-completeness` (component) — compile run 3741 (`b632594b2c40`).
 - **Update** `component/knowledge-compiler-cli` (component) — compile run 3741 (`b632594b2c40`).
@@ -414,8 +500,3 @@ No knowledge changes — compile run 3738 (`77dddb612ef1`).
 ## 2026-08-22
 
 No knowledge changes — compile run 2446 (`601d2381ae16`).
-
-## 2026-08-20
-
-- **Deprecation** `risk/dependency-resolution-failure` (risk) — compile run 2349 (`601d2381ae16`).
-- **Deprecation** `wiki-page/risk-dependency-resolution-failure` (wiki_page) — compile run 2349 (`601d2381ae16`).
