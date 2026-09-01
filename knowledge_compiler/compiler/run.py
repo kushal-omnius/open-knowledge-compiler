@@ -399,6 +399,9 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         run.files_failed = extract_stats["files_failed"]
         run.failed_files = extract_stats["failed_files"]
         llm_ran, llm_warnings, llm_tokens = _extract_semantic(session, ctx, artifacts, facts)
+        run.llm_calls = llm_tokens["calls"]
+        run.llm_input_tokens = llm_tokens["input_tokens"]
+        run.llm_output_tokens = llm_tokens["output_tokens"]
 
         # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
         # _extract_semantic so feature candidates are in `facts`. Load current
@@ -475,6 +478,12 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
                 summary.warnings.extend(emb_warnings)
                 summary.embedding_calls = emb_tokens["calls"]
                 summary.embedding_input_tokens = emb_tokens["input_tokens"]
+                run.embedding_calls = emb_tokens["calls"]
+                run.embedding_input_tokens = emb_tokens["input_tokens"]
+                session.commit()  # emit_embeddings already committed its own work;
+                                  # this persists the run-row token totals set just above —
+                                  # _locked_session's finally: block rolls back anything
+                                  # left pending, so this can't be skipped.
             except LLMProviderError as exc:
                 summary.warnings.append(f"embeddings unavailable — FTS-only retrieval: {exc}")
         except Exception as exc:  # noqa: BLE001 — same contract as emission
