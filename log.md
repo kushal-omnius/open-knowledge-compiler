@@ -4,6 +4,9 @@
 
 ## 2026-09-01
 
+- **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3844 (`eaef7cfecbb4`).
+- **Update** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3844 (`eaef7cfecbb4`).
+
 - **Creation** `component/alembic-versions-0008-llm-embedding-token-usage` (component) — compile run 3843 (`b89e4ac916b4`).
 - **Update** `component/knowledge-compiler-storage-schema` (component) — compile run 3843 (`b89e4ac916b4`).
 - **Update** `feature/compile-process-management` (feature) — compile run 3843 (`b89e4ac916b4`).
@@ -365,5 +368,3 @@ No knowledge changes — compile run 3842 (`775a1acc7bfb`).
 - **Creation** `wiki-page/risk-configuration-file-missing` (wiki_page) — compile run 3740 (`601d2381ae16`).
 - **Creation** `wiki-page/risk-database-connection-failure` (wiki_page) — compile run 3740 (`601d2381ae16`).
 - **Update** `wiki-page/risk-missing-configuration-files` (wiki_page) — compile run 3740 (`601d2381ae16`).
-
-- **Creation** `pull-request/15` (pull_request) — compile run 3739 (`717b33ad4fa7`).
