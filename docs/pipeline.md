@@ -98,7 +98,7 @@ At the start of every incremental compile (and as `kc reconcile`):
 1. Under the advisory lock, read the unified watermark: `max(COALESCE(commit_timestamp, merged_at))` over `succeeded` runs (scope ≠ `full`) for this repo.
 2. **Pass 1 — PR-based:** list PRs merged after the watermark from the forge API, ordered by `merged_at` (ties broken by PR number). Collect their merge-commit SHAs into a set.
 3. **Pass 2 — commit-fill:** list commits on the default branch after the watermark from the forge API. Drop any commit whose SHA is already in the PR-SHA set (it was processed by Pass 1). This covers direct pushes, squash-merge commits with no PR, and repos without a PR workflow.
-4. Merge both lists by timestamp (PR-before-commit for ties). For each item not already recorded `succeeded` (idempotence), run the full stage sequence in order.
+4. Merge both lists by timestamp (PR-before-commit for ties). For each item not already recorded `succeeded` (idempotence), run the full stage sequence in order. **Progress:** `[item] i/n PR #<number> merged <date>` / `[item] i/n commit <short-sha> @ <date>` is emitted to stderr right before each item starts (before Collect, so it fires even for an item with no LLM-eligible changes — those otherwise produce zero `[llm]`/`[embed]` output until their final summary). `i`/`n` count every fetched item for this invocation, including ones skipped by idempotence, and reset on each `kc reconcile`/`kc compile --pr` call — they don't track cumulative progress across resumed runs.
 5. Each change unit is its own compile run with its own atomic commit (`scope = 'pr'` or `scope = 'commit'`); a failure stops the sequence there.
 
 **Change-unit semantics by scope:**
