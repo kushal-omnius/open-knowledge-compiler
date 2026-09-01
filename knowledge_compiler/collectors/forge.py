@@ -24,6 +24,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol, runtime_checkable
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -71,7 +72,7 @@ class ForgeError(Exception):
     pass
 
 
-def _gh_cli_token() -> str | None:
+def _gh_cli_token(hostname: str | None = None) -> str | None:
     """Last-resort token source: the local gh CLI's own stored credential.
     Interactive-developer convenience only — a machine with `gh auth login`
     already done shouldn't also need a separately-provisioned PAT just to
@@ -79,7 +80,10 @@ def _gh_cli_token() -> str | None:
     session to read, so it must keep setting KC_GITHUB_TOKEN/GITHUB_TOKEN
     as a secret regardless of this fallback existing."""
     try:
-        result = subprocess.run(["gh", "auth", "token"], capture_output=True,
+        command = ["gh", "auth", "token"]
+        if hostname:
+            command.extend(["--hostname", hostname])
+        result = subprocess.run(command, capture_output=True,
                                 text=True, timeout=5)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -93,8 +97,10 @@ class GitHubGateway:
     def __init__(self, owner: str, repo: str) -> None:
         self.owner, self.repo = owner, repo
         self.base = os.environ.get("KC_GITHUB_API", "https://api.github.com").rstrip("/")
+        hostname = urlparse(self.base).hostname
+        gh_hostname = hostname if hostname and hostname != "api.github.com" else None
         self.token = (os.environ.get("KC_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
-                     or _gh_cli_token())
+                     or _gh_cli_token(gh_hostname))
         if not self.token:
             raise ForgeError(
                 "no forge token: set KC_GITHUB_TOKEN (or GITHUB_TOKEN), or run "

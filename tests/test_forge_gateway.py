@@ -24,6 +24,7 @@ def no_env_token(monkeypatch):
     whatever's ambient in the machine running these tests."""
     monkeypatch.delenv("KC_GITHUB_TOKEN", raising=False)
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("KC_GITHUB_API", raising=False)
 
 
 def test_404_error_explains_private_repo_or_stale_forge_ref(gateway):
@@ -60,6 +61,16 @@ def test_falls_back_to_gh_cli_token_when_no_env_var_set(no_env_token):
     assert gateway.token == "gho_fromghcli"
 
 
+def test_falls_back_to_gh_cli_token_for_ghe_host(no_env_token, monkeypatch):
+    monkeypatch.setenv("KC_GITHUB_API", "https://github.example.com/api/v3")
+    gh_result = subprocess.CompletedProcess(args=[], returncode=0, stdout="gho_fromghcli\n")
+    with patch("knowledge_compiler.collectors.forge.subprocess.run", return_value=gh_result) as run:
+        gateway = GitHubGateway(owner="omni-us-ea", repo="frida")
+    run.assert_called_once_with(["gh", "auth", "token", "--hostname", "github.example.com"],
+                                capture_output=True, text=True, timeout=5)
+    assert gateway.token == "gho_fromghcli"
+
+
 def test_env_var_takes_precedence_over_gh_cli(monkeypatch):
     monkeypatch.setenv("KC_GITHUB_TOKEN", "explicit-token")
     with patch("knowledge_compiler.collectors.forge.subprocess.run") as run:
@@ -81,5 +92,6 @@ def test_no_token_and_gh_cli_unavailable_raises_helpful_error(no_env_token):
 def test_no_token_and_gh_cli_not_logged_in_raises_helpful_error(no_env_token):
     gh_result = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
     with patch("knowledge_compiler.collectors.forge.subprocess.run", return_value=gh_result):
-        with pytest.raises(ForgeError):
+        with pytest.raises(ForgeError) as exc_info:
             GitHubGateway(owner="omni-us-ea", repo="frida")
+    assert "KC_GITHUB_TOKEN" in str(exc_info.value)
