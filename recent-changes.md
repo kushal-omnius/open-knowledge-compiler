@@ -8,79 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 2912 — `575a64afc0d8`
+## Compile 3738 — `77dddb612ef1`
 
-- **added** [business-rule/concept-field-requirements](business-rule/concept-field-requirements.md)
-- **added** [business-rule/frontmatter-constraints-for-reserved-okf-filenames](business-rule/frontmatter-constraints-for-reserved-okf-filenames.md)
-- **changed** [business-rule/identity-matching-threshold-for-names](business-rule/identity-matching-threshold-for-names.md)
-- **removed** [business-rule/log-file-frontmatter-restriction](business-rule/log-file-frontmatter-restriction.md)
-- **added** [feature/change-tracking](feature/change-tracking.md)
-- **changed** [feature/compile-process-management](feature/compile-process-management.md)
-- **changed** [feature/conformance-check-for-wiki-bundles](feature/conformance-check-for-wiki-bundles.md)
-- **removed** [feature/conformance-reporting](feature/conformance-reporting.md)
-- **changed** [feature/deterministic-content-hashing-utility](feature/deterministic-content-hashing-utility.md)
-- **removed** [feature/emit-wiki](feature/emit-wiki.md)
-- **removed** [feature/entity-management](feature/entity-management.md)
-- **removed** [feature/entity-query-tools](feature/entity-query-tools.md)
-- **added** [feature/entity-resolution](feature/entity-resolution.md)
-- **removed** [feature/fact-representation](feature/fact-representation.md)
-- **changed** [feature/generate-index-and-recent-changes-pages](feature/generate-index-and-recent-changes-pages.md)
-- **removed** [feature/impact-analysis](feature/impact-analysis.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **changed** [feature/journey-coverage-validation](feature/journey-coverage-validation.md)
-- **removed** [feature/linked-context-retrieval](feature/linked-context-retrieval.md)
-- **changed** [feature/normalization-of-facts](feature/normalization-of-facts.md)
-- **added** [feature/okf-rules-specification](feature/okf-rules-specification.md)
-- **changed** [feature/python-language-analysis](feature/python-language-analysis.md)
-- **changed** [feature/test-plan-recommendations](feature/test-plan-recommendations.md)
-- **removed** [feature/test-recommendation-planning](feature/test-recommendation-planning.md)
-- **changed** [feature/verification-of-compilation-state](feature/verification-of-compilation-state.md)
-- **added** [risk/dangling-pages](risk/dangling-pages.md)
-- **changed** [risk/error-handling-for-missing-type](risk/error-handling-for-missing-type.md)
-- **removed** [risk/failed-lock-session](risk/failed-lock-session.md)
-- **removed** [risk/full-compile-rejected-due-to-missing-issues](risk/full-compile-rejected-due-to-missing-issues.md)
-- **added** [risk/input-handling](risk/input-handling.md)
-- **changed** [risk/missing-configuration-files](risk/missing-configuration-files.md)
-- **added** [risk/missing-error-handling-2](risk/missing-error-handling-2.md)
-- **removed** [risk/orphaned-pages](risk/orphaned-pages.md)
-- **changed** [risk/potential-for-identity-conflicts](risk/potential-for-identity-conflicts.md)
-- **removed** [risk/potential-for-non-parseable-frontmatter](risk/potential-for-non-parseable-frontmatter.md)
-- **changed** [risk/repository-lookup-failure](risk/repository-lookup-failure.md)
-- **changed** [risk/stale-test-coverage-detection](risk/stale-test-coverage-detection.md)
-- **changed** [risk/unparsable-file-handling](risk/unparsable-file-handling.md)
-- **added** `wiki-page/business-rule-concept-field-requirements`
-- **added** `wiki-page/business-rule-frontmatter-constraints-for-reserved-okf-filenames`
-- **changed** `wiki-page/business-rule-identity-matching-threshold-for-names`
-- **removed** `wiki-page/business-rule-log-file-frontmatter-restriction`
-- **added** `wiki-page/feature-change-tracking`
-- **changed** `wiki-page/feature-compile-process-management`
-- **changed** `wiki-page/feature-conformance-check-for-wiki-bundles`
-- **removed** `wiki-page/feature-conformance-reporting`
-- **removed** `wiki-page/feature-emit-wiki`
-- **removed** `wiki-page/feature-entity-management`
-- **removed** `wiki-page/feature-entity-query-tools`
-- **added** `wiki-page/feature-entity-resolution`
-- **removed** `wiki-page/feature-fact-representation`
-- **removed** `wiki-page/feature-impact-analysis`
-- **changed** `wiki-page/feature-journey-coverage-validation`
-- **removed** `wiki-page/feature-linked-context-retrieval`
-- **added** `wiki-page/feature-okf-rules-specification`
-- **changed** `wiki-page/feature-python-language-analysis`
-- **changed** `wiki-page/feature-test-plan-recommendations`
-- **removed** `wiki-page/feature-test-recommendation-planning`
-- **changed** `wiki-page/feature-verification-of-compilation-state`
-- **added** `wiki-page/risk-dangling-pages`
-- **changed** `wiki-page/risk-error-handling-for-missing-type`
-- **removed** `wiki-page/risk-failed-lock-session`
-- **removed** `wiki-page/risk-full-compile-rejected-due-to-missing-issues`
-- **added** `wiki-page/risk-input-handling`
-- **changed** `wiki-page/risk-missing-configuration-files`
-- **added** `wiki-page/risk-missing-error-handling-2`
-- **removed** `wiki-page/risk-orphaned-pages`
-- **changed** `wiki-page/risk-potential-for-identity-conflicts`
-- **removed** `wiki-page/risk-potential-for-non-parseable-frontmatter`
-- **changed** `wiki-page/risk-repository-lookup-failure`
-- **changed** `wiki-page/risk-stale-test-coverage-detection`
-- **changed** `wiki-page/risk-unparsable-file-handling`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
