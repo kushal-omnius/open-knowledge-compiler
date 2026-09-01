@@ -4,6 +4,8 @@
 
 ## 2026-09-01
 
+No knowledge changes — compile run 3842 (`775a1acc7bfb`).
+
 - **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3746 (`832dd340e7a0`).
 - **Update** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3746 (`832dd340e7a0`).
 
@@ -342,78 +344,3 @@
 - **Creation** `pull-request/15` (pull_request) — compile run 3739 (`717b33ad4fa7`).
 
 No knowledge changes — compile run 3738 (`77dddb612ef1`).
-
-## 2026-08-26
-
-- **Creation** `business-rule/concept-field-requirements` (business_rule) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `business-rule/frontmatter-constraints-for-reserved-okf-filenames` (business_rule) — compile run 2912 (`575a64afc0d8`).
-- **Update** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `business-rule/log-file-frontmatter-restriction` (business_rule) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `feature/change-tracking` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/compile-process-management` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/conformance-check-for-wiki-bundles` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/conformance-reporting` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/deterministic-content-hashing-utility` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/emit-wiki` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/entity-management` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/entity-query-tools` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `feature/entity-resolution` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/fact-representation` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/generate-index-and-recent-changes-pages` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/impact-analysis` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/incremental-compilation` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/journey-coverage-validation` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/linked-context-retrieval` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/normalization-of-facts` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `feature/okf-rules-specification` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/python-language-analysis` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/test-plan-recommendations` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `feature/test-recommendation-planning` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Update** `feature/verification-of-compilation-state` (feature) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `risk/dangling-pages` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/error-handling-for-missing-type` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `risk/failed-lock-session` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `risk/full-compile-rejected-due-to-missing-issues` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `risk/input-handling` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/missing-configuration-files` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `risk/missing-error-handling-2` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `risk/orphaned-pages` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/potential-for-identity-conflicts` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `risk/potential-for-non-parseable-frontmatter` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/repository-lookup-failure` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/stale-test-coverage-detection` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Update** `risk/unparsable-file-handling` (risk) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/business-rule-concept-field-requirements` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/business-rule-frontmatter-constraints-for-reserved-okf-filenames` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/business-rule-identity-matching-threshold-for-names` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/business-rule-log-file-frontmatter-restriction` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/feature-change-tracking` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-conformance-check-for-wiki-bundles` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-conformance-reporting` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-emit-wiki` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-entity-management` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-entity-query-tools` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/feature-entity-resolution` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-fact-representation` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-impact-analysis` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-journey-coverage-validation` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-linked-context-retrieval` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/feature-okf-rules-specification` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-python-language-analysis` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-test-plan-recommendations` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/feature-test-recommendation-planning` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/risk-dangling-pages` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-error-handling-for-missing-type` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/risk-failed-lock-session` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/risk-full-compile-rejected-due-to-missing-issues` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/risk-input-handling` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-missing-configuration-files` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Creation** `wiki-page/risk-missing-error-handling-2` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/risk-orphaned-pages` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-potential-for-identity-conflicts` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Deprecation** `wiki-page/risk-potential-for-non-parseable-frontmatter` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-repository-lookup-failure` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-stale-test-coverage-detection` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-- **Update** `wiki-page/risk-unparsable-file-handling` (wiki_page) — compile run 2912 (`575a64afc0d8`).

@@ -8,9 +8,8 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 3746 — `832dd340e7a0`
+## Compile 3842 — `775a1acc7bfb`
 
-- **changed** [feature/knowledge-compiler-versioning](feature/knowledge-compiler-versioning.md)
-- **changed** `wiki-page/feature-knowledge-compiler-versioning`
+No knowledge changes.
 
 Full chronological history: [log.md](log.md).
