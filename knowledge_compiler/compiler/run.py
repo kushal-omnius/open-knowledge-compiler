@@ -167,17 +167,24 @@ def reconcile(repo_dir: Path, gateway: ForgeGateway, expect_pr: int | None = Non
 
         summaries: list[CompileSummary] = []
         covered = expect_pr is None or _already_succeeded(session, repo.id, expect_pr)
-        for _, _, kind, item in items:
+        report_progress = ctx.get("progress")
+        for idx, (_, _, kind, item) in enumerate(items, start=1):
             if kind == "pr":
                 pr = item
                 if _already_succeeded(session, repo.id, pr.number):
                     continue  # idempotence (ADR-002)
+                if report_progress:
+                    report_progress("item", idx, len(items),
+                                    f"PR #{pr.number} merged {pr.merged_at:%Y-%m-%d}")
                 summaries.append(_compile_one(session, repo, ctx, pr=pr))
                 covered = covered or pr.number == expect_pr
             else:
                 commit = item
                 if _commit_already_succeeded(session, repo.id, commit.sha):
                     continue  # idempotence for direct commits
+                if report_progress:
+                    report_progress("item", idx, len(items),
+                                    f"commit {commit.sha[:7]} @ {commit.timestamp:%Y-%m-%d}")
                 summaries.append(_compile_one(session, repo, ctx, pr=None, commit=commit))
 
         if not covered:

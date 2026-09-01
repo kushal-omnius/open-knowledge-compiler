@@ -17,6 +17,15 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+- **Per-item reconcile progress**: `[item] i/n PR #<number> merged <date>` / `[item] i/n commit
+  <short-sha> @ <date>` now streams to stderr right before each item in a `kc reconcile`/
+  `kc compile --pr` run starts — before Collect, so it fires even for an item with no
+  LLM-eligible changes (those previously produced zero output until their final summary block,
+  making a long reconcile look silent/stuck between summaries). `i`/`n` count every fetched item
+  for that invocation (including idempotence-skipped ones) and reset on each call.
+
 ## [1.3.1] — 2026-09-01
 
 ### Added
