@@ -3,7 +3,7 @@
 Architecture: docs/architecture.md (v1.0, frozen). IR contract: docs/ir.md.
 """
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # IR layer versions, recorded per compile run (ir.md §5).
 FACT_VOCABULARY_VERSION = "0.1"

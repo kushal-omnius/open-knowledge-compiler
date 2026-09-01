@@ -17,6 +17,18 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.3.1] — 2026-09-01
+
+### Added
+
+- **Persisted LLM/embedding token usage**: 1.3.0 surfaced real token usage in `CompileSummary`
+  and stderr progress lines only — nothing landed in the database, so the numbers vanished once
+  the terminal scrolled past them. New migration (`0008`) adds `llm_calls`/`llm_input_tokens`/
+  `llm_output_tokens`/`embedding_calls`/`embedding_input_tokens` to `compile_runs` (nullable,
+  same "NULL = not measured" convention as `files_seen`/0007), written by `_compile_one`. Rows
+  from before this migration — including anything compiled on 1.3.0 — stay `NULL` permanently;
+  there's no way to recover token usage that was never written down.
+
 ## [1.3.0] — 2026-09-01
 
 ### Added

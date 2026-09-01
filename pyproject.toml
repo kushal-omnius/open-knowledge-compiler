@@ -1,6 +1,6 @@
 [project]
 name = "open-knowledge-compiler"
-version = "1.3.0"
+version = "1.3.1"
 description = "Compiles software engineering artifacts into a structured, queryable OKF (Open Knowledge Format) knowledge base"
 readme = "README.md"
 requires-python = ">=3.11"
