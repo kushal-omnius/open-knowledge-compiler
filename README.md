@@ -211,7 +211,7 @@ No API keys required — the deterministic compiler produces components, APIs, d
 All external configuration lives in env vars and `kc.toml` (written by `kc init`) — nothing is hardcoded:
 
 - `KC_DATABASE_URL` — Postgres URL (default matches `docker-compose.yml`)
-- `KC_GITHUB_TOKEN` / `GITHUB_TOKEN` — forge API for `--pr`/`reconcile`; `KC_GITHUB_API` for GHE
+- `KC_GITHUB_TOKEN` / `GITHUB_TOKEN` — forge API for `--pr`/`reconcile`; `KC_GITHUB_API` for GHE. If neither is set, falls back to `gh auth token` when the `gh` CLI is locally authenticated — interactive-developer convenience only, CI must still set the env var explicitly. When `KC_GITHUB_API` points at a GHE host, the fallback passes `gh auth token --hostname <host>` so it reads that host's credential from `gh`'s multi-host auth store, not `gh`'s default host's token
 - `kc.toml [wiki]` — local publication directory
 - `kc.toml [publisher]` — opt-in loop-safe publishing to a `knowledge/wiki` branch (ADR-010)
 - `kc.toml [llm]` — opt-in semantic layer (ADR-008): business rules, features, risks
