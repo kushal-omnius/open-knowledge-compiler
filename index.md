@@ -6,11 +6,11 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 3842 · Commit: `775a1acc7bfb`
+Repo: `knowledge-compiler` · Compile run: 3843 · Commit: `b89e4ac916b4`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
-## Components (72)
+## Components (73)
 
 - [alembic.env](component/alembic-env.md)
 - [alembic.versions.0001_phase1_schema](component/alembic-versions-0001-phase1-schema.md)
@@ -20,6 +20,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [alembic.versions.0005_okf_spec_version](component/alembic-versions-0005-okf-spec-version.md)
 - [alembic.versions.0006_commit_timestamp](component/alembic-versions-0006-commit-timestamp.md)
 - [alembic.versions.0007_compile_completeness](component/alembic-versions-0007-compile-completeness.md)
+- [alembic.versions.0008_llm_embedding_token_usage](component/alembic-versions-0008-llm-embedding-token-usage.md)
 - [knowledge_compiler](component/knowledge-compiler.md)
 - [knowledge_compiler.cli](component/knowledge-compiler-cli.md)
 - [knowledge_compiler.collectors](component/knowledge-compiler-collectors.md)
@@ -85,7 +86,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (70)
+## Features (72)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Persist Compile Results](feature/atomic-application-of-a-compile-delta.md)
@@ -94,7 +95,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Collector Protocol](feature/collector-protocol.md)
 - [Commit Timestamp Addition](feature/commit-timestamp-addition.md)
 - [Compile a repository](feature/compile-command.md)
-- [Full Compilation](feature/compile-process-management.md)
+- [Compile Full](feature/compile-process-management.md)
 - [Compute Diff](feature/compute-state-delta-between-candidate-and-current.md)
 - [Dynamic Embedder Selection](feature/config-driven-embedder-factory.md)
 - [OKF Conformance Checking](feature/conformance-check-for-wiki-bundles.md)
@@ -103,6 +104,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Deterministic Content Hashing](feature/deterministic-content-hashing-utility.md)
 - [Embedding Providers](feature/embedding-providers-2.md)
 - [Vector Extension Creation](feature/embeddings-schema-migration.md)
+- [Emit Wiki Content](feature/emit-wiki-content.md)
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Entity and Relationship Model Definitions](feature/entity-and-relationship-model-definitions.md)
 - [Entity Management](feature/entity-management.md)
@@ -114,7 +116,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Git Collector](feature/git-collector.md)
 - [Hybrid Search](feature/hybrid-search-with-reciprocal-rank-fusion.md)
 - [Impact Plan](feature/impact-analysis.md)
-- [Incremental Reconciliation](feature/incremental-compilation.md)
+- [Reconcile Incremental Compilation](feature/incremental-compilation.md)
 - [Inspect repository details](feature/inspection-command.md)
 - [JavaScript Language Analysis](feature/javascript-language-analysis.md)
 - [Jira Issue Retrieval](feature/jira-issue-collector.md)
@@ -144,7 +146,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [RetrievalProvider Protocol](feature/retrievalprovider-protocol.md)
 - [Offline Migration Execution](feature/run-migrations-in-offline-mode.md)
 - [Online Migration Execution](feature/run-migrations-in-online-mode.md)
-- [Schema Definitions for Database Entities](feature/schema-definitions-for-database-entities.md)
+- [Data Model for Knowledge Compiler](feature/schema-definitions-for-database-entities.md)
 - [Compile Completeness Tracking](feature/schema-migration-for-compile-runs.md)
 - [Semantic Search](feature/semantic-vector-search-cosine-knn.md)
 - [Serve compiled knowledge base](feature/serve-command.md)
@@ -154,9 +156,10 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Test Scoring](feature/test-scoring.md)
 - [Validate test against compiled knowledge](feature/test-validation-command.md)
 - [Text Rendering for Embedding](feature/text-rendering-for-embedding.md)
+- [Token Usage Tracking](feature/token-usage-tracking.md)
 - [TypeScript Language Analyzer](feature/typescript-fact-extractor.md)
 - [Verify repository state](feature/verification-command.md)
-- [Verify Compile](feature/verification-of-compilation-state.md)
+- [Verify Compilation State](feature/verification-of-compilation-state.md)
 
 ## Business Rules (4)
 
@@ -165,12 +168,13 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Frontmatter Constraints for Reserved OKF Filenames](business-rule/frontmatter-constraints-for-reserved-okf-filenames.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (45)
+## Risks (47)
 
 - [Cache File Risk](risk/cache-file-read-failure.md)
 - [Orphaned Pages Risk](risk/dangling-pages.md)
 - [Data Handling Risk](risk/data-handling-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
+- [Database Connection Failure](risk/database-connection-failure.md)
 - [Error Handling on Connection Failure](risk/database-connection-failure-handling.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
@@ -182,11 +186,11 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Missing File Handling](risk/empty-data-handling.md)
 - [Potential for Incorrect Entity Removal](risk/empty-files-treated-as-missing-file-evidence.md)
 - [Unbounded Input Handling](risk/error-handling-for-missing-type.md)
+- [Failed LLM Integration](risk/failed-llm-integration.md)
 - [Frontmatter Drift Detection](risk/frontmatter-drift-detection.md)
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [Data Integrity Risk](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [Error Handling During API Requests](risk/lack-of-error-handling-on-api-requests.md)
-- [Error Handling for Missing Config](risk/missing-configuration-file-handling.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Environment Dependency Risk](risk/missing-environment-variables.md)
 - [Configuration Injection Risk](risk/missing-error-handling.md)
@@ -208,6 +212,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
 - [Potential for Unauthorized Access](risk/token-exposure-risk.md)
 - [Unbounded PR and Commit Retrieval](risk/unbounded-pr-and-commit-retrieval.md)
+- [Unchecked Compilation Errors](risk/unchecked-compilation-errors.md)
 - [Error Handling Risk](risk/unhandled-exceptions-during-file-analysis.md)
 - [Exception Handling](risk/unhandled-file-parsing-failures.md)
 - [Error Handling on Parse Failures](risk/unparsable-file-handling.md)

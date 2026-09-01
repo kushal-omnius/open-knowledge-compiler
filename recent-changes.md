@@ -8,8 +8,31 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 3842 — `775a1acc7bfb`
+## Compile 3843 — `b89e4ac916b4`
 
-No knowledge changes.
+- **added** [component/alembic-versions-0008-llm-embedding-token-usage](component/alembic-versions-0008-llm-embedding-token-usage.md)
+- **changed** [component/knowledge-compiler-storage-schema](component/knowledge-compiler-storage-schema.md)
+- **changed** [feature/compile-process-management](feature/compile-process-management.md)
+- **added** [feature/emit-wiki-content](feature/emit-wiki-content.md)
+- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
+- **changed** [feature/schema-definitions-for-database-entities](feature/schema-definitions-for-database-entities.md)
+- **added** [feature/token-usage-tracking](feature/token-usage-tracking.md)
+- **changed** [feature/verification-of-compilation-state](feature/verification-of-compilation-state.md)
+- **added** `pull-request/21`
+- **added** [risk/database-connection-failure](risk/database-connection-failure.md)
+- **added** [risk/failed-llm-integration](risk/failed-llm-integration.md)
+- **removed** [risk/missing-configuration-file-handling](risk/missing-configuration-file-handling.md)
+- **added** [risk/unchecked-compilation-errors](risk/unchecked-compilation-errors.md)
+- **added** `wiki-page/component-alembic-versions-0008-llm-embedding-token-usage`
+- **changed** `wiki-page/feature-compile-process-management`
+- **added** `wiki-page/feature-emit-wiki-content`
+- **changed** `wiki-page/feature-incremental-compilation`
+- **changed** `wiki-page/feature-schema-definitions-for-database-entities`
+- **added** `wiki-page/feature-token-usage-tracking`
+- **changed** `wiki-page/feature-verification-of-compilation-state`
+- **added** `wiki-page/risk-database-connection-failure`
+- **added** `wiki-page/risk-failed-llm-integration`
+- **removed** `wiki-page/risk-missing-configuration-file-handling`
+- **added** `wiki-page/risk-unchecked-compilation-errors`
 
 Full chronological history: [log.md](log.md).

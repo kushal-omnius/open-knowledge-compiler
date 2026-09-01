@@ -4,6 +4,31 @@
 
 ## 2026-09-01
 
+- **Creation** `component/alembic-versions-0008-llm-embedding-token-usage` (component) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `component/knowledge-compiler-storage-schema` (component) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `feature/compile-process-management` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `feature/emit-wiki-content` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `feature/schema-definitions-for-database-entities` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `feature/token-usage-tracking` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `feature/verification-of-compilation-state` (feature) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `pull-request/21` (pull_request) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `risk/database-connection-failure` (risk) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `risk/failed-llm-integration` (risk) — compile run 3843 (`b89e4ac916b4`).
+- **Deprecation** `risk/missing-configuration-file-handling` (risk) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `risk/unchecked-compilation-errors` (risk) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/component-alembic-versions-0008-llm-embedding-token-usage` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/feature-emit-wiki-content` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `wiki-page/feature-schema-definitions-for-database-entities` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/feature-token-usage-tracking` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Update** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/risk-database-connection-failure` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/risk-failed-llm-integration` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Deprecation** `wiki-page/risk-missing-configuration-file-handling` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+- **Creation** `wiki-page/risk-unchecked-compilation-errors` (wiki_page) — compile run 3843 (`b89e4ac916b4`).
+
 No knowledge changes — compile run 3842 (`775a1acc7bfb`).
 
 - **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3746 (`832dd340e7a0`).
@@ -342,5 +367,3 @@ No knowledge changes — compile run 3842 (`775a1acc7bfb`).
 - **Update** `wiki-page/risk-missing-configuration-files` (wiki_page) — compile run 3740 (`601d2381ae16`).
 
 - **Creation** `pull-request/15` (pull_request) — compile run 3739 (`717b33ad4fa7`).
-
-No knowledge changes — compile run 3738 (`77dddb612ef1`).
