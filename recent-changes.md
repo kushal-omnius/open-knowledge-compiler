@@ -8,92 +8,9 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 3742 — `8994ec91f4c8`
+## Compile 3743 — `f4378a03aade`
 
-- **removed** [business-rule/identity-matching-threshold-for-names](business-rule/identity-matching-threshold-for-names.md)
-- **changed** [component/knowledge-compiler-compiler-normalize](component/knowledge-compiler-compiler-normalize.md)
-- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
-- **changed** [component/knowledge-compiler-extractors-python-analyzer](component/knowledge-compiler-extractors-python-analyzer.md)
-- **changed** [component/knowledge-compiler-ir](component/knowledge-compiler-ir.md)
-- **changed** [component/knowledge-compiler-mcp-queries](component/knowledge-compiler-mcp-queries.md)
-- **changed** [component/knowledge-compiler-mcp-server](component/knowledge-compiler-mcp-server.md)
-- **changed** [component/knowledge-compiler-wiki-emitter](component/knowledge-compiler-wiki-emitter.md)
-- **changed** [component/knowledge-compiler-wiki-okf-conformance](component/knowledge-compiler-wiki-okf-conformance.md)
-- **changed** [component/knowledge-compiler-wiki-okf-rules](component/knowledge-compiler-wiki-okf-rules.md)
-- **changed** [component/tests-test-incremental](component/tests-test-incremental.md)
-- **changed** [component/tests-test-normalize](component/tests-test-normalize.md)
-- **changed** [component/tests-test-okf-conformance](component/tests-test-okf-conformance.md)
-- **changed** [component/tests-test-python-analyzer](component/tests-test-python-analyzer.md)
-- **changed** [component/tests-test-qa-grounding](component/tests-test-qa-grounding.md)
-- **changed** [component/tests-test-smoke](component/tests-test-smoke.md)
-- **changed** [component/tests-test-wiki-emitter](component/tests-test-wiki-emitter.md)
-- **changed** [feature/compile-process-management](feature/compile-process-management.md)
-- **changed** [feature/deterministic-content-hashing-utility](feature/deterministic-content-hashing-utility.md)
-- **added** [feature/emit-wiki-updates](feature/emit-wiki-updates.md)
-- **added** [feature/entity-and-relationship-model-definitions](feature/entity-and-relationship-model-definitions.md)
-- **removed** [feature/entity-lookup-and-management-tools](feature/entity-lookup-and-management-tools.md)
-- **added** [feature/entity-management](feature/entity-management.md)
-- **removed** [feature/entity-resolution](feature/entity-resolution.md)
-- **changed** [feature/generate-index-and-recent-changes-pages](feature/generate-index-and-recent-changes-pages.md)
-- **changed** [feature/impact-analysis](feature/impact-analysis.md)
-- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
-- **added** [feature/journey-coverage](feature/journey-coverage.md)
-- **changed** [feature/normalization-of-facts](feature/normalization-of-facts.md)
-- **changed** [feature/python-language-analysis](feature/python-language-analysis.md)
-- **changed** [feature/test-coverage-assessment](feature/test-coverage-assessment.md)
-- **changed** [feature/test-plan-recommendations](feature/test-plan-recommendations.md)
-- **changed** [feature/verification-of-compilation-state](feature/verification-of-compilation-state.md)
-- **added** `pull-request/18`
-- **changed** [risk/dangling-pages](risk/dangling-pages.md)
-- **changed** [risk/database-connection-failure](risk/database-connection-failure.md)
-- **removed** [risk/data-inconsistency-risk](risk/data-inconsistency-risk.md)
-- **removed** [risk/dependency-issues](risk/dependency-issues.md)
-- **added** [risk/frontmatter-drift-detection](risk/frontmatter-drift-detection.md)
-- **added** [risk/idempotence-checking](risk/idempotence-checking.md)
-- **removed** [risk/input-handling](risk/input-handling.md)
-- **added** [risk/missing-configuration-file-handling](risk/missing-configuration-file-handling.md)
-- **removed** [risk/missing-configuration-files](risk/missing-configuration-files.md)
-- **removed** [risk/missing-configuration-files-2](risk/missing-configuration-files-2.md)
-- **added** [risk/potential-data-loss-in-normalization](risk/potential-data-loss-in-normalization.md)
-- **changed** [risk/potential-for-identity-conflicts](risk/potential-for-identity-conflicts.md)
-- **removed** [risk/repository-lookup-failure](risk/repository-lookup-failure.md)
-- **removed** [risk/session-management-risks](risk/session-management-risks.md)
-- **changed** [risk/stale-test-coverage](risk/stale-test-coverage.md)
-- **changed** [risk/stale-test-coverage-detection](risk/stale-test-coverage-detection.md)
-- **changed** [risk/unparsable-file-handling](risk/unparsable-file-handling.md)
-- **added** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component`
-- **removed** `wiki-page/business-rule-identity-matching-threshold-for-names`
-- **changed** `wiki-page/feature-compile-process-management`
-- **changed** `wiki-page/feature-deterministic-content-hashing-utility`
-- **added** `wiki-page/feature-emit-wiki-updates`
-- **added** `wiki-page/feature-entity-and-relationship-model-definitions`
-- **removed** `wiki-page/feature-entity-lookup-and-management-tools`
-- **added** `wiki-page/feature-entity-management`
-- **removed** `wiki-page/feature-entity-resolution`
-- **changed** `wiki-page/feature-impact-analysis`
-- **changed** `wiki-page/feature-incremental-compilation`
-- **added** `wiki-page/feature-journey-coverage`
-- **changed** `wiki-page/feature-normalization-of-facts`
-- **changed** `wiki-page/feature-python-language-analysis`
-- **changed** `wiki-page/feature-test-coverage-assessment`
-- **changed** `wiki-page/feature-test-plan-recommendations`
-- **changed** `wiki-page/feature-verification-of-compilation-state`
-- **changed** `wiki-page/risk-dangling-pages`
-- **changed** `wiki-page/risk-database-connection-failure`
-- **removed** `wiki-page/risk-data-inconsistency-risk`
-- **removed** `wiki-page/risk-dependency-issues`
-- **added** `wiki-page/risk-frontmatter-drift-detection`
-- **added** `wiki-page/risk-idempotence-checking`
-- **removed** `wiki-page/risk-input-handling`
-- **added** `wiki-page/risk-missing-configuration-file-handling`
-- **removed** `wiki-page/risk-missing-configuration-files`
-- **removed** `wiki-page/risk-missing-configuration-files-2`
-- **added** `wiki-page/risk-potential-data-loss-in-normalization`
-- **changed** `wiki-page/risk-potential-for-identity-conflicts`
-- **removed** `wiki-page/risk-repository-lookup-failure`
-- **removed** `wiki-page/risk-session-management-risks`
-- **changed** `wiki-page/risk-stale-test-coverage`
-- **changed** `wiki-page/risk-stale-test-coverage-detection`
-- **changed** `wiki-page/risk-unparsable-file-handling`
+- **changed** [feature/knowledge-compiler-versioning](feature/knowledge-compiler-versioning.md)
+- **changed** `wiki-page/feature-knowledge-compiler-versioning`
 
 Full chronological history: [log.md](log.md).

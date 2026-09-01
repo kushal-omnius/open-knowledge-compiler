@@ -4,6 +4,9 @@
 
 ## 2026-09-01
 
+- **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3743 (`f4378a03aade`).
+- **Update** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3743 (`f4378a03aade`).
+
 - **Deprecation** `business-rule/identity-matching-threshold-for-names` (business_rule) — compile run 3742 (`8994ec91f4c8`).
 - **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 3742 (`8994ec91f4c8`).
 - **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 3742 (`8994ec91f4c8`).
@@ -496,7 +499,3 @@ No knowledge changes — compile run 3738 (`77dddb612ef1`).
 
 - **Creation** `component/alembic-versions-0007-compile-completeness` (component) — compile run 2447 (`b632594b2c40`).
 - **Creation** `wiki-page/component-alembic-versions-0007-compile-completeness` (wiki_page) — compile run 2447 (`b632594b2c40`).
-
-## 2026-08-22
-
-No knowledge changes — compile run 2446 (`601d2381ae16`).
