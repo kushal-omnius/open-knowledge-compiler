@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-09-01
+
 ### Added
 
 - **Real LLM/embedding token usage tracking**: `usage` from every provider's API response
