@@ -4,6 +4,9 @@
 
 ## 2026-09-01
 
+- **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3746 (`832dd340e7a0`).
+- **Update** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3746 (`832dd340e7a0`).
+
 - **Update** `component/knowledge-compiler-cli` (component) — compile run 3745 (`6311d87630b6`).
 - **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 3745 (`6311d87630b6`).
 - **Update** `component/knowledge-compiler-extractors-llm-extractor` (component) — compile run 3745 (`6311d87630b6`).
@@ -414,60 +417,3 @@ No knowledge changes — compile run 3738 (`77dddb612ef1`).
 - **Update** `wiki-page/risk-repository-lookup-failure` (wiki_page) — compile run 2912 (`575a64afc0d8`).
 - **Update** `wiki-page/risk-stale-test-coverage-detection` (wiki_page) — compile run 2912 (`575a64afc0d8`).
 - **Update** `wiki-page/risk-unparsable-file-handling` (wiki_page) — compile run 2912 (`575a64afc0d8`).
-
-- **Update** `component/knowledge-compiler-compiler-normalize` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/knowledge-compiler-extractors-python-analyzer` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/knowledge-compiler-wiki-emitter` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/knowledge-compiler-wiki-okf-conformance` (component) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `component/knowledge-compiler-wiki-okf-rules` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-incremental` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-normalize` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-okf-conformance` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-python-analyzer` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-qa-grounding` (component) — compile run 2911 (`575a64afc0d8`).
-- **Update** `component/tests-test-wiki-emitter` (component) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `state-model/knowledge-compiler-compiler-run-status` (state_model) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `state-model/knowledge-compiler-storage-persist-status` (state_model) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-bug-fix-pr-on-covered-component-records-one-covered-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-jira-bug-type-alone-classifies-as-a-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-non-bug-fix-pr-does-not-record-a-fix` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-incremental-py-test-trust-score-populated-once-sample-size-reached` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-aggregated-from-transitions` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-models-relationship-to-owning-component` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-normalize-py-test-state-model-unresolved-module-is-silently-skipped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-okf-conformance-py-test-check-bundle-is-data-driven-not-hardcoded` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-okf-conformance-py-test-check-bundle-reserved-filename-set-is-also-data-driven` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-concept-missing-frontmatter-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-concept-missing-type-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-conformant-bundle-has-no-issues` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-index-extra-frontmatter-key-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-index-without-frontmatter-is-conformant` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-okf-conformance-py-test-log-with-frontmatter-flagged` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-python-analyzer-py-test-if-elif-else-branches-do-not-leak-into-each-other` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-python-analyzer-py-test-non-status-fields-are-ignored` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-field-scoped-per-function` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-transition-anchored-to-owning-module` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-python-analyzer-py-test-state-transition-sequential-and-branch-structure` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-component-page-content` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-cross-links-are-relative-and-resolve` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-dirty-only-regeneration` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-emission-is-byte-deterministic` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-empty-dirty-set-skips-every-page` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-frontmatter-self-check-catches-drift` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-index-has-no-general-frontmatter` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `test-coverage/tests-test-wiki-emitter-py-test-index-self-check-catches-drift` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-log-md-has-no-frontmatter-and-is-date-grouped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-log-md-lists-multiple-changes-as-separate-bullets` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-none-dirty-forces-full-rerender` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-okf-frontmatter` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-orphaned-page-pruned-when-owner-removed` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-pages-written-at-slug-paths` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-changes-scoped-to-last-compile` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-caps-and-points-to-log` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-recent-history-section-is-bounded-and-entity-scoped` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Update** `test-coverage/tests-test-wiki-emitter-py-test-rel-link-helper` (test_coverage) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `wiki-page/component-knowledge-compiler-wiki-okf-rules` (wiki_page) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `wiki-page/state-model-knowledge-compiler-compiler-run-status` (wiki_page) — compile run 2911 (`575a64afc0d8`).
-- **Creation** `wiki-page/state-model-knowledge-compiler-storage-persist-status` (wiki_page) — compile run 2911 (`575a64afc0d8`).
