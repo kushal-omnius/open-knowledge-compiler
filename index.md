@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 3743 · Commit: `f4378a03aade`
+Repo: `knowledge-compiler` · Compile run: 3744 · Commit: `09250e0562f2`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -85,7 +85,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (73)
+## Features (72)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Persist Compile Results](feature/atomic-application-of-a-compile-delta.md)
@@ -115,7 +115,6 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Git Collector](feature/git-collector.md)
 - [Hybrid Search](feature/hybrid-search-with-reciprocal-rank-fusion.md)
 - [Impact Plan](feature/impact-analysis.md)
-- [In-Memory Fake Gateway](feature/in-memory-fake-gateway.md)
 - [Incremental Reconciliation](feature/incremental-compilation.md)
 - [Command for Inspecting Repository Entities](feature/inspection-command.md)
 - [JavaScript Language Analysis](feature/javascript-language-analysis.md)
@@ -168,7 +167,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Frontmatter Constraints for Reserved OKF Filenames](business-rule/frontmatter-constraints-for-reserved-okf-filenames.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (50)
+## Risks (51)
 
 - [Cache File Risk](risk/cache-file-read-failure.md)
 - [Command Misuse Error Handling](risk/command-misuse-error-handling.md)
@@ -192,7 +191,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Index Creation Risk](risk/index-creation-risk.md)
 - [Insufficient Error Handling on Repository Initialization](risk/insufficient-error-handling-on-repository-initialization.md)
 - [Data Integrity Risk](risk/insufficient-handling-of-non-conformant-artifacts.md)
-- [Not Handling GitHub API Rate Limits](risk/lack-of-error-handling-on-api-requests.md)
+- [Error Handling During API Requests](risk/lack-of-error-handling-on-api-requests.md)
 - [Uncaught API Errors](risk/malformed-model-output-causes-unhandled-json-error.md)
 - [Missing Configuration File Handling](risk/missing-configuration-file-handling.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
@@ -215,7 +214,8 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Unresolved Dependency Handling](risk/stale-test-coverage.md)
 - [Missing Coverage Checks](risk/stale-test-coverage-detection.md)
 - [Subprocess Call Failure](risk/subprocess-call-failure.md)
-- [Missing API Token Handling](risk/token-exposure-risk.md)
+- [Potential for Unauthorized Access](risk/token-exposure-risk.md)
+- [Unbounded PR and Commit Retrieval](risk/unbounded-pr-and-commit-retrieval.md)
 - [Error Handling Risk](risk/unhandled-exceptions-during-file-analysis.md)
 - [Exception Handling](risk/unhandled-file-parsing-failures.md)
 - [Error Handling on Parse Failures](risk/unparsable-file-handling.md)

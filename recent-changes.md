@@ -8,9 +8,27 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 3743 — `f4378a03aade`
+## Compile 3744 — `09250e0562f2`
 
-- **changed** [feature/knowledge-compiler-versioning](feature/knowledge-compiler-versioning.md)
-- **changed** `wiki-page/feature-knowledge-compiler-versioning`
+- **changed** [component/knowledge-compiler-collectors-forge](component/knowledge-compiler-collectors-forge.md)
+- **changed** [component/tests-test-forge-gateway](component/tests-test-forge-gateway.md)
+- **removed** [feature/in-memory-fake-gateway](feature/in-memory-fake-gateway.md)
+- **changed** [feature/list-commits](feature/list-commits.md)
+- **changed** [feature/list-merged-pull-requests](feature/list-merged-pull-requests.md)
+- **added** `pull-request/19`
+- **changed** [risk/lack-of-error-handling-on-api-requests](risk/lack-of-error-handling-on-api-requests.md)
+- **changed** [risk/token-exposure-risk](risk/token-exposure-risk.md)
+- **added** [risk/unbounded-pr-and-commit-retrieval](risk/unbounded-pr-and-commit-retrieval.md)
+- **changed** `test-coverage/tests-test-forge-gateway-py-test-404-error-explains-private-repo-or-stale-forge-ref`
+- **added** `test-coverage/tests-test-forge-gateway-py-test-env-var-takes-precedence-over-gh-cli`
+- **added** `test-coverage/tests-test-forge-gateway-py-test-falls-back-to-gh-cli-token-for-ghe-host`
+- **added** `test-coverage/tests-test-forge-gateway-py-test-falls-back-to-gh-cli-token-when-no-env-var-set`
+- **changed** `test-coverage/tests-test-forge-gateway-py-test-non-404-http-error-keeps-generic-message`
+- **added** `test-coverage/tests-test-forge-gateway-py-test-no-token-and-gh-cli-not-logged-in-raises-helpful-error`
+- **added** `test-coverage/tests-test-forge-gateway-py-test-no-token-and-gh-cli-unavailable-raises-helpful-error`
+- **removed** `wiki-page/feature-in-memory-fake-gateway`
+- **changed** `wiki-page/risk-lack-of-error-handling-on-api-requests`
+- **changed** `wiki-page/risk-token-exposure-risk`
+- **added** `wiki-page/risk-unbounded-pr-and-commit-retrieval`
 
 Full chronological history: [log.md](log.md).

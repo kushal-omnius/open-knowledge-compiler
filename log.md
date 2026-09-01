@@ -4,6 +4,27 @@
 
 ## 2026-09-01
 
+- **Update** `component/knowledge-compiler-collectors-forge` (component) — compile run 3744 (`09250e0562f2`).
+- **Update** `component/tests-test-forge-gateway` (component) — compile run 3744 (`09250e0562f2`).
+- **Deprecation** `feature/in-memory-fake-gateway` (feature) — compile run 3744 (`09250e0562f2`).
+- **Update** `feature/list-commits` (feature) — compile run 3744 (`09250e0562f2`).
+- **Update** `feature/list-merged-pull-requests` (feature) — compile run 3744 (`09250e0562f2`).
+- **Creation** `pull-request/19` (pull_request) — compile run 3744 (`09250e0562f2`).
+- **Update** `risk/lack-of-error-handling-on-api-requests` (risk) — compile run 3744 (`09250e0562f2`).
+- **Update** `risk/token-exposure-risk` (risk) — compile run 3744 (`09250e0562f2`).
+- **Creation** `risk/unbounded-pr-and-commit-retrieval` (risk) — compile run 3744 (`09250e0562f2`).
+- **Update** `test-coverage/tests-test-forge-gateway-py-test-404-error-explains-private-repo-or-stale-forge-ref` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Creation** `test-coverage/tests-test-forge-gateway-py-test-env-var-takes-precedence-over-gh-cli` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Creation** `test-coverage/tests-test-forge-gateway-py-test-falls-back-to-gh-cli-token-for-ghe-host` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Creation** `test-coverage/tests-test-forge-gateway-py-test-falls-back-to-gh-cli-token-when-no-env-var-set` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Update** `test-coverage/tests-test-forge-gateway-py-test-non-404-http-error-keeps-generic-message` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Creation** `test-coverage/tests-test-forge-gateway-py-test-no-token-and-gh-cli-not-logged-in-raises-helpful-error` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Creation** `test-coverage/tests-test-forge-gateway-py-test-no-token-and-gh-cli-unavailable-raises-helpful-error` (test_coverage) — compile run 3744 (`09250e0562f2`).
+- **Deprecation** `wiki-page/feature-in-memory-fake-gateway` (wiki_page) — compile run 3744 (`09250e0562f2`).
+- **Update** `wiki-page/risk-lack-of-error-handling-on-api-requests` (wiki_page) — compile run 3744 (`09250e0562f2`).
+- **Update** `wiki-page/risk-token-exposure-risk` (wiki_page) — compile run 3744 (`09250e0562f2`).
+- **Creation** `wiki-page/risk-unbounded-pr-and-commit-retrieval` (wiki_page) — compile run 3744 (`09250e0562f2`).
+
 - **Update** `feature/knowledge-compiler-versioning` (feature) — compile run 3743 (`f4378a03aade`).
 - **Update** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3743 (`f4378a03aade`).
 
@@ -496,6 +517,3 @@ No knowledge changes — compile run 3738 (`77dddb612ef1`).
 - **Creation** `wiki-page/risk-unhandled-exceptions-during-file-analysis` (wiki_page) — compile run 2448 (`b632594b2c40`).
 - **Creation** `wiki-page/risk-unhandled-file-parsing-failures` (wiki_page) — compile run 2448 (`b632594b2c40`).
 - **Update** `wiki-page/risk-unparsable-file-handling` (wiki_page) — compile run 2448 (`b632594b2c40`).
-
-- **Creation** `component/alembic-versions-0007-compile-completeness` (component) — compile run 2447 (`b632594b2c40`).
-- **Creation** `wiki-page/component-alembic-versions-0007-compile-completeness` (wiki_page) — compile run 2447 (`b632594b2c40`).
