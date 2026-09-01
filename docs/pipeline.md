@@ -43,7 +43,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
 - **Reads:** staged artifacts (never the repo directly).
 - **Produces:** Fact IR rows (ir.md §2). Deterministic extractors (analyzers per ADR-006, parsers) run first and always; LLM extractors run second, consulting `llm_cache` before every call and writing validated outputs through it (ADR-008).
 - **Owns:** grammar pinning, parse-failure file skips (recorded as warnings, never compile failures — ADR-006); the LLM validation gate and budget accounting (ADR-008); mandatory anchors on candidates (ADR-004).
-- **Progress:** `[llm] i/n <file> --changed` is emitted to stderr for each file that required a real LLM call (cache miss). Cache hits are silent — the progress stream only reflects actual network work, so a mostly-cached run produces few or no lines.
+- **Progress:** `[llm] i/n <file> --changed (tokens in=X out=Y)` is emitted to stderr for each file that required a real LLM call (cache miss), with that call's actual token usage from the provider response (summed across validation retries). Cache hits are silent — the progress stream only reflects actual network work, so a mostly-cached run produces few or no lines. `CompileSummary` carries the run's totals (`llm_calls`/`llm_input_tokens`/`llm_output_tokens`, cache hits excluded); `kc reconcile`/`kc compile --pr` print a grand total across every PR/commit the run walked, not just the last one.
 - **Records:** which extractor families ran over which scope — required by removal evidence (§5).
 - **Jira→Feature enrichment pass** (additive, opt-in): after the file-level semantic extraction pass, `_jira_feature_enrichment_facts` runs a per-issue LLM call matching each `jira_observed` fact to compiled feature candidates and current-state features. Produces `jira_feature_link_observed` facts (ir.md §2.3); cached via ADR-008; skipped entirely when LLM or Jira is disabled. Failures on individual issues are silently skipped — enrichment is best-effort additive, never load-bearing for the compile.
 
@@ -87,7 +87,7 @@ Each stage: what it reads, what it produces, and the invariants it owns. All sta
   ```
 
   The reference destination is the `knowledge/wiki` branch (ADR-010); every Publisher inherits ADR-010's invariants (loop-safe, destination is publisher-owned and fully regenerable). The canonical home of compiled knowledge remains the database (ADR-001) — publications are renders, never stores.
-- **Progress:** `[embed] n/total <N> entities --changed` is emitted to stderr once per batch of 64 entities. All entities in the batch are by definition dirty or pending (unchanged-hash rows are filtered before batching), so `--changed` is accurate for every line.
+- **Progress:** `[embed] n/total <N> entities --changed (tokens in=X)` is emitted to stderr once per batch of 64 entities, with that batch's actual input-token usage from the provider response. All entities in the batch are by definition dirty or pending (unchanged-hash rows are filtered before batching), so `--changed` is accurate for every line. `CompileSummary` carries the run's totals (`embedding_calls`/`embedding_input_tokens`); `kc reconcile`/`kc compile --pr` print a grand total across every PR/commit the run walked.
 - **Owns:** entity→page mapping; embedding `pending` status on provider outage (degrade to FTS, backfill later — ADR-005).
 - **Failure:** emit failures never roll back Persist — compiled state is already committed and correct; emission is re-runnable from the delta (idempotent by content hash).
 

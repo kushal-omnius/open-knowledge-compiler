@@ -91,6 +91,8 @@ def compile_cmd(full: bool, pr: int | None, emit_only: bool, repo_dir: str, no_l
                 click.echo(f"PR #{pr} already compiled — nothing to do (idempotent)")
             for s in summaries:
                 _echo_summary(s, verbose)
+            if len(summaries) > 1:
+                _echo_token_totals(summaries)
     except CompileError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -114,6 +116,8 @@ def reconcile_cmd(repo_dir: str, verbose: bool) -> None:
         click.echo("up to date — no merged PRs after the watermark")
     for s in summaries:
         _echo_summary(s, verbose)
+    if len(summaries) > 1:
+        _echo_token_totals(summaries)
 
 
 def _gateway(repo_dir):
@@ -145,8 +149,29 @@ def _echo_summary(s, verbose: bool = False) -> None:
         click.echo(f"  wiki: {s.wiki_pages_written} files -> {s.wiki_dir}")
     if s.published_sha:
         click.echo(f"  published: {s.published_sha[:12]} (pushed: {s.pushed})")
+    if s.llm_calls:
+        click.echo(f"  llm: {s.llm_calls} calls  tokens: in={s.llm_input_tokens} out={s.llm_output_tokens}")
+    if s.embedding_calls:
+        click.echo(f"  embeddings: {s.embedding_calls} calls  tokens: in={s.embedding_input_tokens}")
     for w in s.warnings:
         click.echo(f"  warning: {w}")
+
+
+def _echo_token_totals(summaries: list) -> None:
+    """End-of-run grand total across every item a reconcile walked — the number
+    that matters when a run spans many PRs/commits, not just the last one."""
+    llm_calls = sum(s.llm_calls for s in summaries)
+    llm_in = sum(s.llm_input_tokens for s in summaries)
+    llm_out = sum(s.llm_output_tokens for s in summaries)
+    emb_calls = sum(s.embedding_calls for s in summaries)
+    emb_in = sum(s.embedding_input_tokens for s in summaries)
+    if not (llm_calls or emb_calls):
+        return
+    click.echo(f"total across {len(summaries)} run(s):")
+    if llm_calls:
+        click.echo(f"  llm: {llm_calls} calls  tokens: in={llm_in} out={llm_out}")
+    if emb_calls:
+        click.echo(f"  embeddings: {emb_calls} calls  tokens: in={emb_in}")
 
 
 @main.command("verify")

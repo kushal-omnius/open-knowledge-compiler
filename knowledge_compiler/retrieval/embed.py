@@ -22,8 +22,10 @@ _BATCH = 64
 
 def emit_embeddings(session: Session, repo_id: int, embedder, dirty_slugs: set[str],
                     on_progress: Callable[[int, int, str], None] | None = None,
-                    ) -> tuple[int, list[str]]:
-    """Returns (embedded_count, warnings). Commits via the caller's session.
+                    ) -> tuple[int, list[str], dict]:
+    """Returns (embedded_count, warnings, token_summary) where token_summary is
+    {"calls", "input_tokens"} — real spend, one embed() call per batch.
+    Commits via the caller's session.
     on_progress: called (entities_done, total, "embeddings") after each batch."""
     rows = {r.entity_id: r for r in session.execute(
         select(EmbeddingRow).where(EmbeddingRow.repo_id == repo_id,
@@ -43,25 +45,32 @@ def emit_embeddings(session: Session, repo_id: int, embedder, dirty_slugs: set[s
         todo.append((entity, text, text_hash))
 
     embedded = 0
+    calls = 0
+    input_tokens = 0
     for start in range(0, len(todo), _BATCH):
         batch = todo[start:start + _BATCH]
         try:
             vectors = embedder.embed([text for _, text, _ in batch])
+            calls += 1
+            batch_tokens = (getattr(embedder, "last_usage", None) or {}).get("input_tokens", 0)
+            input_tokens += batch_tokens
         except LLMProviderError as exc:
             for entity, _, text_hash in todo[start:]:
                 _upsert(session, rows, repo_id, embedder.model_id, entity, text_hash,
                         vector=None, status="pending")
             session.commit()
             return embedded, [f"embedding provider failed — {len(todo) - start} entities "
-                              f"pending, search degrades to FTS: {exc}"]
+                              f"pending, search degrades to FTS: {exc}"], \
+                   {"calls": calls, "input_tokens": input_tokens}
         for (entity, _, text_hash), vector in zip(batch, vectors):
             _upsert(session, rows, repo_id, embedder.model_id, entity, text_hash,
                     vector=vector, status="current")
             embedded += 1
         if on_progress:
-            on_progress(min(start + _BATCH, len(todo)), len(todo), f"{len(batch)} entities --changed")
+            on_progress(min(start + _BATCH, len(todo)), len(todo),
+                       f"{len(batch)} entities --changed (tokens in={batch_tokens})")
     session.commit()
-    return embedded, []
+    return embedded, [], {"calls": calls, "input_tokens": input_tokens}
 
 
 def _upsert(session: Session, rows: dict, repo_id: int, model_id: str,
