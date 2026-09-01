@@ -12,7 +12,9 @@ authenticated. That fallback is an interactive-developer convenience only —
 there's no non-interactive credential behind the gh CLI's own auth store
 (same reasoning as ADR-021's Jira file-gateway scoping), so CI must keep
 setting the env var explicitly. API base from KC_GITHUB_API (default
-https://api.github.com, override for GHE).
+https://api.github.com, override for GHE) — when overridden, the gh-CLI
+fallback passes `--hostname` so it reads the matching host's credential
+from gh's multi-host auth store instead of gh's default host's token.
 """
 
 from __future__ import annotations
@@ -78,7 +80,13 @@ def _gh_cli_token(hostname: str | None = None) -> str | None:
     already done shouldn't also need a separately-provisioned PAT just to
     unblock `kc reconcile`. Never the primary source: CI has no gh CLI
     session to read, so it must keep setting KC_GITHUB_TOKEN/GITHUB_TOKEN
-    as a secret regardless of this fallback existing."""
+    as a secret regardless of this fallback existing.
+
+    hostname: the KC_GITHUB_API host, passed through to `gh auth token
+    --hostname` for anything other than the default api.github.com — gh
+    stores credentials per host, so calling this without --hostname against
+    a GHE setup would silently return gh's default-host token (or none)
+    instead of the one that actually matches KC_GITHUB_API."""
     try:
         command = ["gh", "auth", "token"]
         if hostname:

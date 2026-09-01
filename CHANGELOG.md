@@ -17,6 +17,16 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`gh` CLI token fallback now targets the right host for GHE**: the fallback added in 1.1.1
+  called `gh auth token` unconditionally, which returns the token for `gh`'s *default* host —
+  silently wrong (or empty) whenever `KC_GITHUB_API` pointed at a GitHub Enterprise instance
+  instead of `api.github.com`. `GitHubGateway` now parses the hostname out of `KC_GITHUB_API`
+  and passes `gh auth token --hostname <host>` whenever it isn't the default, matching how `gh`
+  itself scopes multi-host authentication (`gh auth login --hostname`). No change for the
+  default `api.github.com` case. New test `test_falls_back_to_gh_cli_token_for_ghe_host`.
+
 ## [1.2.0] — 2026-08-26
 
 ### Added
