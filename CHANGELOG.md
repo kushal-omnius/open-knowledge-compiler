@@ -17,6 +17,17 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+- **Real LLM/embedding token usage tracking**: `usage` from every provider's API response
+  (Anthropic/OpenAI/Azure OpenAI/Cloudflare for `[llm]`, OpenAI/Azure OpenAI for `[embeddings]`)
+  was previously discarded, making cost estimates for a compile or reconcile run pure guesswork.
+  `[llm]`/`[embed]` stderr progress lines now show that request's actual token usage; each run's
+  `CompileSummary` carries real totals (`llm_calls`/`llm_input_tokens`/`llm_output_tokens`,
+  `embedding_calls`/`embedding_input_tokens`, cache hits excluded since they cost nothing), printed
+  by `kc compile`/`kc reconcile`; a multi-PR `kc reconcile`/`kc compile --pr` run also prints a
+  grand total across every item walked, not just the last one.
+
 ### Fixed
 
 - **`gh` CLI token fallback now targets the right host for GHE**: the fallback added in 1.1.1

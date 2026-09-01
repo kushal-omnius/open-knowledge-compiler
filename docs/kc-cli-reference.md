@@ -56,7 +56,7 @@ kc compile --pr 142                   # compile one PR incrementally
 kc compile --emit-only                # re-render the wiki only, no new compile
 ```
 
-**Progress** is streamed to stderr (`[llm]` and `[embed]` lines with counts) so long-running stages are no longer silent.
+**Progress** is streamed to stderr (`[llm]` and `[embed]` lines with counts and real token usage per request) so long-running stages are no longer silent. The final summary reports each run's LLM/embedding call and token totals; `kc reconcile`/`kc compile --pr` also print a grand total across every PR/commit walked.
 
 ---
 

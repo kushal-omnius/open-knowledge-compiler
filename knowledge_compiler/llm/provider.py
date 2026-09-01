@@ -30,6 +30,7 @@ class AnthropicProvider:
         self.model_id = model_id
         self._anthropic = anthropic
         self._client = anthropic.Anthropic()
+        self.last_usage: dict[str, int] | None = None  # set by complete(): {"input_tokens", "output_tokens"}
 
     def complete(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         import json
@@ -43,6 +44,8 @@ class AnthropicProvider:
             )
         except self._anthropic.APIError as exc:
             raise LLMProviderError(f"anthropic API error: {exc}") from exc
+        self.last_usage = {"input_tokens": response.usage.input_tokens,
+                           "output_tokens": response.usage.output_tokens}
         if response.stop_reason == "refusal":
             raise LLMProviderError("model refused the extraction request")
         text = next((b.text for b in response.content if b.type == "text"), None)
@@ -68,6 +71,7 @@ class OpenAIProvider:
                 "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
         self.model_id = model_id
         self._openai = openai
+        self.last_usage: dict[str, int] | None = None  # set by complete(): {"input_tokens", "output_tokens"}
         try:
             self._client = openai.OpenAI()  # raises at construction when OPENAI_API_KEY absent
         except openai.OpenAIError as exc:
@@ -86,6 +90,9 @@ class OpenAIProvider:
             )
         except self._openai.OpenAIError as exc:
             raise LLMProviderError(f"openai API error: {exc}") from exc
+        usage = getattr(response, "usage", None)
+        self.last_usage = {"input_tokens": getattr(usage, "prompt_tokens", 0) or 0,
+                           "output_tokens": getattr(usage, "completion_tokens", 0) or 0}
         choice = response.choices[0]
         if choice.finish_reason == "content_filter" or choice.message.refusal:
             raise LLMProviderError("model refused the extraction request")
@@ -125,6 +132,7 @@ class AzureOpenAIProvider(OpenAIProvider):
 
         self.model_id = deployment
         self._openai = openai
+        self.last_usage: dict[str, int] | None = None
         try:
             self._client = openai.AzureOpenAI(
                 azure_endpoint=endpoint, api_key=api_key,
@@ -162,6 +170,7 @@ class CloudflareProvider(OpenAIProvider):
 
         self.model_id = model_id or self.DEFAULT_MODEL
         self._openai = openai
+        self.last_usage: dict[str, int] | None = None
         try:
             self._client = openai.OpenAI(
                 base_url=f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
@@ -185,6 +194,9 @@ class CloudflareProvider(OpenAIProvider):
             )
         except self._openai.OpenAIError as exc:
             raise LLMProviderError(f"cloudflare API error: {exc}") from exc
+        usage = getattr(response, "usage", None)  # not documented as always populated
+        self.last_usage = {"input_tokens": getattr(usage, "prompt_tokens", 0) or 0,
+                           "output_tokens": getattr(usage, "completion_tokens", 0) or 0}
         choice = response.choices[0]
         if choice.finish_reason == "content_filter":
             raise LLMProviderError("model refused the extraction request")
@@ -223,9 +235,13 @@ class FakeLLMProvider:
     responses: dict[str, dict[str, Any]] = field(default_factory=dict)
     model_id: str = "fake-llm"
     calls: int = 0
+    last_usage: dict[str, int] | None = None
 
     def complete(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         self.calls += 1
+        # deterministic stand-in for real API usage — exercises token-accounting
+        # call sites in tests without a real provider.
+        self.last_usage = {"input_tokens": len(prompt) // 4, "output_tokens": 50}
         for needle, output in sorted(self.responses.items()):
             if needle in prompt:
                 return output

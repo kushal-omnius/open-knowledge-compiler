@@ -55,6 +55,8 @@ class LLMSemanticExtractor:
         self.on_progress = on_progress
         self.known_annotations: dict[str, dict[str, str]] = known_annotations or {}
         self.calls_made = 0
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
         self.warnings: list[str] = []
 
     def extract(self, artifacts: list[Artifact]) -> list[Fact]:
@@ -63,26 +65,37 @@ class LLMSemanticExtractor:
                    and a.source_ref not in self.skip_files]
         facts: list[Fact] = []
         for i, artifact in enumerate(eligible, start=1):
-            output, reason = self._complete_cached(artifact)
+            output, reason, usage = self._complete_cached(artifact)
             if output is not None:
                 facts.extend(self._to_facts(artifact, output))
             if self.on_progress and reason == "changed":
-                self.on_progress(i, len(eligible), f"{artifact.source_ref} --changed")
+                self.on_progress(i, len(eligible),
+                                 f"{artifact.source_ref} --changed "
+                                 f"(tokens in={usage['input_tokens']} out={usage['output_tokens']})")
         return facts
+
+    def token_summary(self) -> dict:
+        """Real spend for this run — cache hits cost nothing and aren't counted."""
+        return {"calls": self.calls_made, "input_tokens": self.total_input_tokens,
+                "output_tokens": self.total_output_tokens}
 
     # -- provider + cache ---------------------------------------------------------
 
-    def _complete_cached(self, artifact: Artifact) -> tuple[ExtractionOut | None, str]:
-        """Returns (result, reason) where reason is 'cached' or 'changed'."""
+    def _complete_cached(self, artifact: Artifact) -> tuple[ExtractionOut | None, str, dict]:
+        """Returns (result, reason, usage) where reason is 'cached' or 'changed' and
+        usage is {"input_tokens", "output_tokens"} actually spent on this artifact
+        (zero for a cache hit; summed across validation retries on a miss)."""
         key = cache_key(TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
                         artifact.content_hash)
         cached = self.cache.get(key)
         if cached is not None:
-            return ExtractionOut.model_validate(cached), "cached"  # cache holds validated output only
+            zero = {"input_tokens": 0, "output_tokens": 0}
+            return ExtractionOut.model_validate(cached), "cached", zero  # cache holds validated output only
 
         prompt = build_prompt(artifact.source_ref, self.modules[artifact.source_ref],
                               self.known_symbols.get(artifact.source_ref, []),
                               artifact.content)
+        usage = {"input_tokens": 0, "output_tokens": 0}
         for attempt in (1, 2):  # validation gate: retry once, then skip loudly
             if self.calls_made >= self.max_calls:
                 raise LLMBudgetExceeded(
@@ -90,18 +103,23 @@ class LLMSemanticExtractor:
                     "re-run to resume — completed work is cached")
             self.calls_made += 1
             raw = self.provider.complete(prompt, SCHEMA)
+            call_usage = getattr(self.provider, "last_usage", None) or usage
+            usage = {"input_tokens": usage["input_tokens"] + call_usage.get("input_tokens", 0),
+                     "output_tokens": usage["output_tokens"] + call_usage.get("output_tokens", 0)}
+            self.total_input_tokens += call_usage.get("input_tokens", 0)
+            self.total_output_tokens += call_usage.get("output_tokens", 0)
             try:
                 validated = ExtractionOut.model_validate(raw)
             except ValidationError as exc:
                 if attempt == 2:
                     self.warnings.append(
                         f"LLM output failed validation twice for {artifact.source_ref}: {exc}")
-                    return None, "changed"
+                    return None, "changed", usage
                 continue
             self.cache.put(key, TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
                            validated.model_dump())
-            return validated, "changed"
-        return None, "changed"
+            return validated, "changed", usage
+        return None, "changed", usage
 
     # -- facts ---------------------------------------------------------------------
 

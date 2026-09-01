@@ -122,7 +122,7 @@ kc compile --full --dir /path/to/my-service        # with LLM (requires credenti
 kc compile --full --no-llm --dir /path/to/my-service  # deterministic only, no credentials
 ```
 
-This runs the full pipeline: Git history → code analysis → entity extraction → wiki generation. First run takes a minute or two depending on repo size. During the run, `[llm] i/n <file> --changed` lines stream to stderr for each file that required a real LLM call (cache hits are silent); `[embed] n/total <N> entities --changed` lines stream once per batch of 64 dirty entities. Add `-v` to see a per-slug entity breakdown in the final summary.
+This runs the full pipeline: Git history → code analysis → entity extraction → wiki generation. First run takes a minute or two depending on repo size. During the run, `[llm] i/n <file> --changed (tokens in=X out=Y)` lines stream to stderr for each file that required a real LLM call (cache hits are silent); `[embed] n/total <N> entities --changed (tokens in=X)` lines stream once per batch of 64 dirty entities, each with that request's actual token usage. The final summary reports each run's real LLM/embedding call and token totals (`kc reconcile`/`kc compile --pr` also print a grand total across every PR/commit walked). Add `-v` to see a per-slug entity breakdown in the final summary.
 
 A run with `--no-llm` is marked `degraded` — it produces all structural entities (Component, API, TestCoverage, PullRequest) but skips Feature, BusinessRule, and Risk extraction. Previously extracted semantic entities are never removed by a degraded run.
 

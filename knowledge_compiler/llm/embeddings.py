@@ -29,6 +29,7 @@ class OpenAIEmbedder:
                 "openai SDK not installed — pip install 'open-knowledge-compiler[llm-openai]'") from exc
         self.model_id = model_id
         self._openai = openai
+        self.last_usage: dict[str, int] | None = None  # set by embed(): {"input_tokens"}
         try:
             self._client = openai.OpenAI()
         except openai.OpenAIError as exc:
@@ -39,6 +40,8 @@ class OpenAIEmbedder:
             response = self._client.embeddings.create(model=self.model_id, input=texts)
         except self._openai.OpenAIError as exc:
             raise LLMProviderError(f"openai embeddings error: {exc}") from exc
+        usage = getattr(response, "usage", None)
+        self.last_usage = {"input_tokens": getattr(usage, "prompt_tokens", 0) or 0}
         return [item.embedding for item in sorted(response.data, key=lambda d: d.index)]
 
 
@@ -64,6 +67,7 @@ class AzureOpenAIEmbedder(OpenAIEmbedder):
                 "deployment ([embeddings] model or OPENAI_AZURE_EMBEDDING_DEPLOYMENT)")
         self.model_id = deployment
         self._openai = openai
+        self.last_usage: dict[str, int] | None = None
         try:
             self._client = openai.AzureOpenAI(
                 azure_endpoint=endpoint, api_key=api_key,
@@ -80,9 +84,11 @@ class FakeEmbedder:
     model_id: str = "fake-embed"
     dim: int = 8
     calls: int = 0  # texts embedded, for cache/skip assertions in tests
+    last_usage: dict[str, int] | None = None
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         self.calls += len(texts)
+        self.last_usage = {"input_tokens": sum(len(t) // 4 for t in texts)}
         vectors = []
         for text in texts:
             digest = hashlib.sha256(text.encode("utf-8")).digest()

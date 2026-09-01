@@ -90,6 +90,11 @@ class CompileSummary:
     wiki_pages_written: int = 0
     published_sha: str | None = None
     pushed: bool = False
+    llm_calls: int = 0
+    llm_input_tokens: int = 0
+    llm_output_tokens: int = 0
+    embedding_calls: int = 0
+    embedding_input_tokens: int = 0
 
 
 def read_config(repo_dir: Path) -> dict:
@@ -393,7 +398,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         run.files_parsed = extract_stats["files_parsed"]
         run.files_failed = extract_stats["files_failed"]
         run.failed_files = extract_stats["failed_files"]
-        llm_ran, llm_warnings = _extract_semantic(session, ctx, artifacts, facts)
+        llm_ran, llm_warnings, llm_tokens = _extract_semantic(session, ctx, artifacts, facts)
 
         # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
         # _extract_semantic so feature candidates are in `facts`. Load current
@@ -441,6 +446,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         dirty=len(dirty), warnings=parse_warnings + list(candidate.warnings) + llm_warnings,
         entity_changes=list(delta.entity_changes),
         pr_number=pr.number if pr else None,
+        llm_calls=llm_tokens["calls"], llm_input_tokens=llm_tokens["input_tokens"],
+        llm_output_tokens=llm_tokens["output_tokens"],
     )
 
     # Emit + Publish (pipeline.md §3.6): never roll back Persist; failures are warnings.
@@ -463,9 +470,11 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
                 embedder = ctx.get("embedder") or build_embedder(emb_cfg)
                 progress = ctx.get("progress")
                 on_progress = (lambda i, n, ref: progress("embed", i, n, ref)) if progress else None
-                _, emb_warnings = emit_embeddings(session, repo.id, embedder, dirty,
-                                                  on_progress=on_progress)
+                _, emb_warnings, emb_tokens = emit_embeddings(session, repo.id, embedder, dirty,
+                                                              on_progress=on_progress)
                 summary.warnings.extend(emb_warnings)
+                summary.embedding_calls = emb_tokens["calls"]
+                summary.embedding_input_tokens = emb_tokens["input_tokens"]
             except LLMProviderError as exc:
                 summary.warnings.append(f"embeddings unavailable — FTS-only retrieval: {exc}")
         except Exception as exc:  # noqa: BLE001 — same contract as emission
@@ -497,14 +506,20 @@ def _llm_enabled(ctx: dict) -> bool:
     return _llm_configured(ctx) and not ctx.get("no_llm")
 
 
+_ZERO_LLM_TOKENS = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
+
+
 def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
-                      facts: list[Fact]) -> tuple[bool, list[str]]:
+                      facts: list[Fact]) -> tuple[bool, list[str], dict]:
     """Run LLM extraction if configured (pipeline.md §6.1 semantics).
 
-    Returns (llm_ran, warnings). Provider failure degrades the compile (warning,
-    deterministic results kept); budget exhaustion fails the run resumably."""
+    Returns (llm_ran, warnings, token_summary) where token_summary is
+    {"calls", "input_tokens", "output_tokens"} — real spend (cache hits excluded).
+    Provider failure degrades the compile (warning, deterministic results kept),
+    reporting whatever was actually spent before the failure; budget exhaustion
+    fails the run resumably."""
     if not _llm_enabled(ctx):
-        return False, []
+        return False, [], dict(_ZERO_LLM_TOKENS)
 
     from knowledge_compiler.extractors.annotation_parser import parse_external_keys
     from knowledge_compiler.extractors.llm_extractor import (
@@ -514,6 +529,7 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
     from knowledge_compiler.llm.provider import LLMProviderError, build_provider
 
     llm_cfg = ctx["config"].get("llm", {})
+    extractor = None
     try:
         provider = ctx.get("llm_provider") or build_provider(llm_cfg)
         modules = {f.payload["file"]: f.payload["path"]
@@ -542,11 +558,12 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
             known_symbols=symbols, modules=modules, skip_files=skip,
             on_progress=on_progress, known_annotations=annotations)
         facts.extend(extractor.extract(artifacts))
-        return True, list(extractor.warnings)
+        return True, list(extractor.warnings), extractor.token_summary()
     except LLMBudgetExceeded as exc:
         raise CompileError(str(exc)) from exc  # failed-resumable (pipeline.md §6.2)
     except LLMProviderError as exc:
-        return False, [f"LLM provider unavailable — compiled degraded (--no-llm semantics): {exc}"]
+        tokens = extractor.token_summary() if extractor is not None else dict(_ZERO_LLM_TOKENS)
+        return False, [f"LLM provider unavailable — compiled degraded (--no-llm semantics): {exc}"], tokens
 
 
 _ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
