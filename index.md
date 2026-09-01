@@ -6,7 +6,7 @@ okf_version: "0.2"
 
 # knowledge-compiler — engineering knowledge
 
-Repo: `knowledge-compiler` · Compile run: 3739 · Commit: `717b33ad4fa7`
+Repo: `knowledge-compiler` · Compile run: 3740 · Commit: `601d2381ae16`
 
 Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log.md)
 
@@ -85,7 +85,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [tests.test_verify](component/tests-test-verify.md)
 - [tests.test_wiki_emitter](component/tests-test-wiki-emitter.md)
 
-## Features (79)
+## Features (81)
 
 - [Add OKF Spec Version Column](feature/add-okf-spec-version-column.md)
 - [Artifact Management](feature/artifact-storage.md)
@@ -96,7 +96,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Collector Protocol](feature/collector-protocol.md)
 - [Commit Timestamp Addition](feature/commit-timestamp-addition.md)
 - [Compile Command](feature/compile-command.md)
-- [Full Compile](feature/compile-process-management.md)
+- [Compile Full](feature/compile-process-management.md)
 - [Compile Run Tracking](feature/compile-run-and-repository-recording.md)
 - [Compute Diff](feature/compute-state-delta-between-candidate-and-current.md)
 - [Embedding Configuration](feature/config-driven-embedder-factory.md)
@@ -109,6 +109,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Embedding Management](feature/embedding-management.md)
 - [Embedding Providers](feature/embedding-providers-2.md)
 - [Vector Extension Creation](feature/embeddings-schema-migration.md)
+- [Emit Wiki](feature/emit-wiki.md)
 - [Emitter Protocol](feature/emitter-protocol.md)
 - [Entity Representation](feature/entity-representation.md)
 - [Entity Resolution](feature/entity-resolution.md)
@@ -121,13 +122,14 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Git Collector](feature/git-collector.md)
 - [Hybrid Search](feature/hybrid-search-with-reciprocal-rank-fusion.md)
 - [In-Memory Fake Gateway](feature/in-memory-fake-gateway.md)
-- [Incremental Reconcile](feature/incremental-compilation.md)
+- [Reconcile Changes](feature/incremental-compilation.md)
 - [Inspection Command](feature/inspection-command.md)
 - [JavaScript Language Analysis](feature/javascript-language-analysis.md)
 - [Jira Issue Retrieval](feature/jira-issue-collector.md)
 - [Coverage Analysis](feature/journey-coverage-validation.md)
 - [Keyword Search](feature/keyword-full-text-search-fts.md)
 - [Knowledge Compiler](feature/knowledge-compiler-cli.md)
+- [Knowledge Compiler Versioning](feature/knowledge-compiler-versioning.md)
 - [LanguageAnalyzer Protocol](feature/languageanalyzer-protocol.md)
 - [GitHub Commit Listing](feature/list-commits.md)
 - [GitHub Merged PR Listing](feature/list-merged-pull-requests.md)
@@ -165,7 +167,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Test Validation Command](feature/test-validation-command.md)
 - [TypeScript Analysis](feature/typescript-fact-extractor.md)
 - [Verification Command](feature/verification-command.md)
-- [Verification of Compile](feature/verification-of-compilation-state.md)
+- [Verify Compilation State](feature/verification-of-compilation-state.md)
 
 ## Business Rules (5)
 
@@ -175,12 +177,14 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Identity-matching thresholds](business-rule/identity-matching-threshold-for-names.md)
 - [Removal Evidence Rule](business-rule/relationship-removal-authority-rule.md)
 
-## Risks (47)
+## Risks (49)
 
 - [Cache File Risk](risk/cache-file-read-failure.md)
+- [Configuration File Missing](risk/configuration-file-missing.md)
 - [Unbounded Input Handling](risk/dangling-pages.md)
 - [Data Handling Risk](risk/data-handling-risk.md)
 - [Potential Data Loss on Downgrade](risk/data-loss-on-downgrade.md)
+- [Database Connection Failure](risk/database-connection-failure.md)
 - [Error Handling on Connection Failure](risk/database-connection-failure-handling.md)
 - [Database Connection Risk](risk/database-connection-risk.md)
 - [Missing Error Handling](risk/database-errors-are-not-caught-locally.md)
@@ -197,7 +201,7 @@ Compiled engineering knowledge. [Recent changes](recent-changes.md) · [Log](log
 - [Failure to handle JSONC parsing errors](risk/insufficient-handling-of-non-conformant-artifacts.md)
 - [Not Handling GitHub API Rate Limits](risk/lack-of-error-handling-on-api-requests.md)
 - [Uncaught API Errors](risk/malformed-model-output-causes-unhandled-json-error.md)
-- [Failure Handling in Compile Functions](risk/missing-configuration-files.md)
+- [Failed Compile Handling](risk/missing-configuration-files.md)
 - [Missing Coverage Block](risk/missing-coverage-block.md)
 - [Environment Dependency Risk](risk/missing-environment-variables.md)
 - [Configuration Injection Risk](risk/missing-error-handling.md)

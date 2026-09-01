@@ -8,8 +8,27 @@ generated: true
 
 # Recent changes (last compile)
 
-## Compile 3739 — `717b33ad4fa7`
+## Compile 3740 — `601d2381ae16`
 
-- **added** `pull-request/15`
+- **changed** [component/knowledge-compiler-compiler-run](component/knowledge-compiler-compiler-run.md)
+- **changed** [component/tests-test-qa-grounding](component/tests-test-qa-grounding.md)
+- **changed** [feature/compile-process-management](feature/compile-process-management.md)
+- **added** [feature/emit-wiki](feature/emit-wiki.md)
+- **changed** [feature/incremental-compilation](feature/incremental-compilation.md)
+- **added** [feature/knowledge-compiler-versioning](feature/knowledge-compiler-versioning.md)
+- **changed** [feature/verification-of-compilation-state](feature/verification-of-compilation-state.md)
+- **added** `pull-request/16`
+- **added** [risk/configuration-file-missing](risk/configuration-file-missing.md)
+- **added** [risk/database-connection-failure](risk/database-connection-failure.md)
+- **changed** [risk/missing-configuration-files](risk/missing-configuration-files.md)
+- **removed** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component`
+- **changed** `wiki-page/feature-compile-process-management`
+- **added** `wiki-page/feature-emit-wiki`
+- **changed** `wiki-page/feature-incremental-compilation`
+- **added** `wiki-page/feature-knowledge-compiler-versioning`
+- **changed** `wiki-page/feature-verification-of-compilation-state`
+- **added** `wiki-page/risk-configuration-file-missing`
+- **added** `wiki-page/risk-database-connection-failure`
+- **changed** `wiki-page/risk-missing-configuration-files`
 
 Full chronological history: [log.md](log.md).

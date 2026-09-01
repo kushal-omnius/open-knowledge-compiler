@@ -4,6 +4,27 @@
 
 ## 2026-09-01
 
+- **Update** `component/knowledge-compiler-compiler-run` (component) — compile run 3740 (`601d2381ae16`).
+- **Update** `component/tests-test-qa-grounding` (component) — compile run 3740 (`601d2381ae16`).
+- **Update** `feature/compile-process-management` (feature) — compile run 3740 (`601d2381ae16`).
+- **Creation** `feature/emit-wiki` (feature) — compile run 3740 (`601d2381ae16`).
+- **Update** `feature/incremental-compilation` (feature) — compile run 3740 (`601d2381ae16`).
+- **Creation** `feature/knowledge-compiler-versioning` (feature) — compile run 3740 (`601d2381ae16`).
+- **Update** `feature/verification-of-compilation-state` (feature) — compile run 3740 (`601d2381ae16`).
+- **Creation** `pull-request/16` (pull_request) — compile run 3740 (`601d2381ae16`).
+- **Creation** `risk/configuration-file-missing` (risk) — compile run 3740 (`601d2381ae16`).
+- **Creation** `risk/database-connection-failure` (risk) — compile run 3740 (`601d2381ae16`).
+- **Update** `risk/missing-configuration-files` (risk) — compile run 3740 (`601d2381ae16`).
+- **Deprecation** `test-coverage/tests-test-qa-grounding-py-test-plan-surfaces-transition-gap-for-a-modeled-component` (test_coverage) — compile run 3740 (`601d2381ae16`).
+- **Update** `wiki-page/feature-compile-process-management` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Creation** `wiki-page/feature-emit-wiki` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Update** `wiki-page/feature-incremental-compilation` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Creation** `wiki-page/feature-knowledge-compiler-versioning` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Update** `wiki-page/feature-verification-of-compilation-state` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Creation** `wiki-page/risk-configuration-file-missing` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Creation** `wiki-page/risk-database-connection-failure` (wiki_page) — compile run 3740 (`601d2381ae16`).
+- **Update** `wiki-page/risk-missing-configuration-files` (wiki_page) — compile run 3740 (`601d2381ae16`).
+
 - **Creation** `pull-request/15` (pull_request) — compile run 3739 (`717b33ad4fa7`).
 
 No knowledge changes — compile run 3738 (`77dddb612ef1`).
@@ -444,7 +465,3 @@ No knowledge changes — compile run 2446 (`601d2381ae16`).
 - **Update** `wiki-page/risk-token-exposure-risk` (wiki_page) — compile run 2348 (`601d2381ae16`).
 - **Deprecation** `wiki-page/risk-unvalidated-input-for-hash-function` (wiki_page) — compile run 2348 (`601d2381ae16`).
 - **Update** `wiki-page/risk-validation-failure` (wiki_page) — compile run 2348 (`601d2381ae16`).
-
-## 2026-08-18
-
-No knowledge changes — compile run 2200 (`093a5df8dd47`).
