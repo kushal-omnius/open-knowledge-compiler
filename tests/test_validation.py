@@ -88,13 +88,13 @@ def _plan(session, rid):
     return plan
 
 
-def _write_test(repo: Path, name: str, covers: list[str]) -> Path:
+def _write_test(repo: Path, name: str, covers: list[str], body: str | None = None) -> Path:
     header = "\n".join(f"  - {slug}" for slug in covers)
-    body = f'"""\nkc-covers:\n{header}\n"""\n\ndef test_placeholder():\n    assert True\n'
+    default_body = f'"""\nkc-covers:\n{header}\n"""\n\ndef test_placeholder():\n    assert True\n'
     path = repo / "tests"
     path.mkdir(exist_ok=True)
     f = path / name
-    f.write_text(body, encoding="utf-8")
+    f.write_text(body if body is not None else default_body, encoding="utf-8")
     return f
 
 
@@ -178,6 +178,110 @@ def test_perfect_header_scores_100(gapped):
     assert report.precision == pytest.approx(1.0)
     assert report.recall == pytest.approx(1.0)
     assert report.score_pct == 100.0
+
+
+def test_perfect_citation_but_zero_assertions_scores_zero(gapped):
+    """The anti-theater proof (PLAN-qa-agent-substrate.md Appendix A): a test
+    can cite every citable slug perfectly and still score 0.0% if it
+    contains no assertions at all -- targeting alone can no longer carry
+    the headline score."""
+    from knowledge_compiler.validation import citable_targets_for, score_test
+
+    repo, slug = gapped
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        plan = _plan(session, rid)
+        citable = sorted({s for rec in plan["test_recommendations"] for s in citable_targets_for(rec)})
+
+        header = "\n".join(f"  - {s}" for s in citable)
+        empty_body = f'"""\nkc-covers:\n{header}\n"""\n\ndef test_placeholder():\n    pass\n'
+        f = _write_test(repo, "test_no_assertions.py", citable, body=empty_body)
+        report = score_test(session, rid, f, "component/billing-rules")
+    assert report.precision == pytest.approx(1.0)
+    assert report.recall == pytest.approx(1.0)
+    assert report.targeting_pct == 100.0  # targeting tier is still perfect
+    assert report.has_assertions is False
+    assert report.score_pct == 0.0  # but the composite is not
+
+
+def test_score_version_present(gapped):
+    from knowledge_compiler.validation import SCORE_VERSION, score_test
+
+    repo, slug = gapped
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        _plan(session, rid)
+        f = _write_test(repo, "test_version.py", ["component/billing-rules"])
+        report = score_test(session, rid, f, "component/billing-rules")
+    assert report.score_version == SCORE_VERSION
+
+
+def test_mutation_unavailable_does_not_penalize(gapped):
+    """No [mutation] data is configured on the `gapped` fixture, so
+    mutation_kill_rate must resolve to None and never lower the score below
+    what targeting + assertion-presence alone would produce (ADR-012's
+    informational-not-gating posture, applied here too)."""
+    from knowledge_compiler.validation import citable_targets_for, score_test
+
+    repo, slug = gapped
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        plan = _plan(session, rid)
+        citable = sorted({s for rec in plan["test_recommendations"] for s in citable_targets_for(rec)})
+        f = _write_test(repo, "test_no_mutation_data.py", citable)
+        report = score_test(session, rid, f, "component/billing-rules")
+    assert report.mutation_kill_rate is None
+    assert report.mutation_source_component is None
+    assert report.score_pct == report.targeting_pct == 100.0
+
+
+def test_resolve_mutation_kill_rate_reads_coverage_detail():
+    """Pure unit test of the resolution logic (PLAN-qa-agent-substrate.md
+    Tier 0 / B2's redesign): reads test_plan's own coverage_detail, no new
+    query. No DB needed -- the plan dict is hand-built to the exact shape
+    queries.test_plan/coverage_for already produce."""
+    from knowledge_compiler.validation import _resolve_mutation_kill_rate
+
+    plan = {
+        "test_recommendations": [
+            {"target_kind": "api", "component": "component/x",
+             "targets": [{"slug": "api/get-x"}]},
+            {"target_kind": "symbols", "component": "component/y", "targets": []},
+        ],
+        "coverage_detail": {
+            "component/x": {"mutation_kill_rate": 0.9},
+            "component/y": {"mutation_kill_rate": 0.3},
+        },
+    }
+
+    # single api-kind claim resolves to its owning component's rate
+    rate, source = _resolve_mutation_kill_rate(plan, ["api/get-x"])
+    assert rate == 0.9
+    assert source == "component/x"
+
+    # multiple claims take the worst (minimum) rate among resolved components
+    rate, source = _resolve_mutation_kill_rate(plan, ["api/get-x", "component/y"])
+    assert rate == 0.3
+    assert source == "component/y"
+
+    # a claimed slug outside this for_entity's coverage gaps resolves to nothing
+    rate, source = _resolve_mutation_kill_rate(plan, ["component/unrelated"])
+    assert rate is None
+    assert source is None
+
+
+def test_resolve_mutation_kill_rate_none_when_not_compiled():
+    from knowledge_compiler.validation import _resolve_mutation_kill_rate
+
+    plan = {
+        "test_recommendations": [
+            {"target_kind": "symbols", "component": "component/y", "targets": []},
+        ],
+        "coverage_detail": {"component/y": {"mutation_kill_rate": None}},
+    }
+    rate, source = _resolve_mutation_kill_rate(plan, ["component/y"])
+    assert rate is None
+    assert source is None
 
 
 def test_cli_validate_test_exit_codes(gapped):

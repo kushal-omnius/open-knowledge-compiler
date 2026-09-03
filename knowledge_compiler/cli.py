@@ -315,7 +315,7 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
         raise click.ClickException(
             f"entity '{for_entity}' not found — pass the same slug `test_plan` was run against")
 
-    click.echo(f"kc-covers: {report.test_file}")
+    click.echo(f"kc-covers: {report.test_file}  (score v{report.score_version})")
     click.echo(f"  for entity: {report.for_entity}")
     click.echo()
     if not report.header_found:
@@ -331,6 +331,7 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
     for check in report.existence:
         click.echo(f"  {check.slug:<28} {'OK' if check.exists else 'MISSING'}")
     click.echo()
+    click.echo("--- targeting tier: did it cite the right things? ---")
     click.echo(f"precision/recall vs test_plan({report.for_entity}):")
     click.echo(f"  citable recommended:  {', '.join(report.citable_recommended) or '(none)'}")
     click.echo(f"  precision: {report.precision * 100:.1f}%")
@@ -345,13 +346,80 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
                    f"  [{len(report.symbols_kind_citable)} symbols-kind target(s) require unit tests]")
     if report.extraneous_claims:
         click.echo(f"  extraneous claims (exist, not recommended): {', '.join(report.extraneous_claims)}")
+    click.echo(f"  targeting score: {report.targeting_pct}%")
     click.echo()
-    click.echo("mutation data:     not checked here -- see mutation-test.yaml for the execution-based signal")
+    click.echo("--- verification tier: did it actually assert anything? ---")
+    click.echo(f"  assertions present: {'YES' if report.has_assertions else 'NO -- hard 0x multiplier'}")
+    if report.mutation_kill_rate is not None:
+        click.echo(f"  mutation kill rate: {report.mutation_kill_rate * 100:.1f}% "
+                   f"(compiled signal from {report.mutation_source_component}, via [mutation]/"
+                   f"collectors/mutation.py -- see coverage_for's low_mutation_kill)")
+    else:
+        click.echo("  mutation kill rate: not available -- no [mutation] data compiled for the "
+                   "claimed slugs' owning component(s) (informational only, never gates exit code)")
     click.echo()
-    click.echo(f"SCORE: {report.score_pct}%")
+    mutation_factor = (f"{report.mutation_kill_rate:.2f}" if report.mutation_kill_rate is not None
+                       else "(unavailable=1.0)")
+    click.echo(f"SCORE: {report.score_pct}%  (targeting {report.targeting_pct}% "
+               f"x assertions-present {'1.0' if report.has_assertions else '0.0'} "
+               f"x mutation {mutation_factor})")
 
     if report.nonexistent_claims:
         ctx.exit(1)
+
+
+@main.command("mutation-scope")
+@click.argument("slug")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+def mutation_scope_cmd(slug: str, repo_dir: str) -> None:
+    """Print an anchor-derived mutmut `only_mutate` scope for an entity.
+
+    Complements, never replaces, the compiled `[mutation]` signal
+    `collectors/mutation.py` already feeds into `test_plan`/`coverage_for`:
+    that collector consumes a pre-existing kill-rate JSON at module
+    granularity; this command helps produce a more precisely scoped mutmut
+    run in the first place, from the entity's own compiled anchors (see
+    knowledge_compiler/validation/mutation.py's module docstring for the
+    file-vs-line-span scoping limitation).
+    """
+    from pathlib import Path
+
+    from sqlalchemy.orm import Session
+
+    from knowledge_compiler.compiler.run import CompileError, read_config
+    from knowledge_compiler.ir import Anchor
+    from knowledge_compiler.mcp.queries import get_entity, resolve_repo
+    from knowledge_compiler.storage.db import DatabaseUnavailableError, check_connection, make_engine
+    from knowledge_compiler.validation.mutation import anchor_scope
+
+    try:
+        config = read_config(Path(repo_dir))
+    except CompileError as exc:
+        raise click.ClickException(str(exc)) from exc
+    repo_slug = config["repository"]["slug"]
+
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    with Session(engine) as session:
+        try:
+            repo = resolve_repo(session, repo_slug)
+        except LookupError as exc:
+            raise click.ClickException(str(exc)) from exc
+        entity = get_entity(session, repo.id, slug)
+
+    if entity is None:
+        raise click.ClickException(f"entity '{slug}' not found")
+    anchors = [Anchor(**a) if isinstance(a, dict) else a for a in entity.get("anchors", [])]
+    if not anchors:
+        raise click.ClickException(f"entity '{slug}' has no anchors to scope mutation to")
+
+    scope = anchor_scope(anchors)
+    click.echo(scope.only_mutate)
 
 
 @main.command("validate-okf")
