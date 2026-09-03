@@ -19,6 +19,31 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Added
 
+- **`kc validate-test` verification tier**: alongside the existing targeting
+  tier (citation precision/recall), a new tier checks whether the test
+  actually asserts anything — assertion-presence (always checked,
+  synchronous, AST-based) and, when available, the compiled
+  `mutation_kill_rate` signal `[mutation]`/`collectors/mutation.py` already
+  attaches to Component payloads (read from `test_plan`'s own
+  `coverage_detail`, not a new query or CLI flag). `score_pct` is now the
+  product of targeting × assertion-presence × mutation (each defaulting to
+  a 1.0 multiplier when unchecked/unavailable), not an average, so a
+  perfectly-cited test with zero assertions now scores 0.0% instead of
+  hiding behind a perfect citation score. New `targeting_pct`,
+  `mutation_kill_rate`, `mutation_source_component`, and `score_version`
+  fields on `ValidationReport`.
+- **`kc mutation-scope <slug>`**: prints an anchor-derived mutmut
+  `only_mutate` scope for a compiled entity. Complements, not replaces,
+  the existing `[mutation]` collector — that collector consumes a
+  pre-existing kill-rate JSON at module granularity; this command helps
+  produce a more precisely scoped one in the first place, from the
+  entity's own compiled anchors.
+- `knowledge_compiler.validation` is now a package
+  (`knowledge_compiler/validation/`), with a new `validation/mutation.py`
+  submodule for anchor-scoped mutmut targeting. Existing
+  `from knowledge_compiler.validation import ...` call sites are
+  unaffected — the package re-exports the same names.
+
 - **Per-item reconcile progress**: `[item] i/n PR #<number> merged <date>` / `[item] i/n commit
   <short-sha> @ <date>` now streams to stderr right before each item in a `kc reconcile`/
   `kc compile --pr` run starts — before Collect, so it fires even for an item with no
