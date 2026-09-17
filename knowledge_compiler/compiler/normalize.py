@@ -219,14 +219,28 @@ class _Normalizer:
     def _user_journeys(self) -> None:
         """ADR-017 (items 3+4): V1 scope is deterministic-only — kc.toml
         `[[journeys]]` names an ordered step list of already-compiled entity
-        slugs (component/api/business_rule/feature/risk — anything already in
-        self.entities). Natural key = slugified name, same pattern as
-        pull_request/jira_story. Runs after P3/P4 (not inside P2) precisely
-        so LLM-derived step slugs (business_rule/feature/risk) are already
-        minted and resolvable, not just deterministic ones. A step slug that
-        doesn't resolve to anything compiled this run is dropped with a
-        warning (DP8: visible, never silently merged) rather than failing
-        the whole journey or the compile.
+        slugs (component/api/business_rule/feature/risk — anything already
+        compiled, this run or a prior one). Natural key = slugified name,
+        same pattern as pull_request/jira_story. Runs after P3/P4 (not
+        inside P2) precisely so LLM-derived step slugs (business_rule/
+        feature/risk) are already minted and resolvable, not just
+        deterministic ones. A step slug that doesn't resolve to any
+        compiled entity at all is dropped with a warning (DP8: visible,
+        never silently merged) rather than failing the whole journey or
+        the compile.
+
+        Resolve against self.entities (this run) *and* self.current.entities
+        (everything already persisted) — bug found dogfooding repoA: an
+        incremental `reconcile` only extracts facts for files that changed
+        in that pass, so self.entities alone is that run's slice, never the
+        full accumulated state. Checking self.entities only meant a journey
+        step whose defining file simply wasn't touched this pass — not
+        actually removed, still real and queryable — was misreported as
+        unresolved on every incremental compile that didn't happen to touch
+        every step's file simultaneously. Other Normalize methods already
+        consult self.current.entities for this same cross-run-continuity
+        reason (e.g. the identity-cascade matching pool, _project()); this
+        method just hadn't.
 
         Fail-closed status (dogfood-review finding): a dropped step used to be
         visible only in the transient compile-run warning list — the journey
@@ -234,19 +248,20 @@ class _Normalizer:
         chain could silently pass as a complete one downstream (journey_coverage,
         test_plan, the wiki page). `status` + `unresolved_steps` make that
         distinction durable on the entity, not just at compile time."""
+        current_slugs = {e.slug for e in self.current.entities}
         for f in self._facts_of("user_journey_observed"):
             name = f.payload["name"]
             declared_steps = f.payload.get("steps", [])
             resolved_steps = []
             unresolved_steps = []
             for step_slug in declared_steps:
-                if step_slug in self.entities:
+                if step_slug in self.entities or step_slug in current_slugs:
                     resolved_steps.append(step_slug)
                 else:
                     unresolved_steps.append(step_slug)
                     self.warnings.append(
                         f"user_journey '{name}': step slug '{step_slug}' does not "
-                        f"resolve to any compiled entity this run — dropped")
+                        f"resolve to any compiled entity — dropped")
             if not unresolved_steps:
                 status = "complete"
             elif resolved_steps:

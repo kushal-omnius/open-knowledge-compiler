@@ -34,6 +34,21 @@ so it works even where a raw `git push` of a tag ref is restricted).
   quietly didn't. Missing keys still aren't an error (unchanged "absence is data, not an outage"
   contract) — they're just visible now.
 
+### Fixed
+
+- **`user_journey` steps no longer spuriously drop on incremental compiles**: found dogfooding
+  frida — a genuinely fresh `kc reconcile` dropped every declared step of a journey, even though
+  all of them were real, queryable compiled entities. Root cause: `_user_journeys()` resolved each
+  step against `self.entities` only, which is Normalize's per-run slice (only what this pass's
+  facts touched) — an incremental `reconcile` only extracts facts for files that changed in that
+  pass, so a step whose defining file simply wasn't touched this time looked identical to one that
+  was actually removed, and got dropped (with the ADR-017 fail-closed `status`/`unresolved_steps`
+  field correctly, but misleadingly, reporting the journey as `invalid`). Steps now also resolve
+  against `self.current.entities` (the full accumulated state), matching how other Normalize
+  methods already handle cross-run continuity (e.g. the identity-cascade matching pool, `_project()`).
+  New regression test reproduces the bug end-to-end (full compile, then an incremental reconcile
+  touching an unrelated file, asserting the journey stays `complete`) and fails without the fix.
+
 ## [1.3.1] — 2026-09-01
 
 ### Added

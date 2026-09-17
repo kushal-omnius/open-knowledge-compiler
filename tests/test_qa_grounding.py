@@ -516,6 +516,50 @@ def test_journey_step_unresolvable_slug_is_dropped_with_warning(repo):
     assert journey["payload"]["steps"] == ["component/billing-rules"]
 
 
+def test_journey_step_stays_resolved_on_incremental_compile_that_skips_its_file(repo):
+    """Dogfooding repoA: a genuinely fresh `kc reconcile` still dropped every
+    journey step, because incremental compiles only extract facts for files
+    that changed in that pass — self.entities was that run's slice, not the
+    full accumulated state, so a step whose file simply wasn't touched this
+    time looked identical to one that was actually removed. Reproduces the
+    bug directly: full compile establishes both steps, then an incremental
+    reconcile that only touches a third, unrelated file must NOT re-drop
+    either of them."""
+    import subprocess
+    from datetime import datetime, timedelta, timezone
+
+    from knowledge_compiler.collectors.forge import CommitInfo, FakeForge
+    from knowledge_compiler.compiler.run import compile_full, reconcile
+    from knowledge_compiler.mcp import queries
+
+    repo_dir, slug = repo
+    _set_journeys(repo_dir, ["component/billing-rules", "component/billing-pricing"])
+    compile_full(repo_dir, llm_provider=_provider())
+
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        journey = queries.get_entity(session, rid, "user-journey/apply-discount-at-checkout")
+    assert journey["payload"]["status"] == "complete"
+
+    # Incremental compile touching neither billing/rules.py nor billing/pricing.py.
+    (repo_dir / "billing" / "unrelated.py").write_text(
+        "def noop():\n    return None\n", encoding="utf-8")
+    git(repo_dir, "add", "billing/unrelated.py")
+    git(repo_dir, "commit", "-qm", "add unrelated file")
+    sha = subprocess.run(["git", "-C", str(repo_dir), "rev-parse", "HEAD"],
+                        check=True, capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    commit = CommitInfo(sha=sha, timestamp=datetime(2026, 8, 9, 10, 1, tzinfo=timezone.utc),
+                        message="add unrelated file", files=("billing/unrelated.py",))
+    reconcile(repo_dir, FakeForge(commits=[commit]), llm_provider=_provider())
+
+    with Session(kcdb.make_engine()) as session:
+        rid = repo_id_of(session, slug)
+        journey = queries.get_entity(session, rid, "user-journey/apply-discount-at-checkout")
+    assert journey["payload"]["status"] == "complete"
+    assert journey["payload"]["steps"] == ["component/billing-rules", "component/billing-pricing"]
+    assert journey["payload"]["unresolved_steps"] == []
+
+
 # --- ADR-023: state_model / transition_gap --------------------------------------
 
 
