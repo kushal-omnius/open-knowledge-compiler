@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.3.2] — 2026-09-17
+
 ### Added
 
 - **`kc validate-test` verification tier**: alongside the existing targeting
