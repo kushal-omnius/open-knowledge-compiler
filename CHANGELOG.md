@@ -37,7 +37,7 @@ so it works even where a raw `git push` of a tag ref is restricted).
 ### Fixed
 
 - **`user_journey` steps no longer spuriously drop on incremental compiles**: found dogfooding
-  frida — a genuinely fresh `kc reconcile` dropped every declared step of a journey, even though
+  repoA — a genuinely fresh `kc reconcile` dropped every declared step of a journey, even though
   all of them were real, queryable compiled entities. Root cause: `_user_journeys()` resolved each
   step against `self.entities` only, which is Normalize's per-run slice (only what this pass's
   facts touched) — an incremental `reconcile` only extracts facts for files that changed in that
