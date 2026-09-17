@@ -27,7 +27,7 @@ docker compose up -d                 # Postgres 16 + pgvector (user: kc / kc, db
 kc --help                            # CLI (init/compile/reconcile/verify/inspect/validate-test/validate-okf/serve)
 ```
 
-Core code map: `ir.py` (two-layer IR models, ADR-009) · `interfaces.py` (stage Protocols, ADR-007) · `collectors/git.py` + `collectors/forge.py` + `collectors/jira.py` (Collect; FakeForge/FakeJira for tests) · `extractors/python_analyzer.py` + `typescript_analyzer.py` + `javascript_analyzer.py` (tree-sitter, ADR-006/ADR-015) · `extractors/llm_extractor.py` + `llm/` (semantic layer, ADR-008; FakeLLMProvider for tests) · `compiler/normalize.py` (identity cascade, normalize.md — determinism checklist §9 is the review gate) · `compiler/diff.py` (removal evidence) · `storage/persist.py` (the atomic commit, ADR-003) · `compiler/run.py` (pipeline orchestration, reconcile, verify, `emit_only` — ADR-013's cheap OKF-spec-version rollout path) · `wiki/emitter.py` + `wiki/publisher.py` (OKF wiki, ADR-010 branch publishing) · `wiki/okf_conformance.py` (`kc validate-okf`'s checker, ADR-013) · `validation.py` (`kc validate-test`'s scorer) · `llm/embeddings.py` + `retrieval/` (embeddings emitter, hybrid search, ADR-005; FakeEmbedder for tests) · `mcp/queries.py` + `mcp/server.py` (read-only MCP serve, never compiles).
+Core code map: `ir.py` (two-layer IR models, ADR-009) · `interfaces.py` (stage Protocols, ADR-007) · `collectors/git.py` + `collectors/forge.py` + `collectors/jira.py` (Collect; FakeForge/FakeJira for tests) · `extractors/python_analyzer.py` + `typescript_analyzer.py` + `javascript_analyzer.py` (tree-sitter, ADR-006/ADR-015) · `extractors/llm_extractor.py` + `llm/` (semantic layer, ADR-008; FakeLLMProvider for tests) · `compiler/normalize.py` (identity cascade, normalize.md — determinism checklist §9 is the review gate) · `compiler/diff.py` (removal evidence) · `storage/persist.py` (the atomic commit, ADR-003) · `compiler/run.py` (pipeline orchestration, reconcile, verify, `emit_only` — ADR-013's cheap OKF-spec-version rollout path) · `wiki/emitter.py` + `wiki/publisher.py` (OKF wiki, ADR-010 branch publishing) · `wiki/okf_conformance.py` (`kc validate-okf`'s checker, ADR-013) · `validation/` (`kc validate-test`'s scorer — targeting tier as before, plus a verification tier reading the compiled `mutation_kill_rate` signal; `validation/mutation.py` derives anchor-scoped mutmut targeting via `kc mutation-scope`) · `llm/embeddings.py` + `retrieval/` (embeddings emitter, hybrid search, ADR-005; FakeEmbedder for tests) · `mcp/queries.py` + `mcp/server.py` (read-only MCP serve, never compiles).
 
 Testing conventions: no mocks — real git repos, real Postgres (integration tests skip loudly when it's down), real tree-sitter; LLM tests use `FakeLLMProvider`, embedding tests use `FakeEmbedder`. Both caches (`llm_cache`, `embeddings`) are keyed in part by `model_id` and are shared/repo-agnostic (`llm_cache`) or persist across recompiles (`embeddings`) by design, so tests asserting call counts must use a unique `model_id` per test.
 
@@ -40,9 +40,14 @@ Every test file generated or materially rewritten by an AI agent — in this
 repo or in any repo consuming Knowledge Compiler's compiled knowledge — MUST
 carry a `kc-covers:` block in its module-level docstring, naming the exact
 compiled entity slug(s) it targets (BRAINSTORM-test-generation-eval.md's
-declared-coverage convention; `knowledge_compiler/validation.py` is the
+declared-coverage convention; `knowledge_compiler/validation/` is the
 checker; scoring granularity is component/API level per ADR-012). Not
-optional, not a comment — must be parseable by `ast.get_docstring()`.
+optional, not a comment — must be parseable by `ast.get_docstring()`. The
+scorer's targeting tier (citation precision/recall) still runs at that
+granularity; a verification tier (assertion presence, and the compiled
+`mutation_kill_rate` signal `[mutation]`/`collectors/mutation.py` already
+surfaces via `test_plan`) now multiplies into `score_pct` alongside it —
+never a separate CLI input, always whatever's currently compiled.
 
 Format (exact):
 ```python
