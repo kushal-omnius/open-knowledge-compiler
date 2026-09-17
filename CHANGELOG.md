@@ -26,6 +26,14 @@ so it works even where a raw `git push` of a tag ref is restricted).
   making a long reconcile look silent/stuck between summaries). `i`/`n` count every fetched item
   for that invocation (including idempotence-skipped ones) and reset on each call.
 
+- **Jira key-resolution progress**: `[jira] i/n <scope>: R/N keys resolved (missing: ...)` now
+  streams to stderr whenever a compile item extracts at least one Jira issue key — `<scope>` is
+  `PR #<number>`, `commit <short-sha>`, or `full compile`. Jira linking was previously silent in
+  both directions: a clean resolution and a silently-missing key produced identical (no) output,
+  so there was no way to tell from the terminal whether a PR's cited ticket actually linked or
+  quietly didn't. Missing keys still aren't an error (unchanged "absence is data, not an outage"
+  contract) — they're just visible now.
+
 ## [1.3.1] — 2026-09-01
 
 ### Added
@@ -159,7 +167,7 @@ QA-agent test-grounding improvements (backlog items 1, 2, 5, 6, 7, 3, 4; items
   entries. `journeys_file` accepts a single path string or an array of path
   strings, each resolved relative to the repo directory. Useful when a
   separate QA repo owns the journey definitions for another repo — set
-  `journeys_file = "../qa-repo/frida-journeys.toml"` in the source repo's
+  `journeys_file = "../qa-repo/user-journeys.toml"` in the source repo's
   `kc.toml` and keep the canonical definitions there. Inline `[[journeys]]`
   and `journeys_file` entries are merged (inline first). A missing or
   unreadable file fails loudly at compile time.
@@ -223,7 +231,7 @@ Jira collector: second gateway backend, `[jira] source = "rest" | "file"`
   omitting `_journey_facts`/`_mutation_facts` — the `kc.toml`-sourced facts
   the real compile path appends — causing every `user_journey` entity and
   mutation score to appear as a spurious divergence whenever `[[journeys]]`
-  or `[mutation]` was configured (frida dogfood finding, 2026-08-09). Fixed
+  or `[mutation]` was configured (repoA dogfood finding, 2026-08-09). Fixed
   by including both calls in the shadow compile; the invariant (the shadow
   compile must include every fact source the real compile uses) is now
   documented in `pipeline.md` §7.

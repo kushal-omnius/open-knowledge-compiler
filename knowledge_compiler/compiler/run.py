@@ -374,14 +374,14 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             if jira_cfg.get("enabled") and jira_cfg.get("source") == "file":
                 all_keys = _file_jira_all_keys(ctx)
                 if all_keys:
-                    extra_facts += _jira_facts(ctx, all_keys, pr_number=None)
+                    extra_facts += _jira_facts(ctx, all_keys, pr_number=None, label="full compile")
         elif pr is not None:
             live_paths = [f.path for f in pr.files if f.change != "removed"]
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
             extra_facts = _pr_facts(pr)
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
-            extra_facts += _jira_facts(ctx, issue_keys, pr.number)
+            extra_facts += _jira_facts(ctx, issue_keys, pr.number, label=f"PR #{pr.number}")
             extra_facts += _escaped_defect_facts(extra_facts)
         else:
             live_paths = list(commit.files)
@@ -389,7 +389,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             extra_facts = []
             issue_keys = sorted(set(_ISSUE_KEY.findall(commit.message)))
             if issue_keys:
-                extra_facts += _jira_facts(ctx, issue_keys, pr_number=None)
+                extra_facts += _jira_facts(ctx, issue_keys, pr_number=None,
+                                           label=f"commit {commit.sha[:7]}")
         extra_facts += _mutation_facts(ctx)
         extra_facts += _journey_facts(ctx)
         session.add_all(ArtifactRow(repo_id=repo.id, compile_run_id=run.id,
@@ -696,7 +697,11 @@ def _escaped_defect_facts(facts: list[Fact]) -> list[Fact]:
                 extraction=_FORGE_EXTRACTION, content_hash=content_hash(payload))]
 
 
-def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None) -> list[Fact]:
+def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None,
+                label: str = "") -> list[Fact]:
+    """label: human-readable scope for the progress line (e.g. "PR #142",
+    "commit a1b2c3d", "full compile") — pr_number alone can't distinguish a
+    direct commit from a full compile, both of which pass pr_number=None."""
     if not issue_keys:
         return []
     jira_cfg = ctx["config"].get("jira", {})
@@ -705,14 +710,24 @@ def _jira_facts(ctx: dict, issue_keys: list[str], pr_number: int | None) -> list
     gateway = ctx.get("jira_gateway") or build_jira_gateway(jira_cfg, ctx["repo_dir"])
     if gateway is None:
         return []
+    issues = gateway.get_issues(issue_keys)
     facts = []
-    for issue in gateway.get_issues(issue_keys):
+    for issue in issues:
         payload = {"key": issue.key, "summary": issue.summary, "status": issue.status,
                    "description": issue.description, "issue_type": issue.issue_type,
                    "linked_pr": pr_number}
         facts.append(Fact(fact_type="jira_observed", payload=payload,
                           artifact_refs=(f"jira:{issue.key}",), extraction=_JIRA_EXTRACTION,
                           content_hash=content_hash(payload)))
+    progress = ctx.get("progress")
+    if progress:
+        resolved = sorted(i.key for i in issues)
+        missing = sorted(set(issue_keys) - set(resolved))
+        detail = f"{label}: {len(resolved)}/{len(issue_keys)} keys resolved" if label \
+            else f"{len(resolved)}/{len(issue_keys)} keys resolved"
+        if missing:
+            detail += f" (missing: {', '.join(missing)})"
+        progress("jira", len(resolved), len(issue_keys), detail)
     return facts
 
 
