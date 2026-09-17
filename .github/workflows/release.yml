@@ -1,0 +1,100 @@
+name: Release
+
+# Manual only — a release is a deliberate action, never a side effect of a
+# push. Runs against main regardless of which branch it's dispatched from
+# (checkout pins ref: main below) and is restricted to the repo owner.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+# One release at a time — a second dispatch while one is running would race
+# on the same version-bump commit.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: kc
+          POSTGRES_PASSWORD: kc
+          POSTGRES_DB: kc_wiki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U kc"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      KC_DATABASE_URL: postgresql+psycopg://kc:kc@localhost:5432/kc_wiki
+
+    steps:
+      # workflow_dispatch is already gated to repo collaborators with write
+      # access by GitHub itself; this narrows it further to one specific
+      # person, since "who can trigger a release" and "who can push code"
+      # aren't the same question.
+      - name: Restrict to repository owner
+        run: |
+          if [ "${{ github.actor }}" != "kushal-omnius" ]; then
+            echo "::error::Only the repository owner (kushal-omnius) can trigger a release. Triggered by: ${{ github.actor }}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e .[all]
+
+      - name: Apply database migrations
+        run: python -c "from knowledge_compiler.compiler.bootstrap import upgrade_schema; upgrade_schema()"
+
+      - name: Run test suite
+        run: pytest
+
+      - name: Bump version and date the CHANGELOG
+        id: bump
+        run: |
+          new_version=$(python scripts/release.py "${{ inputs.bump }}")
+          echo "version=$new_version" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml knowledge_compiler/__init__.py CHANGELOG.md
+          git commit -m "Release ${{ steps.bump.outputs.version }}"
+          git push origin main
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.bump.outputs.version }}" \
+            --target main \
+            --title "v${{ steps.bump.outputs.version }}" \
+            --generate-notes
