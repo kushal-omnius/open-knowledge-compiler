@@ -153,6 +153,8 @@ def _echo_summary(s, verbose: bool = False) -> None:
         click.echo(f"  llm: {s.llm_calls} calls  tokens: in={s.llm_input_tokens} out={s.llm_output_tokens}")
     if s.embedding_calls:
         click.echo(f"  embeddings: {s.embedding_calls} calls  tokens: in={s.embedding_input_tokens}")
+    if s.watermark_note:
+        click.echo(f"  reconcile watermark: {s.watermark_note}")
     for w in s.warnings:
         click.echo(f"  warning: {w}")
 

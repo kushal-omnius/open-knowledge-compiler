@@ -62,7 +62,7 @@ kc compile --emit-only                # re-render the wiki only, no new compile
 
 ### `kc reconcile`
 
-Catch up on merged PRs and direct commits missed since the last successful compile. Runs two passes: PR-based (existing path) then commit-fill covering direct pushes, squash commits, and repos without a PR workflow. Items are processed in timestamp order; already-succeeded items are skipped (idempotent). Uses a unified watermark (`max(COALESCE(commit_timestamp, merged_at))` over succeeded non-full runs) so it never re-examines old history.
+Catch up on merged PRs and direct commits missed since the last successful compile. Runs two passes: PR-based (existing path) then commit-fill covering direct pushes, squash commits, and repos without a PR workflow. Items are processed in timestamp order; already-succeeded items are skipped (idempotent). Uses a unified watermark (`max(COALESCE(commit_timestamp, merged_at))` over succeeded runs) so it never re-examines old history. A `kc compile --full` also sets the watermark — to HEAD's commit — when HEAD is on the default branch's upstream, so a reconcile after a bootstrap full compile starts after that commit rather than at the first PR ever merged. The full compile's summary prints a `reconcile watermark:` line saying whether it was set and, if not, why (e.g. no upstream configured, or HEAD not pushed).
 
 ```bash
 kc reconcile [--dir <path>]

@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import tomllib
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import func, select, text
@@ -95,6 +96,9 @@ class CompileSummary:
     llm_output_tokens: int = 0
     embedding_calls: int = 0
     embedding_input_tokens: int = 0
+    # Full compiles only: what the run did to the reconcile watermark. Not a
+    # warning — a NULL watermark is the pre-existing behaviour, not a failure.
+    watermark_note: str | None = None
 
 
 def read_config(repo_dir: Path) -> dict:
@@ -325,6 +329,24 @@ def _locked_session(repo_dir: Path):
             session.commit()
 
 
+def _full_compile_watermark(collector: GitCollector, default_branch: str,
+                            head_sha: str) -> tuple[datetime | None, str | None]:
+    """Reconcile watermark for a full compile: HEAD's committer timestamp, so
+    the next `kc reconcile` resumes after the compiled commit instead of
+    replaying every PR since the start of history (ADR-002 addendum,
+    2026-10-27). Only set when HEAD is on the default branch's upstream
+    history — every PR merged before that commit is then in the compiled
+    tree. Full-compiling another branch or an unpushed commit returns
+    (None, reason): a watermark there could make reconcile skip default-branch
+    PRs whose code was never compiled."""
+    upstream = collector.upstream_of(default_branch)
+    if upstream is None:
+        return None, (f"default branch '{default_branch}' has no upstream configured")
+    if not collector.is_ancestor(head_sha, upstream):
+        return None, f"HEAD {head_sha[:12]} is not on {upstream}"
+    return collector.head_commit_timestamp(), None
+
+
 def _compile_one(session: Session, repo: Repository, ctx: dict,
                  pr: MergedPR | None, commit: CommitInfo | None = None) -> CompileSummary:
     """Compile one change unit. Modes:
@@ -333,12 +355,20 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
     - commit is not None    → direct-commit incremental (no PR metadata)
     """
     collector = GitCollector(ctx["repo_dir"])
+    watermark_ts: datetime | None = None
+    watermark_note: str | None = None
 
     if pr is None and commit is None:
         commit_sha = collector.head_commit()
         in_scope: frozenset[str] = frozenset()
         full = True
         scope_label = "full"
+        watermark_ts, reason = _full_compile_watermark(collector, ctx["default_branch"], commit_sha)
+        watermark_note = (
+            f"set to {watermark_ts.isoformat()} ({commit_sha[:12]}) — reconcile resumes after it"
+            if watermark_ts else
+            f"not set ({reason}) — a reconcile without an earlier PR/commit run "
+            f"replays merged PRs from the start of history")
     elif pr is not None:
         commit_sha = pr.merge_commit_sha
         full = False
@@ -354,7 +384,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
     run = CompileRun(repo_id=repo.id, scope=scope_label,
                      pr_number=pr.number if pr else None,
                      merged_at=pr.merged_at if pr else None,
-                     commit_timestamp=commit.timestamp if commit else None,
+                     commit_timestamp=commit.timestamp if commit else watermark_ts,
                      commit_sha=commit_sha, status="running",
                      fact_vocabulary_version=FACT_VOCABULARY_VERSION,
                      knowledge_model_version=KNOWLEDGE_MODEL_VERSION,
@@ -455,6 +485,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         added=ops.count("added"), changed=ops.count("changed"),
         removed=ops.count("removed"), moved=ops.count("moved"),
         dirty=len(dirty), warnings=parse_warnings + list(candidate.warnings) + llm_warnings,
+        watermark_note=watermark_note,
         entity_changes=list(delta.entity_changes),
         pr_number=pr.number if pr else None,
         llm_calls=llm_tokens["calls"], llm_input_tokens=llm_tokens["input_tokens"],

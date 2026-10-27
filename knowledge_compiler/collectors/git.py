@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from knowledge_compiler.ir import Artifact
@@ -40,6 +41,29 @@ class GitCollector:
 
     def head_commit(self) -> str:
         return _git(self.repo_path, "rev-parse", "HEAD").strip()
+
+    def head_commit_timestamp(self) -> datetime:
+        """Committer timestamp of HEAD (timezone-aware)."""
+        return datetime.fromisoformat(_git(self.repo_path, "log", "-1", "--format=%cI", "HEAD").strip())
+
+    def upstream_of(self, branch: str) -> str | None:
+        """The remote-tracking ref `branch` is configured to track (e.g.
+        `origin/main`), or None when the branch doesn't exist locally or has no
+        upstream configured — resolved through git's own config rather than
+        assuming a remote named `origin`."""
+        result = subprocess.run(
+            ["git", "-C", str(self.repo_path), "rev-parse", "--abbrev-ref", "--verify",
+             "--quiet", f"{branch}@{{upstream}}"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace")
+        upstream = result.stdout.strip()
+        return upstream if result.returncode == 0 and upstream else None
+
+    def is_ancestor(self, commit: str, of: str) -> bool:
+        """True when `commit` is reachable from `of` (or is `of` itself)."""
+        result = subprocess.run(
+            ["git", "-C", str(self.repo_path), "merge-base", "--is-ancestor", commit, of],
+            capture_output=True)
+        return result.returncode == 0
 
     def collect_at_commit(self, commit_sha: str, paths: list[str]) -> list[Artifact]:
         """Stage specific files as they exist at a commit (PR-scoped collection).

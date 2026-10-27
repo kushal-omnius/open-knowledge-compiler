@@ -15,7 +15,7 @@ Table of contents for the Knowledge Compiler's architectural decisions. For the 
 ### [ADR-002 — CI Trigger](ADR-002-ci-trigger.md)
 
 - **Status:** Accepted
-- **Summary:** Compilation is triggered by CI invoking `kc compile --pr N` on merge, made exactly-once and self-healing by mandatory reconcile-first processing and per-repo advisory locks; the serve process never compiles. Addendum (2026-08-09): reconcile now runs two passes — PR-based (`list_merged_prs`) then commit-fill (`list_commits`) covering direct pushes and repos without a PR workflow; watermark unified to `max(COALESCE(commit_timestamp, merged_at))`; `compile_runs.scope` gains `'commit'` (migration 0006).
+- **Summary:** Compilation is triggered by CI invoking `kc compile --pr N` on merge, made exactly-once and self-healing by mandatory reconcile-first processing and per-repo advisory locks; the serve process never compiles. Addendum (2026-08-09): reconcile now runs two passes — PR-based (`list_merged_prs`) then commit-fill (`list_commits`) covering direct pushes and repos without a PR workflow; watermark unified to `max(COALESCE(commit_timestamp, merged_at))`; `compile_runs.scope` gains `'commit'` (migration 0006). Addendum (2026-10-27): a full compile seeds the watermark with HEAD's committer timestamp when HEAD is on the default branch's upstream, so a reconcile after a bootstrap full compile resumes after it instead of replaying all PR history.
 - **Dependencies:** ADR-001 (locks), ADR-003 (`compile_runs` watermark, delta ordering), ADR-008 (cache bounds backlog cost); related: ADR-004 (in-order processing preserves matching state)
 - **Depended on by:** —
 - **Related documents:** architecture.md §3, pipeline.md, mcp.md (planned)

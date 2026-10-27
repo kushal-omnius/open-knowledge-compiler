@@ -175,6 +175,17 @@ Affected compiler stages:
 
 **Unchanged invariants:** merge-order processing, advisory lock, atomic Persist commit, exactly-once semantics, and degraded-mode behaviour all hold without modification. PR metadata (`pr_observed`, Jira linkage) is preserved exactly where it exists.
 
+## Addendum — Full compiles seed the watermark (2026-10-27)
+
+**Problem:** a `full` run stored `commit_timestamp = NULL`, and the watermark query ignores rows where both `commit_timestamp` and `merged_at` are NULL. A repo bootstrapped with `kc compile --full` therefore had no watermark, so its first `kc reconcile` listed every merged PR and commit since the start of history and replayed them as PR-scoped compiles on top of state that was already at HEAD. That rewound touched files to historical versions until the replay caught up, cost an LLM call per historical file version, and gave no knowledge benefit — only PR attribution.
+
+**Resolution:** a `full` run records HEAD's committer timestamp in `commit_timestamp`, so it counts toward the watermark like any other run and the next reconcile resumes after the compiled commit. Guard: only when HEAD is reachable from the default branch's upstream (`<default_branch>@{upstream}`, resolved through git's own config — no remote name assumed). Then every PR merged before that commit is in the compiled tree. A full compile of another branch or an unpushed commit, or one with no upstream configured, leaves `commit_timestamp` NULL — the previous behaviour — because a watermark there could make reconcile skip default-branch PRs whose code was never compiled. The outcome is reported as a `reconcile watermark:` line in the compile summary, not as a warning: NULL is the pre-existing behaviour, not a failure.
+
+**Consequences:**
+- Every full compile moves the watermark (not just the first). PRs merged before a full compile's commit never get PR-scoped runs, so they have no `pull_request` entities and `which_pr_introduced` reports the full compile for what existed by then. Current-state knowledge is unaffected — the full compile read HEAD.
+- Boundary: PRs are compared by forge `merged_at`, the watermark here is a git committer timestamp. For GitHub merge/squash commits these coincide to within seconds; when `merged_at` is later, the PR whose merge commit was compiled is reprocessed once — harmless, the result already matches.
+- No schema change: `compile_runs.commit_timestamp` exists since migration 0006. Rows written before this change stay NULL.
+
 ## Future Reconsideration
 
 Revisit if a hosted/multi-tenant offering emerges (webhooks become the natural front door for a service that already runs 24/7 — B's costs are then sunk), or if dogfood evidence shows CI-dependency staleness is a recurring pain that scheduled reconciliation doesn't adequately bound.
