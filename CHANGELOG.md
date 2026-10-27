@@ -17,6 +17,20 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- **A full compile now seeds the reconcile watermark** (ADR-002 addendum, 2026-10-27): a `full` run
+  used to store no timestamp, so a repo bootstrapped with `kc compile --full` had no watermark and
+  its first `kc reconcile` replayed every merged PR since the start of history — rewinding touched
+  files to old versions until it caught up, and paying an LLM call per historical file version.
+  A full compile now records HEAD's committer timestamp in `compile_runs.commit_timestamp` (no
+  migration — the column exists since 0006), so the next reconcile resumes after the compiled
+  commit. Only set when HEAD is reachable from `<default_branch>@{upstream}`; a full compile of
+  another branch, an unpushed commit, or a repo with no upstream keeps the previous NULL behaviour,
+  since a watermark there could make reconcile skip PRs whose code was never compiled. The compile
+  summary gains a `reconcile watermark:` line saying which happened. 4 new tests in
+  `tests/test_full_compile_watermark.py`.
+
 ## [1.3.3] — 2026-09-17
 
 ## [1.3.2] — 2026-09-17
