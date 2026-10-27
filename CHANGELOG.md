@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-10-27
+
 ### Fixed
 
 - **A full compile now seeds the reconcile watermark** (ADR-002 addendum, 2026-10-27): a `full` run
