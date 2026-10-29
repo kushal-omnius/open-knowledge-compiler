@@ -31,6 +31,7 @@ Structural knowledge (components, APIs, dependencies) is necessary but not the d
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Analyze a repository](#analyze-a-repository)
+- [Run kc from inside another repo](#run-kc-from-inside-another-repo)
 - [Run modes](#run-modes)
 - [Configuration](#configuration)
 - [Semantic layer (LLM extraction)](#semantic-layer-llm-extraction-optional)
@@ -187,6 +188,47 @@ kc verify --dir /path/to/my-service
 ```
 
 No API keys required — the deterministic compiler produces components, APIs, dependencies, test coverage, and the wiki on its own.
+
+## Run kc from inside another repo
+
+To run `kc` directly inside the analyzed repo — no `--dir`, no activated venv, no `.env` loader — install it once as a [uv](https://docs.astral.sh/uv/) tool and keep credentials in user env vars.
+
+**Step 1 — Put `kc` on PATH** (run once):
+
+```bash
+uv tool install --editable /path/to/open-knowledge-compiler
+uv tool update-shell        # adds ~/.local/bin to PATH; open a new terminal afterwards
+```
+
+`kc` gets its own isolated environment, so it works regardless of which venv is active in the target repo. `--editable` picks up source changes in this checkout immediately; re-run the install with `--reinstall` when `pyproject.toml` dependencies change. To use it in the current terminal without reopening, prepend `~/.local/bin` to PATH (Windows cmd: `set PATH=%USERPROFILE%\.local\bin;%PATH%`).
+
+**Step 2 — Credentials without a `.env` file:**
+
+- **GitHub** — nothing to set if the `gh` CLI is logged in; `kc` falls back to `gh auth token` (see [Configuration](#configuration)).
+- **LLM / embeddings** — only if the repo's `kc.toml` enables `[llm]` or `[embeddings]`. Persist the provider's env vars as user env vars (picked up by new terminals), e.g. for azure-openai:
+
+```bash
+# Windows cmd
+setx OPENAI_AZURE_ENDPOINT "https://<your-resource>.openai.azure.com"
+setx OPENAI_AZURE_API_KEY "<key>"
+setx OPENAI_AZURE_DEPLOYMENT "gpt-4o-mini"
+setx OPENAI_AZURE_EMBEDDING_DEPLOYMENT "text-embedding-3-small"
+
+# PowerShell (one per variable)
+[Environment]::SetEnvironmentVariable('OPENAI_AZURE_API_KEY', '<key>', 'User')
+
+# macOS / Linux — add to ~/.bashrc or ~/.zshrc
+export OPENAI_AZURE_API_KEY="<key>"
+```
+
+These are stored in plain text, same as a `.env` file. For a single session only, use `$env:NAME = '...'` (PowerShell) or `set NAME=...` (cmd) instead.
+
+**Step 3 — Run from the repo root** (`--dir` defaults to the current directory):
+
+```bash
+cd /path/to/my-service
+kc reconcile -v
+```
 
 ## Run modes
 
