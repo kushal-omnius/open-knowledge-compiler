@@ -7,7 +7,7 @@ fields; nothing here ever writes (ADR-002: serve never compiles).
 
 from __future__ import annotations
 
-from sqlalchemy import func, select
+from sqlalchemy import bindparam, func, select, text
 from sqlalchemy.orm import Session
 
 from knowledge_compiler.storage.schema import (
@@ -243,8 +243,36 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
             "tests": test_list}
 
 
+IMPACT_RELATIONS = ("depends_on", "governs", "implemented_by", "affects")
+DEFAULT_IMPACT_DEPTH = 3
+MAX_IMPACT_DEPTH = 10
+
+# Walks incoming impact edges outward from the changed entity. `path` holds
+# every entity id on the current walk, so an edge back onto it (a dependency
+# cycle) is never followed. Depth bounds the walk; the path guard bounds each
+# branch.
+_IMPACT_WALK = text("""
+WITH RECURSIVE walk(entity_id, relation, via_id, depth, path) AS (
+    SELECT r.from_entity_id, r.relation_type, r.to_entity_id, 1,
+           ARRAY[r.to_entity_id, r.from_entity_id]
+    FROM relationships r
+    WHERE r.repo_id = :repo_id AND r.to_entity_id = :start_id
+      AND r.relation_type IN :relations AND r.from_entity_id <> :start_id
+  UNION ALL
+    SELECT r.from_entity_id, r.relation_type, r.to_entity_id, w.depth + 1,
+           w.path || r.from_entity_id
+    FROM walk w
+    JOIN relationships r ON r.to_entity_id = w.entity_id
+    WHERE r.repo_id = :repo_id AND r.relation_type IN :relations
+      AND w.depth < :max_depth AND NOT (r.from_entity_id = ANY(w.path))
+)
+SELECT entity_id, relation, via_id, depth FROM walk
+""").bindparams(bindparam("relations", expanding=True))
+
+
 def impact_plan(session: Session, repo_id: int, slug: str,
-                dep_map: dict[str, str] | None = None) -> dict | None:
+                dep_map: dict[str, str] | None = None,
+                max_depth: int = DEFAULT_IMPACT_DEPTH) -> dict | None:
     """Composed planning query: given a changed entity, what would be affected
     (within this repo), which of the affected components have test-coverage
     gaps, and what this entity reaches across repos. Pure composition over
@@ -254,12 +282,18 @@ def impact_plan(session: Session, repo_id: int, slug: str,
     (BRAINSTORM-test-generation-eval.md's next steps): step 1 of separating
     *what needs testing* (deterministic) from *writing the test* (LLM, later).
 
-    "Affected" = one-hop incoming edges of type depends_on/governs/
-    implemented_by/affects — i.e. anything that would need re-examination if
-    `slug` changes: dependents (depends_on), governing business rules
-    (governs), features it implements (implemented_by), risks that name it
-    (affects). Not transitive in this first cut — a multi-hop blast radius is
-    a natural follow-on once this shape is validated against real changes.
+    "Affected" = everything reachable by walking incoming edges of type
+    depends_on/governs/implemented_by/affects outward from `slug`, up to
+    `max_depth` hops (default 3; QA-signal review finding 4): dependents
+    (depends_on), governing business rules (governs), features (implemented_by)
+    and risks (affects), then their dependents, and so on. A change to a
+    low-level module re-tests the modules that import it *and* the modules
+    that import those. Each affected entity appears once, at its shortest
+    depth, with `via` (the entity it was reached through at that depth;
+    `slug` itself for depth 1). Ties at the same depth resolve to the
+    lexicographically smallest (relation, via). Cycles are never re-entered.
+    max_depth=1 reproduces the old one-hop result (plus the `depth`/`via`
+    fields).
 
     Scope boundary (explicit, not a bug): cross-repo *inbound* impact ("who in
     another repo depends on this") is not answerable here. ADR-011's
@@ -277,15 +311,20 @@ def impact_plan(session: Session, repo_id: int, slug: str,
     id_to_slug = {v: k for k, v in slug_to_id.items()}
     entity_id = slug_to_id[slug]
 
-    impact_relations = ("depends_on", "governs", "implemented_by", "affects")
-    incoming = session.execute(select(RelationshipRow).where(
-        RelationshipRow.repo_id == repo_id,
-        RelationshipRow.to_entity_id == entity_id,
-        RelationshipRow.relation_type.in_(impact_relations),
-    )).scalars().all()
-    affected = sorted({(r.relation_type, id_to_slug[r.from_entity_id]) for r in incoming})
+    if not 1 <= max_depth <= MAX_IMPACT_DEPTH:
+        raise ValueError(f"max_depth must be between 1 and {MAX_IMPACT_DEPTH}, got {max_depth}")
+    best: dict[str, tuple[int, str, str]] = {}  # slug -> (depth, relation, via)
+    for entity_id_, relation, via_id, depth in session.execute(_IMPACT_WALK, {
+            "repo_id": repo_id, "start_id": entity_id, "relations": list(IMPACT_RELATIONS),
+            "max_depth": max_depth}).all():
+        candidate = (depth, relation, id_to_slug[via_id])
+        reached = id_to_slug[entity_id_]
+        if reached not in best or candidate < best[reached]:
+            best[reached] = candidate
+    affected = sorted(((d, rel, s, via) for s, (d, rel, via) in best.items()),
+                      key=lambda a: (a[0], a[1], a[2]))
 
-    candidate_targets = ({s for _rel, s in affected if s.startswith("component/")}
+    candidate_targets = ({s for _d, _rel, s, _via in affected if s.startswith("component/")}
                          | ({slug} if entity["entity_type"] == "component" else set()))
     candidate_rows = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug.in_(candidate_targets))).scalars().all() \
@@ -296,7 +335,9 @@ def impact_plan(session: Session, repo_id: int, slug: str,
 
     return {
         "slug": slug, "entity_type": entity["entity_type"],
-        "affected": [{"relation": rel, "slug": s} for rel, s in affected],
+        "max_depth": max_depth,
+        "affected": [{"relation": rel, "slug": s, "depth": d, "via": via}
+                     for d, rel, s, via in affected],
         "coverage_gaps": sorted(t for t, cov in coverage.items() if cov and not cov["covered"]),
         # Distinct from coverage_gaps: covered, but every covering test predates
         # the component's most recent change (ADR-018) — a different condition
