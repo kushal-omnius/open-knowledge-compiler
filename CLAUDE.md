@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Knowledge Compiler** (package: `open-knowledge-compiler`, Apache-2.0) — an open-source system that continuously compiles software engineering artifacts (Git repos, PRs, Jira tickets, docs, OpenAPI specs) into a structured, persistent knowledge base queryable by AI agents. The compiler metaphor is intentional: raw artifacts go in, structured engineering knowledge comes out. The emitted wiki is a conformant [OKF](docs/okf-conformance.md) (Open Knowledge Format) bundle — see [ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md) for spec-version tracking and the open-source release rationale.
+**Knowledge Compiler** (package: `open-knowledge-compiler`, Apache-2.0) — an open-source system that continuously compiles software engineering artifacts (Git history, PRs, Jira tickets, source code, tests) into a structured, persistent knowledge base queryable by AI agents. Prose docs (README/Markdown) and OpenAPI specs are **planned inputs, not shipped** — no collector or extractor exists for them yet. The compiler metaphor is intentional: raw artifacts go in, structured engineering knowledge comes out. The emitted wiki is a conformant [OKF](docs/okf-conformance.md) (Open Knowledge Format) bundle — see [ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md) for spec-version tracking and the open-source release rationale.
 
 **North star (the moat):** every roadmap and prioritization call should serve one question — *given what this software does and what changed, what exactly must be verified, and how do we know the resulting test is actually trustworthy?* Two capabilities answer it and are this project's actual differentiation from generic repository-intelligence tools (Sourcegraph, JetBrains Context, generic wiki/knowledge compilers like `llm-wiki-compiler`, code-graph tools like `agentforge-graph`): a **Behavioral Contract** model (state/transition/failure-mode knowledge, not just structural knowledge — component/API/dependency facts) for "what must be verified," and a **Test Trust Score** (mutation-kill rate + flakiness + escaped-defect history + coverage completeness, combined into one signal — building on the existing mutation-kill signal, [ADR-018](docs/decisions/ADR-018-stale-test-detection.md) stale-test detection, and the backlogged [ADR-019](docs/decisions/ADR-019-test-flakiness-signal.md)/[ADR-020](docs/decisions/ADR-020-escaped-defect-trust-score.md)) for "is the test trustworthy." Neither exists today as a compiled entity or a synthesized score. When two pieces of work compete for priority, prefer the one that moves toward these over general repository-understanding features — that territory is increasingly commoditized elsewhere.
 
@@ -97,7 +97,7 @@ re-run if it doesn't — don't hand back a test with an unvalidated header.
 ## Planned Architecture
 
 Pipeline stages (in order):
-1. **Collect** — ingest artifacts from Git, PRs, Jira, README, OpenAPI, tests
+1. **Collect** — ingest artifacts from Git, PRs, Jira, source code, tests (planned, not yet implemented: README/prose docs, OpenAPI specs)
 2. **Extract** — derive engineering knowledge (LLM + deterministic methods)
 3. **Normalize** — canonicalize into shared entity schema
 4. **Persist** — write to PostgreSQL
