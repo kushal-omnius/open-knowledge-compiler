@@ -96,7 +96,9 @@ Emitted by language analyzers and deterministic extractors:
 | `component_observed` | path, kind (package/module), language | analyzers |
 | `symbol_observed` | symbol_path, kind (class/function/method), signature, anchor, body_hash | analyzers |
 | `dependency_observed` | from-component path → to-component path or external package | analyzers |
-| `api_endpoint_observed` | HTTP method, route, handler anchor, source (`code_pattern` \| `openapi` — kept distinct for conflict surfacing, §4.3) | analyzers, OpenAPI extractor |
+| `api_endpoint_observed` | HTTP method, route, handler anchor, source (`code_pattern` \| `openapi` — kept distinct for conflict surfacing, §4.3); optional `router` (dotted ref of the decorated/called object, whose composed prefixes Normalize prepends — additive clarification, QA-signal review finding 6) | analyzers, OpenAPI extractor |
+| `router_observed` | router ref (`<module>.<name>`), own prefix (FastAPI `APIRouter(prefix=...)`; `""` for `FastAPI()`, Express `Router()`/`express()`), file | Python, TypeScript, JavaScript analyzers (additive, finding 6) |
+| `router_mount_observed` | parent ref, child ref, mount prefix, file — FastAPI `include_router(child, prefix=...)`, Express `parent.use('/prefix', ..., child)`; Express `export default r` / `module.exports = r` are recorded as an empty-prefix mount of `r` under `<module>.default` so importers' default imports reach the router | Python, TypeScript, JavaScript analyzers (additive, finding 6) |
 | `test_case_observed` | test node id, framework, **module** (the analyzer's own module-path convention — Normalize never derives it with language assumptions; boundary leak found by the TypeScript stress test), anchor | analyzers |
 | `test_target_observed` | test node id → targeted symbol/component, mechanism (import/call/marker) | analyzers |
 | `source_change_observed` | file, change kind, spans (the PR's *source diff* — drives incremental scoping; deliberately named to avoid confusion with the knowledge delta) | git collector |
@@ -161,6 +163,8 @@ Identity classes per ADR-004's categorization:
 | State Model | deterministic | owning Component path + field name (ADR-023 — Python analyzer only, V1 scope) |
 
 **API key note:** the natural key is *always* method + normalized route — route parameters are positional, with names elided (`GET /users/{}`), so `/users/{id}` and `/users/{user_id}` are the same API. OpenAPI `operationId` is an **alias attribute**, never identity: adding operationIds to an existing spec must not churn API identity. API kinds beyond HTTP (GraphQL, gRPC, CLI) are a future vocabulary extension, not an abstraction to build now.
+
+**Router prefix composition (additive clarification, QA-signal review finding 6):** the route in the API key is the *full* served route. Normalize resolves each router ref to `<component>:<attr>` (longest internal component prefix, dotted-suffix fallback as for imports), then computes full(R) = full(parent) + mount prefix + R's own prefix over every mount of R. A router mounted nowhere is served at its own prefix; a router mounted twice yields one API per mount; cycles are cut at the repeated router; fan-out is capped at 16 prefixes per router. Facts stay per-file, so the composition is order-independent. Components that declare routers or mounts carry them in a `routing` payload field, which PR/commit compiles use to widen their collection scope (pipeline.md §3.1).
 
 **Component granularity note:** both packages and modules are Components; the hierarchy is explicit via the `contains` relationship (§3.3), not encoded in identity. A package Component contains its module Components.
 

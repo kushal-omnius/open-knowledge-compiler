@@ -58,7 +58,7 @@ from knowledge_compiler.storage.db import (
     DatabaseUnavailableError, check_connection, make_engine, repo_lock_key,
 )
 from knowledge_compiler.storage.persist import load_current_state, persist_compile
-from knowledge_compiler.storage.schema import ArtifactRow, CompileRun, FactRow, Repository
+from knowledge_compiler.storage.schema import ArtifactRow, CompileRun, EntityRow, FactRow, Repository
 
 _FORGE_EXTRACTION = Extraction(method="deterministic", extractor="forge-collector",
                                extractor_version="0.1")
@@ -408,6 +408,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         elif pr is not None:
             live_paths = [f.path for f in pr.files if f.change != "removed"]
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
+            artifacts, in_scope = _widen_routing_scope(session, repo.id, collector, commit_sha,
+                                                       artifacts, in_scope)
             extra_facts = _pr_facts(pr)
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
@@ -416,6 +418,8 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         else:
             live_paths = list(commit.files)
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
+            artifacts, in_scope = _widen_routing_scope(session, repo.id, collector, commit_sha,
+                                                       artifacts, in_scope)
             extra_facts = []
             issue_keys = sorted(set(_ISSUE_KEY.findall(commit.message)))
             if issue_keys:
@@ -615,6 +619,47 @@ def _extract_semantic(session: Session, ctx: dict, artifacts: list[Artifact],
 
 
 _ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
+
+# Cheap textual hint that a changed file may declare routes, routers or mounts.
+# A false positive only costs re-collecting the routing files; the analyzers
+# decide what is actually a route.
+_ROUTING_HINT = re.compile(
+    r"include_router|APIRouter\s*\(|FastAPI\s*\(|\bRouter\s*\(|express\s*\(|\.use\s*\("
+    r"|@\s*[\w.]+\.(?:get|post|put|delete|patch|head|options|route)\s*\("
+    r"|\.(?:get|post|put|delete|patch|head|options)\s*\(\s*['\"`]/")
+
+
+def _routing_files(session: Session, repo_id: int) -> set[str]:
+    """Files that currently define API routes, routers or router mounts."""
+    files: set[str] = set()
+    rows = session.execute(select(EntityRow.entity_type, EntityRow.payload).where(
+        EntityRow.repo_id == repo_id, EntityRow.entity_type.in_(("api", "component")))).all()
+    for entity_type, payload in rows:
+        if entity_type == "api":
+            files.update(payload.get("files") or [])
+        elif payload.get("routing"):
+            files.update(payload.get("files") or [])
+    return files
+
+
+def _widen_routing_scope(session: Session, repo_id: int, collector: GitCollector,
+                         commit_sha: str, artifacts: list[Artifact],
+                         in_scope: frozenset[str]) -> tuple[list[Artifact], frozenset[str]]:
+    """Route prefixes compose across files (a router in one file, include_router
+    or app.use in another). A PR/commit slice that touches any of that must see
+    all of it, or Normalize would compose different routes than a full compile
+    and the API entities would flip between slugs. So when the change touches a
+    known routing file, or a changed file looks like it declares routing,
+    re-collect every known routing file at this commit and add it to the scope.
+    Untouched routing files re-extract to identical facts, so they produce no
+    delta of their own."""
+    routing = _routing_files(session, repo_id)
+    touches = bool(in_scope & routing) or any(
+        a.content is not None and _ROUTING_HINT.search(a.content) for a in artifacts)
+    extra = sorted(routing - in_scope)
+    if not touches or not extra:
+        return artifacts, in_scope
+    return artifacts + collector.collect_at_commit(commit_sha, extra), in_scope | frozenset(extra)
 _BUG_FIX_RE = re.compile(r"\b(fix(es|ed)?|bug(fix)?|hotfix|regression)\b", re.IGNORECASE)
 
 

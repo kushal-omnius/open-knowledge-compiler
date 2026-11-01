@@ -22,6 +22,7 @@ import tree_sitter_javascript as tsjs
 from tree_sitter import Language, Node, Parser
 
 from knowledge_compiler.extractors.body_hash import body_hash
+from knowledge_compiler.extractors import express_routing
 from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
 
 _JS_LANGUAGE = Language(tsjs.language())
@@ -41,7 +42,7 @@ _EXTRACTION = Extraction(
 # Express/Fastify-style routes: <obj>.<verb>('/path', handler). Leading '/'
 # requirement keeps map.get('key') and similar calls out (same guard as TS analyzer).
 _ROUTE = re.compile(
-    r"\b[\w.]+\.(get|post|put|delete|patch|head|options)\s*\(\s*['\"`](/[^'\"`]*)['\"`]"
+    r"\b([\w.]+)\.(get|post|put|delete|patch|head|options)\s*\(\s*['\"`](/[^'\"`]*)['\"`]"
 )
 
 _TEST_CALL = re.compile(r"^(test|it)$")
@@ -181,10 +182,15 @@ class JavaScriptAnalyzer:
                 fact("test_target_observed", {"test_module": module, "target_path": target,
                                               "mechanism": "import", "file": ref})
 
+        aliases = express_routing.import_aliases(
+            tree.root_node, lambda spec: _resolve_import(spec, ref)[0])
+        express_routing.routing_facts(tree.root_node, module, ref, aliases, fact)
         for m in _ROUTE.finditer(artifact.content):
             line = artifact.content[: m.start()].count("\n") + 1
-            payload = {"method": m.group(1).upper(), "route": m.group(2), "handler": None,
-                       "source": "code_pattern", "file": ref}
+            payload = {"method": m.group(2).upper(), "route": m.group(3), "handler": None,
+                       "source": "code_pattern", "file": ref,
+                       # router ref; Normalize prepends its composed app.use() prefixes
+                       "router": express_routing.resolve_ref(m.group(1), module, aliases)}
             fact("api_endpoint_observed", payload,
                  anchors=(Anchor(file_path=ref, span=(line, line)),))
         return facts
