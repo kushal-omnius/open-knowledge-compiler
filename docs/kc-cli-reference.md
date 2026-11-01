@@ -176,14 +176,15 @@ kc eval [--dir <path>] [--labels <file>] [--json]
 
 Labels use component module paths and test file paths, never slugs, so they can be written from the source tree alone. A `[[change]]` entry names a compile run by `pr = N` or `commit = "<sha prefix>"`; that run must not be the bootstrap compile (its delta marks everything added). Labels that name an uncompiled component or a missing run are errors, not misses. Scores are micro-averaged; `n/a` means no evidence (nothing predicted and nothing expected).
 
-Example output (a logic-only edit to `billing/rules.py`, with one real test and one import-only smoke test):
+Example output (a logic-only edit to `billing/rules.py`, with one real test and one import-only smoke test; labels: `tests = ["tests/test_rules.py"]`, `stale = true`, `changed = affected = ["billing.rules"]`):
 ```
 metric             precision  recall    f1   tp/fp/fn
 covers                  0.50    1.00  0.67   1/1/0
-stale_coverage           n/a    0.00   n/a   0/0/1
-change_detection         n/a    0.00   n/a   0/0/1
-impact                   n/a    0.00   n/a   0/0/1
+stale_coverage          1.00    1.00  1.00   1/0/0
+change_detection        1.00    1.00  1.00   1/0/0
+impact                  0.33    1.00  0.50   1/2/0
 ```
+`covers` still counts the import-only smoke test (review finding 2). `impact` precision is low because `impact_plan` also lists the two test modules that import `billing.rules`. Before per-symbol `body_hash`, the same scenario scored 0.00 recall on `stale_coverage`, `change_detection` and `impact`, because the edit produced no delta.
 
 ---
 

@@ -94,7 +94,7 @@ Emitted by language analyzers and deterministic extractors:
 | Fact type | Payload (essentials) | Emitted by |
 |---|---|---|
 | `component_observed` | path, kind (package/module), language | analyzers |
-| `symbol_observed` | symbol_path, kind (class/function/method), signature, anchor | analyzers |
+| `symbol_observed` | symbol_path, kind (class/function/method), signature, anchor, body_hash | analyzers |
 | `dependency_observed` | from-component path → to-component path or external package | analyzers |
 | `api_endpoint_observed` | HTTP method, route, handler anchor, source (`code_pattern` \| `openapi` — kept distinct for conflict surfacing, §4.3) | analyzers, OpenAPI extractor |
 | `test_case_observed` | test node id, framework, **module** (the analyzer's own module-path convention — Normalize never derives it with language assumptions; boundary leak found by the TypeScript stress test), anchor | analyzers |
@@ -108,6 +108,8 @@ Emitted by language analyzers and deterministic extractors:
 | `state_transition_observed` | field name (`status`/`state`), from_state (nullable), to_state, confidence (`"structural"`), anchor (module-scoped) | Python analyzer only, ADR-023 (V1 scope): `<anything>.<field> = "literal"` assignments, chained in source order per function scope; if/elif/else and try/except branches never leak state into each other — a field touched in any branch resets to unknown (`from_state: null`) after the branch construct rather than fabricating a cross-branch edge |
 | `escaped_defect_observed` | pr_number, reasons (`title_or_body` \| `jira_issue_type`), jira_bug_keys, changed_files | Deterministic classification of a merged PR (ADR-020, PR-triggered compiles only): title/body regex OR a linked Jira issue typed `Bug`. Whether each changed file's component was already covered as of the *preceding* compile is a Normalize-only lookup (needs `current` state) — not carried in this fact |
 | `jira_feature_link_observed` | jira_key, feature_names (list of feature entity names this story motivates) | Jira→Feature enrichment LLM pass (run.py `_jira_feature_enrichment_facts`): runs after `_extract_semantic` so feature candidates are available; uses LLM cache (ADR-008); skipped when LLM or Jira disabled. Normalize resolves feature names to slugs via `_jira_stories()` + `_p5_relationships()` to emit `motivates` → Feature edges. |
+
+**`body_hash` (additive clarification, QA-signal review finding 1):** the first 16 hex chars of sha256 over the definition's tree-sitter subtree, skipping comment nodes. Leaves contribute their text; named inner nodes contribute open/close markers (so a Python dedent, which changes structure but not tokens, still changes the hash). Comment and whitespace edits leave it unchanged; logic edits change it. The shared implementation is `extractors/body_hash.py` (Python, TypeScript and JavaScript analyzers). A class's hash covers its methods, so a method edit changes both. Note: the first compile after upgrading churns every component once, because each `symbols` entry gains the field.
 
 ### 2.4 LLM candidate facts
 
@@ -211,7 +213,7 @@ delta = {
 | Fact types | Entity produced |
 |---|---|
 | — (repo config, at Collect) | Project (+ `contains` to top-level Components) |
-| `component_observed` + `dependency_observed` + `symbol_observed` | Component (+ `depends_on`, `contains`) |
+| `component_observed` + `dependency_observed` + `symbol_observed` | Component (+ `depends_on`, `contains`). Each entry in the component's `symbols` payload carries `symbol_path`, `kind` and, when the analyzer emits it, `body_hash`, so a logic-only edit changes the component's content_hash and produces a delta (additive clarification, QA-signal review finding 1) |
 | `api_endpoint_observed` (all sources) | API (+ `defined_in`) |
 | `test_case_observed` + `test_target_observed` | Test Coverage (+ `covers`) |
 | `pr_observed` | Pull Request |

@@ -22,6 +22,7 @@ from importlib.metadata import version as pkg_version
 import tree_sitter_typescript as tsts
 from tree_sitter import Language, Node, Parser
 
+from knowledge_compiler.extractors.body_hash import body_hash
 from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
 
 _TS = Language(tsts.language_typescript())
@@ -253,7 +254,8 @@ class TypeScriptAnalyzer:
         params = body_node.child_by_field_name("parameters")
         payload = {"symbol_path": symbol_path, "kind": kind,
                    "signature": params.text.decode("utf-8") if params is not None else None,
-                   "file": artifact.source_ref, "span": list(span)}
+                   "file": artifact.source_ref, "span": list(span),
+                   "body_hash": body_hash(body_node)}
         fact("symbol_observed", payload,
              anchors=(Anchor(file_path=artifact.source_ref, symbol_path=symbol_path, span=span),))
 

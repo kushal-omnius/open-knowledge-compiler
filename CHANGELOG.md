@@ -22,8 +22,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 - `kc eval`: scores `covers`, `stale_coverage`, per-run change detection and
   `impact_plan` against hand labels (`kc-eval.toml`) as micro-averaged
   precision/recall/F1, with `--json` per-label detail. Establishes the
-  baseline for the QA-signal fixes that follow. A strict-xfail test documents
-  the known gap: a function-body-only edit produces no component delta.
+  baseline for the QA-signal fixes below. (Its strict-xfail test for the
+  body-only change-detection gap now passes; see Fixed.)
 
 ### Changed
 
@@ -31,6 +31,21 @@ so it works even where a raw `git push` of a tag ref is restricted).
   inputs that ship (Git history, PRs, Jira, source code, tests). Prose docs
   (README/Markdown) and OpenAPI specs are listed as planned — no collector or
   extractor exists for either yet.
+
+### Fixed
+
+- Change detection now sees logic-only edits (QA-signal review finding 1).
+  The Python, TypeScript and JavaScript analyzers add a per-symbol `body_hash`
+  to `symbol_observed` facts: the first 16 hex chars of sha256 over the
+  definition's syntax tree, skipping comments. Normalize carries it into each
+  entry of the component `symbols` payload. A function-body-only edit now
+  produces a component delta, so `kc eval` change detection, `stale_coverage`
+  and `impact_plan` see it. Comment and whitespace-only edits still produce no
+  delta. `test_body_only_change_is_detected` is no longer xfail.
+  **Upgrade note:** the first compile after upgrading reports every component
+  as changed (`~N`), once, because each `symbols` entry gains `body_hash`.
+  Expect a full wiki republish and re-embedding of components on that run.
+  There is no schema migration; `symbols` is JSON payload.
 
 ## [1.4.1] — 2026-10-29
 

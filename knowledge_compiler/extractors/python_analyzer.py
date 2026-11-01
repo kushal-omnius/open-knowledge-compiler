@@ -16,6 +16,7 @@ from importlib.metadata import version as pkg_version
 import tree_sitter_python as tspython
 from tree_sitter import Language, Node, Parser
 
+from knowledge_compiler.extractors.body_hash import body_hash
 from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
 
 _PY_LANGUAGE = Language(tspython.language())
@@ -145,6 +146,7 @@ class PythonAnalyzer:
             "symbol_path": symbol_path, "kind": kind,
             "signature": params.text.decode("utf-8") if params is not None else None,
             "file": artifact.source_ref, "span": list(span),
+            "body_hash": body_hash(node),
         }
         fact("symbol_observed", payload, anchors=(anchor,))
 
