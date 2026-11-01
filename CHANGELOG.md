@@ -25,6 +25,13 @@ so it works even where a raw `git push` of a tag ref is restricted).
   baseline for the QA-signal fixes that follow. A strict-xfail test documents
   the known gap: a function-body-only edit produces no component delta.
 
+### Changed
+
+- Docs honesty pass: README tagline and CLAUDE.md overview now list only the
+  inputs that ship (Git history, PRs, Jira, source code, tests). Prose docs
+  (README/Markdown) and OpenAPI specs are listed as planned — no collector or
+  extractor exists for either yet.
+
 ## [1.4.1] — 2026-10-29
 
 ## [1.4.0] — 2026-10-27
