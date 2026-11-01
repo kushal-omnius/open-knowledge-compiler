@@ -72,7 +72,7 @@ def build_server(repo_dir: Path):
                      "features, and risks that govern it. Call `get_entity(slug)` for "
                      "full relationships and provenance.\n\n"
                      "**Planning the impact of a change:**\n"
-                     "Call `impact_plan(slug)` for one-hop affected entities and "
+                     "Call `impact_plan(slug)` for transitively affected entities (depth 3 by default) and "
                      "coverage gaps. `test_plan` is a superset of this.\n\n"
                      "**Exploring what's compiled:**\n"
                      "Call `knowledge_stats()` for entity counts and last compile "
@@ -138,20 +138,28 @@ def build_server(repo_dir: Path):
                     or {"error": f"no entity '{slug}'"})
 
     @mcp.tool()
-    def impact_plan(slug: str) -> dict:
-        """Given a changed entity's slug, returns: one-hop affected entities
-        (components, APIs, features that depend on or implement this entity),
-        which of those have test-coverage gaps, and what this entity reaches
-        across configured cross-repo dependencies.
+    def impact_plan(slug: str, max_depth: int = 3) -> dict:
+        """Given a changed entity's slug, returns: the affected entities
+        (components that depend on it, business rules that govern it, features
+        it implements, risks that name it), walked transitively up to
+        `max_depth` hops (default 3, max 10), each tagged with its `depth` and
+        the `via` entity it was reached through; which affected components
+        have test-coverage gaps; and what this entity reaches across
+        configured cross-repo dependencies. max_depth=1 gives direct
+        relationships only.
 
-        Not transitive — only direct relationships. Cross-repo *inbound* impact
-        (other repos that depend on this one) is out of scope.
+        Cross-repo *inbound* impact (other repos that depend on this one) is
+        out of scope.
 
         For test-writing purposes, prefer test_plan() — it is a superset of
         this tool and also provides concrete test targets and context."""
         with repo_session() as (session, repo_id):
-            return (queries.impact_plan(session, repo_id, slug, dep_map=dep_map)
-                    or {"error": f"no entity '{slug}'"})
+            try:
+                plan = queries.impact_plan(session, repo_id, slug, dep_map=dep_map,
+                                           max_depth=max_depth)
+            except ValueError as exc:
+                return {"error": str(exc)}
+            return plan or {"error": f"no entity '{slug}'"}
 
     @mcp.tool()
     def test_plan(slug: str) -> dict:

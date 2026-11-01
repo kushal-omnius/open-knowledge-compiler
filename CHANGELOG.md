@@ -58,6 +58,16 @@ so it works even where a raw `git push` of a tag ref is restricted).
   until it is updated from `test_plan`. Repos without prefixes keep their
   routes and slugs. Components that declare routers or mounts gain a
   `routing` payload field. There is no schema migration.
+- `impact_plan` is now transitive (QA-signal review finding 4). A
+  recursive CTE walks `depends_on`/`governs`/`implemented_by`/`affects` up
+  to `max_depth` hops: default 3, range 1-10, exposed on the MCP tool as
+  `impact_plan(slug, max_depth=3)`. Each `affected` entry gains `depth`
+  (shortest hop count) and `via` (the previous hop). Ties at the same depth
+  resolve to the smallest `(relation, via)`. Cycles are never re-entered.
+  `coverage_gaps` / `stale_coverage` / … now cover components at every
+  depth, so `test_plan` and `kc eval`'s `impact` metric see the wider blast
+  radius. Depth-1 entries keep their old fields and order; `max_depth=1`
+  reproduces the old result. No schema change.
 
 ## [1.4.1] — 2026-10-29
 
