@@ -270,6 +270,55 @@ def inspect_cmd(repo_dir: str) -> None:
                 click.echo(f"  failed: {', '.join(last_run.failed_files or [])}")
 
 
+@main.command("eval")
+@click.option("--dir", "repo_dir", type=click.Path(file_okay=False, exists=True), default=".",
+              show_default=True, help="Repository directory (contains kc.toml).")
+@click.option("--labels", "labels_path", type=click.Path(dir_okay=False), default=None,
+              help="Hand-labeled ground truth (default: <dir>/kc-eval.toml).")
+@click.option("--json", "as_json", is_flag=True, help="Emit metrics plus per-label detail as JSON.")
+def eval_cmd(repo_dir: str, labels_path: str | None, as_json: bool) -> None:
+    """Precision/recall of covers, stale_coverage, change detection and impact vs labels."""
+    import json
+    from pathlib import Path
+
+    from sqlalchemy.orm import Session
+
+    from knowledge_compiler.compiler.run import CompileError, read_repo_config
+    from knowledge_compiler.evaluation import LabelError, evaluate, load_labels
+    from knowledge_compiler.mcp.queries import resolve_repo
+    from knowledge_compiler.storage.db import DatabaseUnavailableError, check_connection, make_engine
+
+    try:
+        slug = read_repo_config(Path(repo_dir))["slug"]
+        labels = load_labels(Path(labels_path) if labels_path else Path(repo_dir) / "kc-eval.toml")
+    except (CompileError, LabelError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    engine = make_engine()
+    try:
+        check_connection(engine)
+    except DatabaseUnavailableError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    with Session(engine) as session:
+        try:
+            report = evaluate(session, resolve_repo(session, slug).id, labels)
+        except (LabelError, LookupError) as exc:
+            raise click.ClickException(str(exc)) from exc
+
+    if as_json:
+        click.echo(json.dumps(report.as_dict(), indent=2))
+        return
+
+    def fmt(v: float | None) -> str:
+        return "n/a" if v is None else f"{v:.2f}"
+
+    click.echo(f"{'metric':<18} {'precision':>9} {'recall':>7} {'f1':>5}   tp/fp/fn")
+    for name, m in report.metrics.items():
+        click.echo(f"{name:<18} {fmt(m.precision):>9} {fmt(m.recall):>7} {fmt(m.f1):>5}"
+                   f"   {m.tp}/{m.fp}/{m.fn}")
+
+
 @main.command("validate-test")
 @click.argument("test_file", type=click.Path(exists=True, dir_okay=False))
 @click.option("--for-entity", "for_entity", required=True,

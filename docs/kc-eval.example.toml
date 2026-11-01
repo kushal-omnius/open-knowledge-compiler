@@ -1,0 +1,31 @@
+# Hand-labeled ground truth for `kc eval`. Copy to <repo>/kc-eval.toml.
+#
+# Label from the source tree, not from kc output: the point is to measure
+# where compiled knowledge disagrees with what a reviewer knows is true.
+# Aim for ~30 [[coverage]] entries and ~20 [[change]] entries, including
+# at least 5 changes that only edit function bodies.
+
+# A component (module path, as `kc inspect`/the wiki shows it) and the test
+# files that genuinely exercise its behavior. Leave out tests that merely
+# import it for fixtures, types or setup.
+[[coverage]]
+component = "billing.rules"
+tests = ["tests/test_rules.py"]
+stale = false   # optional: true if every covering test predates the last behavior change
+
+[[coverage]]
+component = "billing.pricing"
+tests = []      # genuinely untested — a correct coverage gap
+
+# A compiled change, named by PR number or commit prefix (not the bootstrap
+# compile). `changed`: components whose behavior changed. `affected`: everything
+# that needs re-testing, which always includes `changed`.
+[[change]]
+pr = 42
+changed = ["billing.rules"]
+affected = ["billing.rules", "api.checkout"]
+
+[[change]]
+commit = "a3f9c1d20b12"
+changed = ["billing.pricing"]
+affected = ["billing.pricing"]
