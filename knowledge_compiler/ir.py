@@ -46,6 +46,7 @@ DETERMINISTIC_FACT_TYPES = frozenset({
     "source_change_observed", "pr_observed", "jira_observed",
     "doc_section_observed", "mutation_score_observed", "user_journey_observed",
     "state_transition_observed", "escaped_defect_observed",
+    "router_observed", "router_mount_observed",
 })
 
 LLM_CANDIDATE_FACT_TYPES = frozenset({

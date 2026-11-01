@@ -324,6 +324,23 @@ class _Normalizer:
                 symbol["body_hash"] = f.payload["body_hash"]
             symbols_by_module.setdefault(module, []).append(symbol)
 
+        # router declarations and mounts, kept on the component that declares
+        # them: PR compiles read this from current state to find which files
+        # must be re-collected so route prefixes compose the same as a full compile
+        module_of_file = {f.payload["file"]: f.payload["path"] for f in self._facts_of("component_observed")}
+        routing_by_module: dict[str, dict[str, list]] = {}
+        for f in self._facts_of("router_observed"):
+            module = module_of_file.get(f.payload["file"])
+            if module is not None:
+                routing_by_module.setdefault(module, {"routers": [], "mounts": []})["routers"].append(
+                    {"router": f.payload["router"], "prefix": f.payload["prefix"]})
+        for f in self._facts_of("router_mount_observed"):
+            module = module_of_file.get(f.payload["file"])
+            if module is not None:
+                routing_by_module.setdefault(module, {"routers": [], "mounts": []})["mounts"].append(
+                    {"parent": f.payload["parent"], "child": f.payload["child"],
+                     "prefix": f.payload["prefix"]})
+
         deps_by_module: dict[str, list[str]] = {}
         for f in self._facts_of("dependency_observed"):
             deps_by_module.setdefault(f.payload["from_path"], []).append(f.payload["to_path"])
@@ -345,6 +362,15 @@ class _Normalizer:
                 # external dependency coordinates (ecosystem-agnostic; resolution is post-V1)
                 "external_dependencies": [d for d in deps if not self._resolve_internal(d, internal)],
             }
+            if path in routing_by_module:
+                # only present when the module declares routers or mounts, so
+                # components without routing keep their payload (and hash) as is
+                routing = routing_by_module[path]
+                payload["routing"] = {
+                    "routers": sorted(routing["routers"], key=lambda r: (r["router"], r["prefix"])),
+                    "mounts": sorted(routing["mounts"],
+                                     key=lambda m: (m["parent"], m["child"], m["prefix"])),
+                }
             self._put(self._entity("component", f"component/{slugify(path)}", path, payload),
                       rule="natural_key", signals={}, facts=group)
 
@@ -501,18 +527,85 @@ class _Normalizer:
             return candidates[0]
         return None
 
+    # -- router prefix composition (FastAPI include_router, Express app.use) -------
+
+    _MAX_ROUTE_PREFIXES = 16  # a router mounted under many parents is rare; cap the fan-out
+
+    def _router_key(self, ref: str, internal: set[str]) -> str:
+        """Dotted router ref (`app.api.items.router`) -> `<component>:<attr>`.
+        The component is the longest prefix that names an internal component
+        (dotted-suffix fallback for an import root below the repo root, same
+        rule as _resolve_internal). A ref with no internal component, such as a
+        third-party app object, keys on itself."""
+        parts = ref.split(".")
+        for i in range(len(parts) - 1, 0, -1):
+            if ".".join(parts[:i]) in internal:
+                return f"{'.'.join(parts[:i])}:{'.'.join(parts[i:])}"
+        for i in range(len(parts) - 1, 0, -1):
+            head = ".".join(parts[:i])
+            candidates = [c for c in internal if c.endswith("." + head)]
+            if len(candidates) == 1:
+                return f"{candidates[0]}:{'.'.join(parts[i:])}"
+        return ref
+
+    @staticmethod
+    def _join_route(prefix: str, route: str) -> str:
+        if not prefix:
+            return route
+        if not route:
+            return prefix  # `@router.post("")` under prefix /items -> /items
+        return prefix.rstrip("/") + (route if route.startswith("/") else "/" + route)
+
+    def _route_prefixes(self, internal: set[str]) -> dict[str, list[str]]:
+        """Router key -> every full prefix it is served under. full(R) is the
+        full prefix of each parent R is mounted on, plus the mount's prefix,
+        plus R's own prefix. A router mounted nowhere is served at its own prefix.
+        Cycles (a.use(b); b.use(a)) are cut at the repeated router."""
+        own: dict[str, str] = {}
+        for f in self._facts_of("router_observed"):
+            own[self._router_key(f.payload["router"], internal)] = f.payload["prefix"]
+        parents: dict[str, set[tuple[str, str]]] = {}
+        for f in self._facts_of("router_mount_observed"):
+            child = self._router_key(f.payload["child"], internal)
+            parents.setdefault(child, set()).add(
+                (self._router_key(f.payload["parent"], internal), f.payload["prefix"]))
+
+        # No memo: a result computed while some routers are on the visiting path
+        # (cycle-cut) differs from the top-level one, and reusing it would make
+        # the output depend on iteration order. Routing graphs are small.
+        def full(key: str, visiting: frozenset[str]) -> list[str]:
+            mine = own.get(key, "")
+            result: set[str] = set()
+            for parent, mount_prefix in sorted(parents.get(key, ())):
+                if parent in visiting:
+                    continue
+                for p in full(parent, visiting | {key}):
+                    result.add(self._join_route(self._join_route(p, mount_prefix), mine))
+            return sorted(result)[: self._MAX_ROUTE_PREFIXES] if result else [mine]
+
+        return {key: full(key, frozenset()) for key in set(own) | set(parents)}
+
     def _apis(self) -> None:
-        by_key: dict[tuple[str, str], list[Fact]] = {}
+        # same observed ∪ current-state set _components resolves imports against
+        internal = {f.payload["path"] for f in self._facts_of("component_observed")} | \
+            {e.payload["path"] for e in self.current.entities if e.entity_type == "component"}
+        prefixes = self._route_prefixes(internal)
+        by_key: dict[tuple[str, str], list[tuple[Fact, str]]] = {}
         for f in self._facts_of("api_endpoint_observed"):
-            key = (f.payload["method"], normalize_route(f.payload["route"]))
-            by_key.setdefault(key, []).append(f)
+            routes = [f.payload["route"]]
+            if f.payload.get("router"):
+                key = self._router_key(f.payload["router"], internal)
+                routes = [self._join_route(p, f.payload["route"]) for p in prefixes.get(key, [""])]
+            for raw in routes:
+                by_key.setdefault((f.payload["method"], normalize_route(raw)), []).append((f, raw))
 
         for method, route in sorted(by_key):
-            group = by_key[(method, route)]
+            pairs = by_key[(method, route)]
+            group = list({id(f): f for f, _ in pairs}.values())
             sources = sorted({f.payload["source"] for f in group})
             payload = {
                 "method": method, "route": route,
-                "raw_routes": sorted({f.payload["route"] for f in group}),
+                "raw_routes": sorted({raw for _, raw in pairs}),
                 "handlers": sorted({f.payload["handler"] for f in group if f.payload.get("handler")}),
                 "sources": sources,  # discrepancy attribute (ir.md §4.3): visible, never auto-resolved
                 "files": sorted({f.payload["file"] for f in group}),

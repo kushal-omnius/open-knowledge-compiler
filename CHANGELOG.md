@@ -39,6 +39,25 @@ so it works even where a raw `git push` of a tag ref is restricted).
   as changed (`~N`), once, because each `symbols` entry gains `body_hash`.
   Expect a full wiki republish and re-embedding of components on that run.
   There is no schema migration; `symbols` is JSON payload.
+- API routes now include router prefixes (QA-signal review finding 6).
+  FastAPI `APIRouter(prefix=...)` + `include_router(..., prefix=...)` and
+  Express `app.use('/x', router)` (ESM imports, CommonJS `require`,
+  `export default` / `module.exports`) compose into the full served route.
+  This covers nesting, a router mounted more than once (one API per mount),
+  routers mounted from another file, and an import root below the repo root.
+  The analyzers emit new per-file `router_observed` / `router_mount_observed`
+  facts and a `router` ref on `api_endpoint_observed`. Normalize composes
+  them. PR and commit compiles that touch routing now re-collect every known
+  routing file, so an incremental compile composes the same routes as a full
+  one (`kc verify` stays clean). Also fixed: a FastAPI empty path
+  (`@router.post("")`) was not detected.
+  **Upgrade note:** in repos that use prefixes, API routes and therefore
+  API slugs change (`api/get-items` becomes `api/get-api-v1-items`). The
+  first compile reports the old APIs removed and the new ones added, and a
+  `kc-covers:` header citing an old API slug will fail `kc validate-test`
+  until it is updated from `test_plan`. Repos without prefixes keep their
+  routes and slugs. Components that declare routers or mounts gain a
+  `routing` payload field. There is no schema migration.
 
 ## [1.4.1] — 2026-10-29
 
