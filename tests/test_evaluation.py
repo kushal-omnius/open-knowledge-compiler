@@ -4,8 +4,8 @@ and impact.
 
 The harness is only useful if it can *disagree* with the compiler, so the
 integration tests below are built around cases where compiled knowledge and
-ground truth differ — an import-only test the compiler counts as coverage, and
-a body-only edit the compiler's change detection can't see.
+ground truth differ: an import-only test (now scored as weak, not coverage)
+and a body-only edit (now detected via body_hash).
 
 Pure parsing/scoring tests need nothing; integration tests use real Postgres,
 real git, real tree-sitter (same conventions as test_qa_grounding.py).
@@ -126,7 +126,10 @@ def _evaluate(repo_dir: Path, slug: str, labels_toml: str):
 
 
 @needs_db
-def test_import_only_test_is_scored_as_a_covers_false_positive(repo):
+def test_import_only_test_is_not_counted_as_coverage(repo):
+    """Review finding 2, fixed by coverage mechanisms: test_smoke.py imports
+    billing.rules but never calls it, so it is weak (import, 0.3) evidence and
+    not counted. test_rules.py calls apply_discount (call, 0.7) and is."""
     from knowledge_compiler.compiler.run import compile_full
     repo_dir, slug = repo
     compile_full(repo_dir, llm_provider=None)
@@ -134,9 +137,12 @@ def test_import_only_test_is_scored_as_a_covers_false_positive(repo):
     report = _evaluate(repo_dir, slug, '[[coverage]]\ncomponent = "billing.rules"\n'
                                        'tests = ["tests/test_rules.py"]\nstale = false\n')
     covers = report.metrics["covers"]
-    assert (covers.tp, covers.fp, covers.fn) == (1, 1, 0)
-    assert covers.precision == 0.5
-    assert report.items[0]["predicted_tests"] == ["tests/test_rules.py", "tests/test_smoke.py"]
+    assert (covers.tp, covers.fp, covers.fn) == (1, 0, 0)
+    assert covers.precision == 1.0
+    assert report.items[0]["predicted_tests"] == ["tests/test_rules.py"]
+    assert report.items[0]["weak_tests"] == ["tests/test_smoke.py"]
+    assert report.items[0]["mechanisms"] == {"tests/test_rules.py": "call",
+                                             "tests/test_smoke.py": "import"}
 
 
 @needs_db
@@ -198,4 +204,4 @@ def test_cli_prints_metric_table(repo):
 
     result = CliRunner().invoke(main, ["eval", "--dir", str(repo_dir)])
     assert result.exit_code == 0, result.output
-    assert "covers" in result.output and "0.50" in result.output
+    assert "covers" in result.output and "1.00" in result.output

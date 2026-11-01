@@ -179,12 +179,12 @@ Labels use component module paths and test file paths, never slugs, so they can 
 Example output (a logic-only edit to `billing/rules.py`, with one real test and one import-only smoke test; labels: `tests = ["tests/test_rules.py"]`, `stale = true`, `changed = affected = ["billing.rules"]`):
 ```
 metric             precision  recall    f1   tp/fp/fn
-covers                  0.50    1.00  0.67   1/1/0
+covers                  1.00    1.00  1.00   1/0/0
 stale_coverage          1.00    1.00  1.00   1/0/0
 change_detection        1.00    1.00  1.00   1/0/0
 impact                  0.33    1.00  0.50   1/2/0
 ```
-`covers` still counts the import-only smoke test (review finding 2). `impact` precision is low because `impact_plan` also lists the two test modules that import `billing.rules`. Before per-symbol `body_hash`, the same scenario scored 0.00 recall on `stale_coverage`, `change_detection` and `impact`, because the edit produced no delta.
+`covers` scores tests at confidence ≥ 0.5, so the import-only smoke test is reported under `weak_tests` in `--json` instead of as a false positive (before coverage mechanisms: precision 0.50). `impact` precision is low because `impact_plan` also lists the two test modules that import `billing.rules`. Before per-symbol `body_hash`, the same scenario scored 0.00 recall on `stale_coverage`, `change_detection` and `impact`, because the edit produced no delta.
 
 ---
 
@@ -335,7 +335,7 @@ One `kc serve` process per repo. To serve multiple repos, run multiple processes
 | `list_entities(entity_type, limit?)` | List all entities of one type. |
 | `recent_changes(runs?)` | Knowledge deltas of the N most recent compiles: what was added, changed, removed, or moved. |
 | `which_pr_introduced(slug)` | Which PR (or bootstrap compile) first added this entity. |
-| `coverage_for(component_slug)` | Which tests cover this component. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). Also reports `escaped_defect_fix_count`/`escaped_defect_trust_score`/`low_escaped_defect_trust` (ADR-020): whether bug-fix PRs landing on this component found it already "covered" — an outcome-based signal, populated only on PR-triggered compiles, `trust_score` withheld (`null`) below a minimum fix-count sample. |
+| `coverage_for(component_slug)` | Which tests cover this component. Each test reports `mechanism` (`http` \| `call` \| `import`) and `confidence` (0.8 / 0.7 / 0.3; `null` for tests compiled before this signal existed, counted as coverage). `covered` is true only when some test reaches confidence ≥ 0.5; `weakly_covered` flags a component whose only tests merely import it (listed in `tests`, but a gap for `impact_plan`/`test_plan`); `max_confidence` is the best seen. Each test now also reports `stale` (true if the component changed more recently than the test's own `last_compile_run_id` — ADR-018, zero schema change, computed from the existing entity envelope) and, when a `[mutation]` scores file is configured, `mutation_kill_rate`/`low_mutation_kill` (ADR-012's ≤40% trigger). Also reports `escaped_defect_fix_count`/`escaped_defect_trust_score`/`low_escaped_defect_trust` (ADR-020): whether bug-fix PRs landing on this component found it already "covered" — an outcome-based signal, populated only on PR-triggered compiles, `trust_score` withheld (`null`) below a minimum fix-count sample. |
 | `linked_context(component_slug)` | The business rules, features, and risks that govern/are-implemented-by/affect this component — the same context `test_plan` inlines, exposed standalone for direct lookups. |
 | `journey_coverage(journey_slug)` | Whether a declared `[[journeys]]` end-to-end journey is covered by a single test that exercises every step's component, versus each step only being covered individually. Also returns `status` (`complete`\|`partial`\|`invalid`) and `unresolved_steps` — a step that didn't resolve at compile time is dropped, not failed, so `covered_end_to_end: true` on a non-`complete` journey only proves the resolved portion of the declared chain (dogfood-review finding). |
 | `knowledge_stats()` | Entity counts by type and last successful compile metadata, plus `knowledge_completeness` (`files_seen`/`files_parsed`/`files_failed`/`parse_coverage`/`failed_files` — null on compiles predating this signal, dogfood-review finding). |

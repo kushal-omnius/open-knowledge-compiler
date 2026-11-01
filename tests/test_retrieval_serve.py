@@ -173,7 +173,11 @@ def test_mcp_query_functions(compiled):
         assert entity["provenance"]  # every answer carries how-do-we-know
 
         cov = queries.coverage_for(session, rid, "component/billing-rules")
-        assert cov["covered"] and cov["tests"][0]["node_id"] == "tests/test_rules.py::test_cap"
+        # the fixture's test imports apply_discount but never calls it: listed,
+        # but only as import-level (weak) evidence, so not counted as coverage
+        assert cov["tests"][0]["node_id"] == "tests/test_rules.py::test_cap"
+        assert cov["tests"][0]["mechanism"] == "import" and cov["tests"][0]["confidence"] == 0.3
+        assert not cov["covered"] and cov["weakly_covered"]
 
         intro = queries.which_pr_introduced(session, rid, "component/billing-rules")
         assert intro["pr_number"] is None and "bootstrap" in intro["note"]

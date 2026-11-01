@@ -193,13 +193,22 @@ def evaluate(session: Session, repo_id: int, labels: Labels) -> EvalReport:
     covers, stale = Metric(), Metric()
     for label in labels.coverage:
         cov = queries.coverage_for(session, repo_id, path_to_slug[label.component])
-        tests = session.execute(select(EntityRow.payload).where(
+        # score what impact_plan treats as coverage: tests at or above the
+        # confidence bar (or with no recorded evidence: pre-upgrade compiles).
+        # Weak, import-only tests are listed separately in --json.
+        counted = {t["slug"]: t for t in cov["tests"]
+                   if t["confidence"] is None or t["confidence"] >= queries.COVERAGE_GAP_CONFIDENCE}
+        rows = session.execute(select(EntityRow.slug, EntityRow.payload).where(
             EntityRow.repo_id == repo_id,
-            EntityRow.slug.in_([t["slug"] for t in cov["tests"]]))).scalars().all()
-        predicted = {p["file"] for p in tests}
+            EntityRow.slug.in_([t["slug"] for t in cov["tests"]]))).all()
+        file_of = {slug: payload["file"] for slug, payload in rows}
+        predicted = {file_of[s] for s in counted}
         covers.add(predicted, label.tests)
         item = {"kind": "coverage", "component": label.component,
                 "predicted_tests": sorted(predicted), "expected_tests": sorted(label.tests),
+                "weak_tests": sorted({file_of[t["slug"]] for t in cov["tests"]
+                                     if t["slug"] not in counted}),
+                "mechanisms": {file_of[t["slug"]]: t["mechanism"] for t in cov["tests"]},
                 "predicted_stale": cov["stale"]}
         if label.stale is not None:
             # stale is a binary judgment per component: positive class = "stale"

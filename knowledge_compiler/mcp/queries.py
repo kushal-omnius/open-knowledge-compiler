@@ -188,6 +188,9 @@ def linked_context(session: Session, repo_id: int, component_slug: str) -> dict:
     return {"business_rules": business_rules, "features": features, "risks": risks}
 
 
+COVERAGE_GAP_CONFIDENCE = 0.5
+
+
 def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | None:
     component = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug == component_slug)).scalar_one_or_none()
@@ -207,10 +210,27 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
     # given test was itself touched, the test may be asserting stale behavior —
     # a cheaper, equivalent read of the same signal a delta_changes join would
     # give, with no new schema and no new query surface.
-    test_list = [{"slug": t.slug, "node_id": t.payload.get("node_id"),
-                 "framework": t.payload.get("framework"),
-                 "stale": t.last_compile_run_id < component.last_compile_run_id}
-                for t in tests]
+    test_list = []
+    for t in tests:
+        # coverage quality (QA-signal review finding 2): the strongest evidence
+        # this test has for *this* component. Tests compiled before the
+        # `coverage` field existed have no evidence recorded: reported as
+        # unknown (None) and, as before, counted as real coverage.
+        evidence = next((c for c in t.payload.get("coverage", [])
+                         if c["component"] == component_slug), None)
+        test_list.append({
+            "slug": t.slug, "node_id": t.payload.get("node_id"),
+            "framework": t.payload.get("framework"),
+            "stale": t.last_compile_run_id < component.last_compile_run_id,
+            "mechanism": evidence["mechanism"] if evidence else None,
+            "confidence": evidence["confidence"] if evidence else None,
+        })
+    # Below COVERAGE_GAP_CONFIDENCE (e.g. a test that only imports the module)
+    # is "weak": listed, but not counted as coverage, so impact_plan reports
+    # the component as a gap.
+    strong = [t for t in test_list
+              if t["confidence"] is None or t["confidence"] >= COVERAGE_GAP_CONFIDENCE]
+    confidences = [t["confidence"] for t in test_list if t["confidence"] is not None]
     # Mutation-kill surfacing (item 2, ADR-012's named trigger condition): when
     # a component already looks "covered" but its mutation-kill rate (opt-in,
     # collectors/mutation.py) is low, that's the concrete, execution-based
@@ -218,7 +238,7 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
     # invariant — surfaced here, inline, instead of only in a separate CI
     # artifact nobody consuming test_plan/coverage_for is looking at.
     mutation_kill_rate = component.payload.get("mutation_kill_rate")
-    low_mutation_kill = (bool(tests) and mutation_kill_rate is not None
+    low_mutation_kill = (bool(strong) and mutation_kill_rate is not None
                         and mutation_kill_rate <= 0.4)
     # Escaped-defect trust score (ADR-020): a forward-looking, outcome-based
     # signal, distinct from every proxy above — of the bug-fix PRs that have
@@ -230,11 +250,14 @@ def coverage_for(session: Session, repo_id: int, component_slug: str) -> dict | 
     # _MIN_ESCAPED_DEFECT_SAMPLE) per the ADR's own sparse-sample caveat.
     escaped_defect_fix_count = component.payload.get("escaped_defect_fix_count", 0)
     escaped_defect_trust_score = component.payload.get("escaped_defect_trust_score")
-    low_escaped_defect_trust = (bool(tests) and escaped_defect_trust_score is not None
+    low_escaped_defect_trust = (bool(strong) and escaped_defect_trust_score is not None
                                and escaped_defect_trust_score <= 0.5)
     return {"component": component_slug,
-            "covered": bool(tests),
-            "stale": bool(test_list) and all(t["stale"] for t in test_list),
+            "covered": bool(strong),
+            # has covers edges, but every one is below the confidence bar
+            "weakly_covered": bool(test_list) and not strong,
+            "max_confidence": max(confidences) if confidences else None,
+            "stale": bool(strong) and all(t["stale"] for t in strong),
             "mutation_kill_rate": mutation_kill_rate,
             "low_mutation_kill": low_mutation_kill,
             "escaped_defect_fix_count": escaped_defect_fix_count,

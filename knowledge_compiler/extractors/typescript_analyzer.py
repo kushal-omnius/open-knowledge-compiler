@@ -23,7 +23,7 @@ import tree_sitter_typescript as tsts
 from tree_sitter import Language, Node, Parser
 
 from knowledge_compiler.extractors.body_hash import body_hash
-from knowledge_compiler.extractors import express_routing
+from knowledge_compiler.extractors import express_routing, js_test_evidence
 from knowledge_compiler.ir import Anchor, Artifact, Extraction, Fact, content_hash
 
 _TS = Language(tsts.language_typescript())
@@ -197,6 +197,8 @@ class TypeScriptAnalyzer:
         aliases = express_routing.import_aliases(
             tree.root_node, lambda spec: _resolve_import(spec, ref, configs)[0])
         express_routing.routing_facts(tree.root_node, module, ref, aliases, fact)
+        if is_test:
+            js_test_evidence.test_evidence(tree.root_node, ref, module, aliases, fact)
         for m in _ROUTE.finditer(artifact.content):
             line = artifact.content[: m.start()].count("\n") + 1
             payload = {"method": m.group(2).upper(), "route": m.group(3), "handler": None,
