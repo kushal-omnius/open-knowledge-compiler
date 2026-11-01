@@ -7,7 +7,9 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![OKF BundleDex](https://bundledex.net/static-badge.svg)](https://bundledex.net)
 
-Compiles software engineering artifacts (Git repos, PRs, Jira, docs, OpenAPI, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
+Compiles software engineering artifacts (Git history, PRs, Jira, source code, tests) into a structured, persistent knowledge base — queryable by humans (living wiki) and AI agents (MCP). Not another RAG system: raw artifacts go in once, compiled knowledge stays synchronized through incremental, PR-triggered compilation.
+
+**Inputs today:** Git history, pull requests (GitHub), Jira issues linked from PRs, source code (Python, TypeScript, JavaScript) and the tests in it. **Planned, not yet implemented:** prose docs (README/Markdown) and OpenAPI specs — no collector or extractor exists for either yet.
 
 **Status:** Architecture v1.0 frozen · V1 pipeline implemented (deterministic compiler for Python + TypeScript + JavaScript, incremental compilation with reconcile + verify, OKF v0.2-conformant wiki with loop-safe branch publishing and its own `kc validate-okf` checker, opt-in LLM semantic layer, opt-in embeddings with hybrid retrieval, read-only MCP server). Apache-2.0, dogfooded on real repositories including compiling itself (`kc verify`-clean, `kc validate-okf`-conformant). CI runs the full test suite on every push/PR against a real Postgres instance. Next: incremental `--pr` compilation wired into CI for this repo itself, and a real entry-point plugin ecosystem beyond the built-ins.
 
