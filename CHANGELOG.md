@@ -46,7 +46,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
   delta. `test_body_only_change_is_detected` is no longer xfail.
   **Upgrade note:** the first compile after upgrading reports every component
   as changed (`~N`), once, because each `symbols` entry gains `body_hash`.
-  Expect a full wiki republish and re-embedding of components on that run.
+  Expect a full wiki republish on that run. There is no re-embedding: the
+  embedding text uses only string payload fields, and `symbols` is a list.
   There is no schema migration; `symbols` is JSON payload.
 - API routes now include router prefixes (QA-signal review finding 6).
   FastAPI `APIRouter(prefix=...)` + `include_router(..., prefix=...)` and
