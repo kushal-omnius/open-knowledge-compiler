@@ -599,6 +599,7 @@ class _Normalizer:
             for raw in routes:
                 by_key.setdefault((f.payload["method"], normalize_route(raw)), []).append((f, raw))
 
+        slugs = self._api_slugs(sorted(by_key))
         for method, route in sorted(by_key):
             pairs = by_key[(method, route)]
             group = list({id(f): f for f, _ in pairs}.values())
@@ -611,8 +612,41 @@ class _Normalizer:
                 "files": sorted({f.payload["file"] for f in group}),
             }
             name = f"{method} {route}"
-            slug = f"api/{slugify(name)}"
-            self._put(self._entity("api", slug, name, payload), "natural_key", {}, group)
+            self._put(self._entity("api", slugs[(method, route)], name, payload),
+                      "natural_key", {}, group)
+
+    def _api_slugs(self, keys: list[tuple[str, str]]) -> dict[tuple[str, str], str]:
+        """Slug per (method, normalized route), with ADR-004's collision rule:
+        a deterministic `-2`, `-3`, ... suffix at mint time. slugify drops `{}`
+        and trailing slashes, so `GET /users`, `GET /users/{}` and `GET /users/`
+        all slugify to `api/get-users`. Before this, all but one were silently
+        overwritten.
+
+        An API that already exists in current state keeps its slug (identity is
+        the natural key, so the slug is looked up by it), and those slugs are
+        reserved first. A newly seen colliding key then takes the next free
+        suffix, in sorted key order. No existing slug ever changes; only routes
+        that previously had no entity get a suffixed one. As ADR-004 accepts,
+        a rebuild into an empty database may hand out suffixes differently
+        ("equivalent modulo slug renaming")."""
+        existing = {(e.payload["method"], e.payload["route"]): e.slug
+                    for e in self.current.entities if e.entity_type == "api"}
+        taken = set(existing.values())
+        slugs: dict[tuple[str, str], str] = {}
+        for key in keys:
+            if key in existing:
+                slugs[key] = existing[key]
+        for key in keys:
+            if key in slugs:
+                continue
+            base = f"api/{slugify(f'{key[0]} {key[1]}')}"
+            slug, n = base, 1
+            while slug in taken:
+                n += 1
+                slug = f"{base}-{n}"
+            slugs[key] = slug
+            taken.add(slug)
+        return slugs
 
     def _test_coverage(self) -> None:
         # `targets` stays the module's import list (unchanged shape). Per-test

@@ -89,6 +89,12 @@ so it works even where a raw `git push` of a tag ref is restricted).
   coverage until the next full compile. Known limitation: a function passed
   rather than called (`CliRunner().invoke(main)`, `pytest.raises(E, f)`)
   is import-level evidence.
+- API routes whose slugs collide are no longer silently dropped. `GET /users`,
+  `GET /users/{id}` and `GET /users/` all slugify to `api/get-users`, and
+  Normalize kept only the last one. It now applies ADR-004's dedup-suffix
+  rule: an API that already exists keeps its slug, and a newly seen colliding
+  route gets `-2`, `-3`, … in sorted order. No existing slug changes; the
+  previously missing routes appear as new API entities.
 
 ## [1.4.1] — 2026-10-29
 
