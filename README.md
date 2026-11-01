@@ -246,6 +246,7 @@ kc reconcile -v
 | `kc reconcile -v` | Same, plus a per-slug breakdown of added/changed/removed entities in the summary |
 | `kc verify` | Zero-write shadow compile; reports drift between incremental state and a full compile |
 | `kc inspect` | The debugging surface: counts by type + last delta |
+| `kc eval` | Precision/recall of `covers`, `stale_coverage`, change detection and impact against hand labels in `kc-eval.toml` ([example](docs/kc-eval.example.toml)) |
 | `kc validate-test <file> --for-entity <slug>` | Score a generated test's `kc-covers:` header against compiled knowledge; exits 1 if header missing or any slug doesn't exist ([ADR-012](docs/decisions/ADR-012-defer-verification-requirement-entity.md)) |
 | `kc validate-okf` | Check the emitted wiki bundle against OKF conformance rules ([ADR-013](docs/decisions/ADR-013-open-source-okf-conformance.md), [docs/okf-conformance.md](docs/okf-conformance.md)) |
 | `kc serve` | Read-only MCP server (stdio) over the knowledge base — never compiles (`pip install -e .[serve]`) |
