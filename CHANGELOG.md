@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-11-01
+
 ### Added
 
 - `kc eval`: scores `covers`, `stale_coverage`, per-run change detection and
