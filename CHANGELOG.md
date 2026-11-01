@@ -68,6 +68,27 @@ so it works even where a raw `git push` of a tag ref is restricted).
   depth, so `test_plan` and `kc eval`'s `impact` metric see the wider blast
   radius. Depth-1 entries keep their old fields and order; `max_depth=1`
   reproduces the old result. No schema change.
+- Coverage now distinguishes tests that exercise a component from tests
+  that merely import it (QA-signal review finding 2). Python, TypeScript and
+  JavaScript test files emit per-test `call` evidence (a test body calls an
+  imported name) and `http` evidence (a test-client or supertest request).
+  Calls in fixtures, `beforeEach` setup, local helpers and `conftest.py` are
+  excluded. Normalize matches `http` paths to API routes and attributes them
+  to the defining component. It records the strongest evidence per covered
+  component in a new `coverage` field on the `test_coverage` payload: http
+  0.8, call 0.7, import 0.3. `covers` edges are unchanged; there is no
+  schema migration and no edge attributes. `coverage_for` reports
+  `mechanism`/`confidence` per test plus `weakly_covered` and
+  `max_confidence`. `covered` (and therefore `impact_plan`/`test_plan` gaps,
+  `stale`, `low_mutation_kill` and `low_escaped_defect_trust`) now requires
+  confidence ≥ 0.5. `kc eval`'s `covers` metric scores the same set and
+  lists weak tests in `--json`.
+  **Upgrade note:** components covered only by import-level tests become
+  coverage gaps, so expect more `test_plan` recommendations. Tests compiled
+  before this change have no evidence recorded and keep counting as
+  coverage until the next full compile. Known limitation: a function passed
+  rather than called (`CliRunner().invoke(main)`, `pytest.raises(E, f)`)
+  is import-level evidence.
 
 ## [1.4.1] — 2026-10-29
 

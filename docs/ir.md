@@ -100,7 +100,7 @@ Emitted by language analyzers and deterministic extractors:
 | `router_observed` | router ref (`<module>.<name>`), own prefix (FastAPI `APIRouter(prefix=...)`; `""` for `FastAPI()`, Express `Router()`/`express()`), file | Python, TypeScript, JavaScript analyzers (additive, finding 6) |
 | `router_mount_observed` | parent ref, child ref, mount prefix, file — FastAPI `include_router(child, prefix=...)`, Express `parent.use('/prefix', ..., child)`; Express `export default r` / `module.exports = r` are recorded as an empty-prefix mount of `r` under `<module>.default` so importers' default imports reach the router | Python, TypeScript, JavaScript analyzers (additive, finding 6) |
 | `test_case_observed` | test node id, framework, **module** (the analyzer's own module-path convention — Normalize never derives it with language assumptions; boundary leak found by the TypeScript stress test), anchor | analyzers |
-| `test_target_observed` | test node id → targeted symbol/component, mechanism (import/call/marker) | analyzers |
+| `test_target_observed` | test node id → targeted symbol/component, mechanism (import/call/marker; plus `http` — additive clarification, QA-signal review finding 2). `import` facts are per test *module* (no `node_id`); `call` (a call inside a test function body to an imported name — fixtures, `beforeEach` setup, local helpers and conftest.py never count) and `http` (a test-client request with a literal path, plus `method`) carry the test's `node_id` | analyzers (Python, TypeScript, JavaScript) |
 | `source_change_observed` | file, change kind, spans (the PR's *source diff* — drives incremental scoping; deliberately named to avoid confusion with the knowledge delta) | git collector |
 | `pr_observed` | number, title, body, merged_at, commit shas, linked issue keys | PR collector |
 | `jira_observed` | issue key, summary, status, acceptance criteria, links | Jira collector |
@@ -219,7 +219,7 @@ delta = {
 | — (repo config, at Collect) | Project (+ `contains` to top-level Components) |
 | `component_observed` + `dependency_observed` + `symbol_observed` | Component (+ `depends_on`, `contains`). Each entry in the component's `symbols` payload carries `symbol_path`, `kind` and, when the analyzer emits it, `body_hash`, so a logic-only edit changes the component's content_hash and produces a delta (additive clarification, QA-signal review finding 1) |
 | `api_endpoint_observed` (all sources) | API (+ `defined_in`) |
-| `test_case_observed` + `test_target_observed` | Test Coverage (+ `covers`) |
+| `test_case_observed` + `test_target_observed` | Test Coverage (+ `covers`). The payload keeps `targets` (the module's imports) and adds `coverage`: one `{component, mechanism, confidence}` per covered component, holding the strongest evidence: `http` 0.8 (request route-matched to an API, attributed to its defining component; `{}`/`:param` match one segment, fewest params wins), `call` 0.7, `import` 0.3. `covers` edges are unchanged (any evidence). Consumers treat confidence < 0.5 as a gap. Additive clarification, QA-signal review finding 2; edge attributes were deliberately not used (data-model.md: no relationship payload in V1) |
 | `pr_observed` | Pull Request |
 | `jira_observed` | Jira Story (+ `motivates` where links resolve) |
 | `feature_candidate` | Feature via identity cascade (+ `implemented_by`, `exposes`) |

@@ -39,6 +39,7 @@ _ROUTE_VERB = re.compile(
 _ROUTE_FLASK = re.compile(r"@\s*([\w.]+)\.route\s*\(\s*[\"']([^\"']+)[\"'](.*)", re.DOTALL)
 # Constructors whose result is a router: FastAPI apps and APIRouter instances.
 _ROUTER_CTORS = frozenset({"FastAPI", "APIRouter"})
+_HTTP_VERBS = frozenset({"get", "post", "put", "delete", "patch", "head", "options"})
 _FLASK_METHODS = re.compile(r"methods\s*=\s*\[([^\]]*)\]")
 
 # ADR-023: attribute names treated as state fields. `<anything>.<field> = "literal"`
@@ -104,6 +105,8 @@ class PythonAnalyzer:
         self._aliases = self._import_aliases(tree.root_node, module, ref.endswith("__init__.py"))
         self._walk(tree.root_node, artifact, module, fact, imports, scope=(), is_test=is_test)
         self._routing(tree.root_node, module, ref, fact)
+        if is_test:
+            self._test_evidence(tree.root_node, module, ref, fact)
 
         for target in sorted(set(imports)):
             fact("dependency_observed", {"from_path": module, "to_path": target})
@@ -260,6 +263,53 @@ class PythonAnalyzer:
             "confidence": "structural", "file": artifact.source_ref,
         }, anchors=(Anchor(file_path=artifact.source_ref, symbol_path=module, span=span),))
         last_state[field_name] = to_state
+
+    # -- test evidence beyond imports (QA-signal review finding 2) ----------------
+
+    def _test_evidence(self, root: Node, module: str, ref: str, fact) -> None:
+        """Per test function: `call` evidence for each call to a name imported
+        from another module, and `http` evidence for each test-client request
+        (`client.get("/items/1")`). Only test function bodies are scanned, so
+        names a test file imports just for fixtures, types or setup never count
+        as a call. conftest.py is not a test file, so its imports never count."""
+        for node in root.children:
+            fn = node.child_by_field_name("definition") if node.type == "decorated_definition" else node
+            if fn is None or fn.type != "function_definition":
+                continue
+            name_node, body = fn.child_by_field_name("name"), fn.child_by_field_name("body")
+            if name_node is None or body is None or not name_node.text.decode("utf-8").startswith("test"):
+                continue
+            node_id = f"{ref}::{name_node.text.decode('utf-8')}"
+            calls: set[str] = set()
+            requests: set[tuple[str, str]] = set()
+            stack = [body]
+            while stack:
+                n = stack.pop()
+                stack.extend(n.children)
+                if n.type != "call":
+                    continue
+                callee, args = n.child_by_field_name("function"), n.child_by_field_name("arguments")
+                if callee is None or args is None:
+                    continue
+                if callee.type == "attribute":
+                    attr = callee.child_by_field_name("attribute")
+                    verb = attr.text.decode("utf-8") if attr is not None else ""
+                    first = next((a for a in args.children if a.is_named), None)
+                    path = self._string_literal_value(first) if first is not None and first.type == "string" else None
+                    if verb in _HTTP_VERBS and path is not None and path.startswith("/"):
+                        requests.add((verb.upper(), path))
+                        continue
+                if callee.type in ("identifier", "attribute"):
+                    text = callee.text.decode("utf-8")
+                    if text.split(".")[0] in self._aliases:  # imported, not a local helper
+                        calls.add(self._resolve_ref(text, module))
+            for target in sorted(calls):
+                fact("test_target_observed", {"test_module": module, "target_path": target,
+                                              "mechanism": "call", "file": ref, "node_id": node_id})
+            for method, path in sorted(requests):
+                fact("test_target_observed", {"test_module": module, "target_path": path,
+                                              "mechanism": "http", "method": method,
+                                              "file": ref, "node_id": node_id})
 
     # -- router prefixes (FastAPI APIRouter / include_router) ---------------------
     #

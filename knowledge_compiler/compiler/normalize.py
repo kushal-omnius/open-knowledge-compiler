@@ -615,9 +615,17 @@ class _Normalizer:
             self._put(self._entity("api", slug, name, payload), "natural_key", {}, group)
 
     def _test_coverage(self) -> None:
+        # `targets` stays the module's import list (unchanged shape). Per-test
+        # `call`/`http` evidence is kept aside for _p5, which resolves it to
+        # components and records the strongest mechanism per component.
         targets_by_module: dict[str, list[str]] = {}
+        self._test_evidence: dict[str, list[dict]] = {}
         for f in self._facts_of("test_target_observed"):
-            targets_by_module.setdefault(f.payload["test_module"], []).append(f.payload["target_path"])
+            mechanism = f.payload.get("mechanism", "import")
+            if mechanism == "import":
+                targets_by_module.setdefault(f.payload["test_module"], []).append(f.payload["target_path"])
+            elif f.payload.get("node_id"):
+                self._test_evidence.setdefault(f.payload["node_id"], []).append(f.payload)
 
         for f in self._facts_of("test_case_observed"):
             node_id = f.payload["node_id"]
@@ -749,6 +757,82 @@ class _Normalizer:
 
     # -- P5: relationships -------------------------------------------------------------
 
+    # -- coverage quality (QA-signal review finding 2) --------------------------------
+
+    COVERAGE_CONFIDENCE = {"http": 0.8, "call": 0.7, "import": 0.3}
+
+    @staticmethod
+    def _route_segments(route: str) -> list[str]:
+        route = route.split("?", 1)[0].split("#", 1)[0]
+        return [seg for seg in route.strip("/").split("/") if seg]
+
+    def _http_components(self, method: str, path: str, components: dict[str, str]) -> set[str]:
+        """Components defining the API a test request hits. Literal segments
+        must match, and a `{}`/`:param` segment matches any one segment. When
+        several routes match (`/items/recent` and `/items/{}`), only the most
+        specific (fewest params) count."""
+        if not hasattr(self, "_api_index"):
+            apis = {e.slug: e for e in self.current.entities if e.entity_type == "api"}
+            apis.update({e.slug: e for e in self.entities.values() if e.entity_type == "api"})
+            self._api_index = [
+                (e.payload["method"], self._route_segments(e.payload["route"]),
+                 frozenset(e.payload.get("files", [])))
+                for e in apis.values()]
+        want = self._route_segments(path)
+        best: tuple[int, set[str]] = (10**6, set())
+        for api_method, segs, files in self._api_index:
+            if api_method != method or len(segs) != len(want):
+                continue
+            params = 0
+            for pat, seg in zip(segs, want):
+                if pat == "{}" or pat.startswith(":"):
+                    params += 1
+                elif pat != seg:
+                    break
+            else:
+                comps = {components[r] for f in files
+                         if (r := self._resolve_internal(_file_to_module(f), set(components)))}
+                if params < best[0]:
+                    best = (params, set(comps))
+                elif params == best[0]:
+                    best[1].update(comps)
+        return best[1]
+
+    def _covers(self, e: Entity, components: dict[str, str]) -> None:
+        """`covers` edges for one test, plus the strongest evidence per covered
+        component in the payload's `coverage` list: http (0.8) > call (0.7) >
+        import (0.3). Edges keep their old meaning (any evidence); the
+        confidence is what coverage_for / impact_plan judge a gap by."""
+        best: dict[str, tuple[float, str]] = {}
+
+        def offer(slug: str, mechanism: str) -> None:
+            conf = self.COVERAGE_CONFIDENCE[mechanism]
+            if slug not in best or conf > best[slug][0]:
+                best[slug] = (conf, mechanism)
+
+        for target in e.payload["targets"]:
+            resolved = self._resolve_internal(target, set(components))
+            if resolved:
+                offer(components[resolved], "import")
+            # unresolved targets are external imports (pytest, stdlib, deps)
+        for ev in getattr(self, "_test_evidence", {}).get(e.payload["node_id"], []):
+            if ev["mechanism"] == "call":
+                resolved = self._resolve_internal(ev["target_path"], set(components))
+                if resolved:
+                    offer(components[resolved], "call")
+            elif ev["mechanism"] == "http":
+                for slug in self._http_components(ev["method"], ev["target_path"], components):
+                    offer(slug, "http")
+
+        for slug in best:
+            self.relationships.add((e.slug, "covers", slug))
+        coverage = [{"component": slug, "mechanism": mech, "confidence": conf}
+                    for slug, (conf, mech) in sorted(best.items())]
+        if coverage != e.payload.get("coverage"):
+            self.entities[e.slug] = self._entity(
+                "test_coverage", e.slug, e.name, {**e.payload, "coverage": coverage},
+                anchors=e.anchors)
+
     def _p5_relationships(self) -> None:
         observed = {e.payload["path"]: e.slug for e in self.entities.values()
                     if e.entity_type == "component"}
@@ -792,10 +876,7 @@ class _Normalizer:
                     if resolved:
                         self.relationships.add((e.slug, "defined_in", components[resolved]))
             elif e.entity_type == "test_coverage":
-                for target in e.payload["targets"]:
-                    resolved = self._resolve_internal(target, set(components))
-                    if resolved:
-                        self.relationships.add((e.slug, "covers", components[resolved]))
+                self._covers(e, components)
                     # unresolved targets are external imports (pytest, stdlib, deps) —
                     # already recorded as external_dependencies on the test's component;
                     # warning here would be noise, not DP-8 visibility (dogfood finding)
