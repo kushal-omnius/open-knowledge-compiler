@@ -317,8 +317,12 @@ class _Normalizer:
             # methods: symbol_path is module.Class.method — walk up to the module
             while module not in by_path and "." in module:
                 module = module.rsplit(".", 1)[0]
-            symbols_by_module.setdefault(module, []).append(
-                {"symbol_path": f.payload["symbol_path"], "kind": f.payload["kind"]})
+            # body_hash (when the analyzer emits it) makes a logic-only edit change
+            # the component payload, and therefore its content_hash and delta
+            symbol = {"symbol_path": f.payload["symbol_path"], "kind": f.payload["kind"]}
+            if f.payload.get("body_hash") is not None:
+                symbol["body_hash"] = f.payload["body_hash"]
+            symbols_by_module.setdefault(module, []).append(symbol)
 
         deps_by_module: dict[str, list[str]] = {}
         for f in self._facts_of("dependency_observed"):

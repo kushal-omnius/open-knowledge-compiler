@@ -157,10 +157,9 @@ def test_symbol_level_change_is_detected_and_scored(repo):
 
 
 @needs_db
-@pytest.mark.xfail(strict=True, reason="review finding 1: component content_hash ignores "
-                   "function bodies, so a logic-only edit produces no delta. Remove this "
-                   "marker when per-symbol body hashing lands.")
 def test_body_only_change_is_detected(repo):
+    """Review finding 1, fixed by per-symbol body_hash: a logic-only edit (same
+    symbols, same imports) must still produce a component delta."""
     from knowledge_compiler.compiler.run import compile_full
     repo_dir, slug = repo
     compile_full(repo_dir, llm_provider=None)
