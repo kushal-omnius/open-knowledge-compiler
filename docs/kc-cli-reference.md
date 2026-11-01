@@ -161,6 +161,32 @@ The completeness lines are omitted for compile runs that predate the signal, and
 
 ---
 
+### `kc eval`
+
+Scores compiled QA signals against hand-labeled ground truth: precision/recall/F1 for `covers`, `stale_coverage`, per-run change detection, and `impact_plan`. Reads directly from the DB; never compiles. Use it to set a baseline before changing extraction or normalization, then to prove the change helped.
+
+```bash
+kc eval [--dir <path>] [--labels <file>] [--json]
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--labels` | `<dir>/kc-eval.toml` | Labels file (see [kc-eval.example.toml](kc-eval.example.toml)) |
+| `--json` | off | Metrics plus per-label predicted/expected detail |
+
+Labels use component module paths and test file paths, never slugs, so they can be written from the source tree alone. A `[[change]]` entry names a compile run by `pr = N` or `commit = "<sha prefix>"`; that run must not be the bootstrap compile (its delta marks everything added). Labels that name an uncompiled component or a missing run are errors, not misses. Scores are micro-averaged; `n/a` means no evidence (nothing predicted and nothing expected).
+
+Example output (a logic-only edit to `billing/rules.py`, with one real test and one import-only smoke test):
+```
+metric             precision  recall    f1   tp/fp/fn
+covers                  0.50    1.00  0.67   1/1/0
+stale_coverage           n/a    0.00   n/a   0/0/1
+change_detection         n/a    0.00   n/a   0/0/1
+impact                   n/a    0.00   n/a   0/0/1
+```
+
+---
+
 ### `kc validate-test`
 
 Score a generated test's `kc-covers:` header against compiled knowledge. **Never compiles** — a downstream check over already-compiled state.

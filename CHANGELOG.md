@@ -17,6 +17,14 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+- `kc eval`: scores `covers`, `stale_coverage`, per-run change detection and
+  `impact_plan` against hand labels (`kc-eval.toml`) as micro-averaged
+  precision/recall/F1, with `--json` per-label detail. Establishes the
+  baseline for the QA-signal fixes that follow. A strict-xfail test documents
+  the known gap: a function-body-only edit produces no component delta.
+
 ## [1.4.1] — 2026-10-29
 
 ## [1.4.0] — 2026-10-27
