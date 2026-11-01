@@ -111,9 +111,9 @@ def test_pr_compile_produces_precise_delta(env):
     from knowledge_compiler.compiler.run import compile_pr
 
     repo, slug, merge_pr = env
-    # structural change (new symbol). Note deliberately: a body-only edit (e.g. a
-    # constant 20 -> 25) produces an EMPTY deterministic delta — bodies are the
-    # LLM layer's knowledge (business rules), not structure. That's by design.
+    # structural change (new symbol). A body-only edit (e.g. a constant 20 -> 25)
+    # also produces a component delta now, via per-symbol body_hash; see
+    # test_body_hash.py and test_evaluation.py::test_body_only_change_is_detected.
     pr = merge_pr(101, {"billing/rules.py":
                         "def apply_discount(pct):\n    return min(pct, 25)\n\n"
                         "def audit_discount(pct):\n    return pct\n"})
