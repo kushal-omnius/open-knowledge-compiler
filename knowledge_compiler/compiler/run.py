@@ -258,8 +258,8 @@ def verify(repo_dir: Path) -> VerifyReport:
         extracted_facts, _extract_stats = _extract(artifacts)
         facts = extracted_facts + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
-        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))
+        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"], scope)
         delta, _ = compute_diff(candidate, current, scope)
 
         histogram: dict[str, int] = {}
@@ -468,7 +468,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         families = frozenset({"deterministic"} | ({"llm"} if llm_ran else set()))
         scope = CompileScope(full=full, ran_families=families, in_scope_files=in_scope)
         # current already loaded above (before enrichment)
-        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
+        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"], scope)
         delta, dirty = compute_diff(candidate, current, scope)
         persist_compile(session, repo.id, run, candidate, delta)
         run.finished_at = func.now()

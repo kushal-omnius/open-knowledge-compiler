@@ -7,6 +7,7 @@ an entity actually ran. Pure function — no I/O.
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass
 
 from knowledge_compiler.compiler.normalize import CandidateState, CurrentState
@@ -68,6 +69,36 @@ def _anchor_files(entity: Entity) -> tuple[str, ...]:
     return tuple(sorted({a.file_path for a in entity.anchors}))
 
 
+def split_unobserved(candidate_slugs: Collection[str], current: CurrentState,
+                     scope: CompileScope) -> tuple[set[str], set[str]]:
+    """(removed, survivors): the current entities absent from the candidate,
+    split by removal evidence. Also used by Normalize to resolve journey steps
+    against the post-compile state (normalize.md §1)."""
+    cur = {e.slug: e for e in current.entities}
+    survivors: set[str] = set()
+    removed_slugs: set[str] = set()
+    unobserved = sorted(set(cur) - set(candidate_slugs))
+    for slug in unobserved:
+        if cur[slug].entity_type == "wiki_page":
+            continue  # decided after owners (below)
+        if _removable(cur[slug], scope):
+            removed_slugs.add(slug)
+        else:
+            survivors.add(slug)
+    # wiki pages have derived identity: they follow their owner's fate, never their own files
+    for slug in unobserved:
+        e = cur[slug]
+        if e.entity_type != "wiki_page":
+            continue
+        owner = e.payload.get("owner_slug", "")
+        if owner in removed_slugs or (scope.full and owner not in candidate_slugs
+                                      and owner not in survivors):
+            removed_slugs.add(slug)
+        else:
+            survivors.add(slug)
+    return removed_slugs, survivors
+
+
 def compute_diff(candidate: CandidateState, current: CurrentState,
                  scope: CompileScope) -> tuple[Delta, set[str]]:
     """Returns (delta, dirty_slugs). Dirty = entity changes ∪ relationship endpoints
@@ -98,27 +129,7 @@ def compute_diff(candidate: CandidateState, current: CurrentState,
                                             "new": list(_anchor_files(e))}},
                 evidence=_evidence(candidate, slug)))
 
-    # survivors: current entities absent from the candidate that removal evidence spares
-    survivors: set[str] = set()
-    removed_slugs: set[str] = set()
-    unobserved = sorted(set(cur) - set(cand))
-    for slug in unobserved:
-        if cur[slug].entity_type == "wiki_page":
-            continue  # decided after owners (below)
-        if _removable(cur[slug], scope):
-            removed_slugs.add(slug)
-        else:
-            survivors.add(slug)
-    # wiki pages have derived identity: they follow their owner's fate, never their own files
-    for slug in unobserved:
-        e = cur[slug]
-        if e.entity_type != "wiki_page":
-            continue
-        owner = e.payload.get("owner_slug", "")
-        if owner in removed_slugs or (scope.full and owner not in cand and owner not in survivors):
-            removed_slugs.add(slug)
-        else:
-            survivors.add(slug)
+    removed_slugs, survivors = split_unobserved(cand, current, scope)
     for slug in sorted(removed_slugs):
         entity_changes.append(EntityChange(
             op="removed", slug=slug, entity_type=cur[slug].entity_type,

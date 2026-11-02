@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from knowledge_compiler.ir import (
     LLM_CANDIDATE_FACT_TYPES,
@@ -18,6 +19,9 @@ from knowledge_compiler.ir import (
     Relationship,
     content_hash,
 )
+
+if TYPE_CHECKING:
+    from knowledge_compiler.compiler.diff import CompileScope
 
 # --- Contract types -------------------------------------------------------------
 
@@ -135,16 +139,19 @@ def _fact_snapshot(fact: Fact) -> dict:
 
 
 def normalize(facts: list[Fact], current: CurrentState, config: Thresholds,
-              repo_slug: str) -> CandidateState:
-    n = _Normalizer(facts, current, config, repo_slug)
+              repo_slug: str, scope: CompileScope | None = None) -> CandidateState:
+    """`scope` is the compile's CompileScope; without it (unit callers) every
+    current entity is treated as surviving the compile."""
+    n = _Normalizer(facts, current, config, repo_slug, scope)
     return n.run()
 
 
 class _Normalizer:
     def __init__(self, facts: list[Fact], current: CurrentState, config: Thresholds,
-                 repo_slug: str) -> None:
+                 repo_slug: str, scope: CompileScope | None = None) -> None:
         self.facts = facts
         self.current = current
+        self.scope = scope
         self.config = config
         self.repo_slug = repo_slug
         self.entities: dict[str, Entity] = {}
@@ -247,8 +254,19 @@ class _Normalizer:
         entity itself looked identical to a fully-resolved one, so a shortened
         chain could silently pass as a complete one downstream (journey_coverage,
         test_plan, the wiki page). `status` + `unresolved_steps` make that
-        distinction durable on the entity, not just at compile time."""
+        distinction durable on the entity, not just at compile time.
+
+        Only current entities that survive *this* compile count (dogfood finding
+        on frida, 1.5.0): a compile that itself removes a step's target (e.g. an
+        API slug renamed by router-prefix composition) used to resolve the step
+        against the pre-compile snapshot, persist the journey as `complete`, and
+        make the next `kc verify` diverge. Survival is Diff's removal-evidence
+        rule (split_unobserved), not a parallel notion."""
         current_slugs = {e.slug for e in self.current.entities}
+        if self.scope is not None:
+            from knowledge_compiler.compiler.diff import split_unobserved
+            removed, _ = split_unobserved(self.entities, self.current, self.scope)
+            current_slugs -= removed
         for f in self._facts_of("user_journey_observed"):
             name = f.payload["name"]
             declared_steps = f.payload.get("steps", [])
