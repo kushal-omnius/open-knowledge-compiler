@@ -17,6 +17,21 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- Jira→feature matching (the per-issue LLM pass after file-level semantic
+  extraction) streams `[llm] i/n jira:<KEY> --changed|--failed` progress
+  lines, reports issues whose call failed (e.g. exhausted HTTP 429 retries)
+  as one compile warning instead of dropping their feature links silently,
+  and counts its calls toward `[llm] max_calls_per_run` and the `llm:`
+  call/token totals (previously uncounted). A run whose file pass leaves no
+  budget for these calls now fails resumably; raise `max_calls_per_run` by
+  the number of linked Jira issues if needed.
+- The per-repo compile advisory lock is held on a dedicated connection.
+  Locking and unlocking through the pooled Session could hit different
+  connections once the Jira pass opened a second one, leaking the lock so
+  the next compile of that repo in the same process waited forever.
+
 ## [1.5.0] — 2026-11-01
 
 ### Added
