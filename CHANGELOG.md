@@ -17,6 +17,20 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- `kc eval` no longer counts test modules as changed or affected components.
+  kc compiles test files as components, but labels name the source modules
+  whose behavior changed, so every test file a PR edited was scored as a
+  false positive: on frida, 108 of 132 change-detection false positives.
+  A component is a test module when one of its files is a test file by its
+  own analyzer's convention (`test_*.py`, `*.test.ts`, …). Such components
+  are dropped from `change_detection` and `impact` predictions and listed
+  per item as `excluded_test_modules` in `--json`, except components the
+  label itself names: the convention can misfire (frida's production
+  workflow `cause_agent_test.py`), and the label is the ground truth.
+  Coverage scoring is unchanged.
+
 ## [1.6.0] — 2026-11-02
 
 ### Added

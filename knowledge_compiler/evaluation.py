@@ -23,6 +23,17 @@ Scoring is micro-averaged (TP/FP/FN summed across items). A label that names
 a component or compile run the knowledge base doesn't have is an error, not a
 miss: it is almost always a typo, and silently scoring it would corrupt the
 baseline (fail loud).
+
+Test modules are not components for `change_detection` and `impact`. kc
+compiles test files as components too, but a reviewer labels the source
+modules whose behavior changed, so a PR that touches a test would otherwise
+count every edited test file as a false positive (frida dogfood: 108 of 132).
+A component is a test module when one of its files is a test file by its own
+analyzer's convention (`test_*.py`, `*.test.ts`, ...). Those are dropped from
+the predicted sets and listed per item as `excluded_test_modules`, except any
+the label itself names: a naming convention can be wrong (frida's production
+workflow `cause_agent_test.py`), and the label is the ground truth. Removed
+components, which have no current entity to classify, are kept as predicted.
 """
 
 from __future__ import annotations
@@ -34,8 +45,21 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from knowledge_compiler.extractors import (
+    javascript_analyzer,
+    python_analyzer,
+    typescript_analyzer,
+)
 from knowledge_compiler.mcp import queries
 from knowledge_compiler.storage.schema import CompileRun, DeltaChangeRow, EntityRow
+
+# Each analyzer owns its test-file convention (ADR-006); reuse it rather than a
+# name pattern of our own, so the eval and the compiler agree on what a test is.
+_TEST_FILE_RULES = {
+    "python": python_analyzer._is_test_file,
+    "typescript": typescript_analyzer._is_test_file,
+    "javascript": javascript_analyzer._is_test_file,
+}
 
 
 class LabelError(ValueError):
@@ -157,6 +181,18 @@ def _component_paths(session: Session, repo_id: int) -> dict[str, str]:
     return {payload["path"]: slug for slug, payload in rows}
 
 
+def _is_test_module(payload: dict) -> bool:
+    rule = _TEST_FILE_RULES.get(payload.get("language", ""))
+    return rule is not None and any(rule(f) for f in payload.get("files", []))
+
+
+def _test_modules(session: Session, repo_id: int) -> set[str]:
+    """Paths of compiled components that are test modules."""
+    rows = session.execute(select(EntityRow.payload).where(
+        EntityRow.repo_id == repo_id, EntityRow.entity_type == "component")).scalars()
+    return {payload["path"] for payload in rows if _is_test_module(payload)}
+
+
 def _find_run(session: Session, repo_id: int, label: ChangeLabel) -> CompileRun:
     q = select(CompileRun).where(CompileRun.repo_id == repo_id, CompileRun.status == "succeeded")
     if label.pr is not None:
@@ -218,6 +254,7 @@ def evaluate(session: Session, repo_id: int, labels: Labels) -> EvalReport:
         report.items.append(item)
 
     changed, impact = Metric(), Metric()
+    test_modules = _test_modules(session, repo_id) if labels.changes else set()
     for label in labels.changes:
         run = _find_run(session, repo_id, label)
         delta_slugs = set(session.execute(select(DeltaChangeRow.slug).where(
@@ -233,6 +270,12 @@ def evaluate(session: Session, repo_id: int, labels: Labels) -> EvalReport:
             predicted_affected |= {slug_to_path[a["slug"]] for a in plan["affected"]
                                    if a["slug"] in slug_to_path}
 
+        # the label wins over the naming convention for anything it names
+        unscored = test_modules - label.changed - label.affected
+        excluded = (predicted_changed | predicted_affected) & unscored
+        predicted_changed -= unscored
+        predicted_affected -= unscored
+
         changed.add(predicted_changed, label.changed)
         impact.add(predicted_affected, label.affected)
         report.items.append({
@@ -240,6 +283,7 @@ def evaluate(session: Session, repo_id: int, labels: Labels) -> EvalReport:
             "predicted_changed": sorted(predicted_changed), "expected_changed": sorted(label.changed),
             "predicted_affected": sorted(predicted_affected),
             "expected_affected": sorted(label.affected),
+            "excluded_test_modules": sorted(excluded),
         })
 
     if labels.coverage:
