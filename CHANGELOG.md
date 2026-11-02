@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-11-02
+
 ### Added
 
 - Rename lineage for path-keyed entities (normalize.md §4.1). A PR that
