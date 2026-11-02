@@ -92,6 +92,8 @@ class ValidationReport:
     missing_from_claims: list[str] = field(default_factory=list)
     extraneous_claims: list[str] = field(default_factory=list)
     nonexistent_claims: list[str] = field(default_factory=list)
+    # claimed slug retired by a git rename -> the slug it is scored as (normalize.md §4.1)
+    renamed_claims: dict[str, str] = field(default_factory=dict)
     # targeting tier (unchanged formula, now split out from the composite)
     targeting_pct: float = 0.0
     # verification tier (new)
@@ -236,6 +238,12 @@ def score_test(session: Session, repo_id: int, test_file: Path, for_entity: str,
                                claimed_slugs=claimed or [])
     if claimed is None:
         return report
+
+    # a citation of a renamed entity still names it: score its successor, and
+    # report the rename so the header gets updated
+    report.renamed_claims = {s: live for s in claimed
+                             if (live := queries.resolve_renamed_slug(session, repo_id, s))}
+    claimed = list(dict.fromkeys(report.renamed_claims.get(s, s) for s in claimed))
 
     report.existence = [SlugCheck(s, queries.get_entity(session, repo_id, s, dep_map=dep_map) is not None)
                         for s in claimed]

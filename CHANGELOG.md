@@ -17,6 +17,19 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+- Rename lineage for path-keyed entities (normalize.md §4.1). A PR that
+  renames files still removes and re-adds the components, test coverage,
+  state models and wiki pages keyed by those paths, because their slugs are
+  derived from the path (ADR-004). The delta now pairs them: `renamed_to` on
+  the removed row, `renamed_from` on the added one. A stale slug resolves to
+  its successor: MCP `get_entity`/`impact_plan`/`test_plan` (the result is
+  marked `renamed_from`), `kc validate-test` (`renamed_claims` instead of a
+  nonexistent-slug failure) and `[[journeys]]` steps (warned, recorded in
+  `renamed_steps`). Found replaying frida PR #468, a 43-file pure rename.
+  PR compiles only: direct-commit and full compiles see no rename report.
+
 ### Fixed
 
 - PR and commit compiles now resolve TypeScript path aliases (`@/*` ->
@@ -45,6 +58,12 @@ so it works even where a raw `git push` of a tag ref is restricted).
   copies a hit to the new key. So the upgrade compile makes no new LLM calls
   for unchanged files. Linux/macOS checkouts and repos without autocrlf are
   unaffected. No schema change.
+
+- A PR compile no longer drops a journey's `traverses` edges to steps whose
+  files the PR didn't touch. P5 emitted the edges only to entities observed
+  in that compile, and a re-observed journey's outgoing edges are
+  authoritative, so every such PR deleted them and the next `kc verify`
+  diverged (normalize.md §7).
 
 ## [1.5.0] — 2026-11-01
 
