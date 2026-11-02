@@ -227,7 +227,7 @@ class TypeScriptAnalyzer:
                        "lexical_declaration", "variable_declaration"):
                 self._walk_decl(child, artifact, module, fact, imports, scope, is_test)
             elif t == "expression_statement" and is_test:
-                self._test_case(child, artifact, fact)
+                self._test_statement(child, artifact, module, fact, imports, scope)
             else:
                 self._walk(child, artifact, module, fact, imports, scope, is_test)
 
@@ -270,21 +270,45 @@ class TypeScriptAnalyzer:
         fact("symbol_observed", payload,
              anchors=(Anchor(file_path=artifact.source_ref, symbol_path=symbol_path, span=span),))
 
-    def _test_case(self, stmt: Node, artifact: Artifact, fact) -> None:  # noqa: C901
-        module = _module_path(artifact.source_ref)
+    def _test_statement(self, stmt: Node, artifact: Artifact, module: str, fact,
+                        imports: list[str], scope: tuple[str, ...]) -> None:
+        """A test()/it() call is a test case; any other call, such as describe()
+        or beforeEach(), is recursed into through its function arguments, so the
+        describe()-wrapped shape (frida dogfood: every vitest file) is found the
+        way the JavaScript analyzer already finds it."""
         call = stmt.children[0] if stmt.children else None
         if call is None or call.type != "call_expression":
             return
+        if self._test_case(call, artifact, fact):
+            return
+        args = call.child_by_field_name("arguments")
+        if args is None:
+            return
+        for arg in args.children:
+            if arg.type in ("arrow_function", "function_expression"):
+                body = arg.child_by_field_name("body")
+                if body is not None:
+                    self._walk(body, artifact, module, fact, imports, scope, is_test=True)
+
+    def _test_case(self, call: Node, artifact: Artifact, fact) -> bool:
+        """Emits a test_case_observed fact if `call` is a test()/it() (or
+        .skip/.only) invocation. Returns whether it matched."""
+        module = _module_path(artifact.source_ref)
         fn = call.child_by_field_name("function")
         args = call.child_by_field_name("arguments")
-        if fn is None or args is None or not _TEST_CALL.match(fn.text.decode("utf-8")):
-            return
+        if fn is None or args is None:
+            return False
+        if fn.type == "member_expression":
+            fn = fn.child_by_field_name("object")
+        if fn is None or fn.type != "identifier" or not _TEST_CALL.match(fn.text.decode("utf-8")):
+            return False
         strings = [c for c in args.children if c.type == "string"]
         if not strings:
-            return
+            return False
         test_name = strings[0].text.decode("utf-8").strip("'\"`")
         span = (call.start_point[0] + 1, call.end_point[0] + 1)
         fact("test_case_observed",
              {"node_id": f"{artifact.source_ref}::{test_name}", "framework": "jest",
               "file": artifact.source_ref, "module": module},
              anchors=(Anchor(file_path=artifact.source_ref, span=span),))
+        return True

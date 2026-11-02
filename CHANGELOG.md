@@ -19,6 +19,19 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Fixed
 
+- Test cases in pytest classes and in `describe()` blocks are detected.
+  The Python analyzer only took module-level `test*` functions, so
+  `class TestX:` / `def test_y(self):` tests (and their call evidence) were
+  invisible. The TypeScript analyzer only took top-level `test()`/`it()`
+  calls, so every `describe()`-wrapped test was invisible too (the JavaScript
+  analyzer already handled this). On frida these were 26 of the 27 genuine
+  covering tests `kc eval` missed. Python now follows pytest's default
+  collection (`test*` methods of module-level `Test*` classes, node id
+  `file::Class::test`); TypeScript finds `test`/`it` (with `.skip`/`.only`)
+  at any `describe()` depth, like JavaScript. Existing top-level node ids are
+  unchanged. **Upgrade note:** one `kc compile --full` adds the newly
+  detected tests as new `test_coverage` entities and their `covers` edges.
+
 - Calls through `from package import module` now cover the module. A test
   doing `from storage import blob_utils` and `blob_utils.read_bytes(...)` under
   a `backend/` import root produced `call` evidence for
