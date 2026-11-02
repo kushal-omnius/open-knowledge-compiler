@@ -19,6 +19,18 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Fixed
 
+- Rendering an imported component in a JS/TS test now counts as `call`
+  evidence. Only call expressions were scanned, so a component test doing
+  `render(<BundleEditor ... />)` linked the component by its import alone
+  (confidence 0.3), and `coverage_for`/`test_plan` reported it as a gap.
+  Inside a test body, a JSX tag naming an imported component (`<Editor />`,
+  `<Ns.Panel />`) is now a call to it; lowercase intrinsic tags never count,
+  and renders in `beforeEach` or helpers stay setup, as calls do. Known
+  limit, unchanged: setup inside a test body, such as
+  `usePermissionsStore.setState(...)`, still counts as a call.
+  **Upgrade note:** one `kc compile --full` upgrades existing component
+  tests from import to call coverage.
+
 - Test cases in pytest classes and in `describe()` blocks are detected.
   The Python analyzer only took module-level `test*` functions, so
   `class TestX:` / `def test_y(self):` tests (and their call evidence) were

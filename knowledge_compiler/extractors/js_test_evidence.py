@@ -6,13 +6,21 @@ in `describe` blocks), the callback body is scanned for:
 
 - `call` evidence: a call to a name the file imported (ESM or CommonJS), such
   as `applyDiscount(50)` or `rules.applyDiscount(50)`. It resolves to the
-  imported module through the same aliases router refs use.
+  imported module through the same aliases router refs use. Rendering an
+  imported component, `<BundleEditor />` or `<Ns.Panel />`, is a call too: that
+  is how a component test exercises it (frida dogfood finding). Lowercase tags
+  are intrinsic elements and never count.
 - `http` evidence: a test-client request with a literal path, such as
   supertest's `request(app).get('/api/items/1')`.
 
 Calls in `beforeEach`/`beforeAll` setup and in local helpers are not test
 bodies, so they never count, which mirrors the Python analyzer's
 fixture-exclusion rule.
+
+Known limit: setup done inside a test body still counts. Priming a store with
+`usePermissionsStore.setState({...})` is a call to `permissionsStore`, though
+the test exercises something else; telling setup from exercise would need more
+than the call's syntax, so it is not attempted.
 """
 
 from __future__ import annotations
@@ -26,6 +34,8 @@ from knowledge_compiler.extractors.express_routing import _string, resolve_ref
 _TEST_FNS = frozenset({"test", "it"})
 _HTTP_VERBS = frozenset({"get", "post", "put", "delete", "patch", "head", "options"})
 _FUNCTION_TYPES = frozenset({"arrow_function", "function_expression", "function"})
+# the tag-bearing JSX nodes (a closing tag repeats its opening tag, so it is skipped)
+_JSX_TAGS = frozenset({"jsx_opening_element", "jsx_self_closing_element"})
 
 
 def _test_name(call: Node) -> str | None:
@@ -63,6 +73,12 @@ def _scan(body: Node, node_id: str, module: str, aliases: dict[str, str], fact) 
     while stack:
         n = stack.pop()
         stack.extend(n.children)
+        if n.type in _JSX_TAGS:
+            tag = n.child_by_field_name("name")
+            text = tag.text.decode("utf-8") if tag is not None else ""
+            if text[:1].isupper() and text.split(".")[0] in aliases:
+                calls.add(resolve_ref(text, module, aliases))
+            continue
         if n.type != "call_expression":
             continue
         callee, args = n.child_by_field_name("function"), n.child_by_field_name("arguments")
