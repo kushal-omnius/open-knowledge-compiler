@@ -7,6 +7,7 @@ is one transaction. Every incremental compile reconciles first (ADR-002).
 
 from __future__ import annotations
 
+import posixpath
 import re
 import tomllib
 from dataclasses import dataclass
@@ -27,7 +28,7 @@ from knowledge_compiler.compiler.diff import CompileScope, compute_diff
 from knowledge_compiler.compiler.normalize import Thresholds, normalize
 from knowledge_compiler.extractors.javascript_analyzer import JavaScriptAnalyzer
 from knowledge_compiler.extractors.python_analyzer import PythonAnalyzer
-from knowledge_compiler.extractors.typescript_analyzer import TypeScriptAnalyzer
+from knowledge_compiler.extractors.typescript_analyzer import TypeScriptAnalyzer, is_tsconfig
 
 
 def _extract(artifacts: list[Artifact]) -> tuple[list[Fact], dict]:
@@ -410,6 +411,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
             artifacts, in_scope = _widen_routing_scope(session, repo.id, collector, commit_sha,
                                                        artifacts, in_scope)
+            artifacts = _with_tsconfigs(collector, commit_sha, artifacts)
             extra_facts = _pr_facts(pr)
             issue_keys = next((f.payload["linked_issue_keys"] for f in extra_facts
                               if f.fact_type == "pr_observed"), [])
@@ -420,6 +422,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
             artifacts = collector.collect_at_commit(commit_sha, live_paths)
             artifacts, in_scope = _widen_routing_scope(session, repo.id, collector, commit_sha,
                                                        artifacts, in_scope)
+            artifacts = _with_tsconfigs(collector, commit_sha, artifacts)
             extra_facts = []
             issue_keys = sorted(set(_ISSUE_KEY.findall(commit.message)))
             if issue_keys:
@@ -660,6 +663,21 @@ def _widen_routing_scope(session: Session, repo_id: int, collector: GitCollector
     if not touches or not extra:
         return artifacts, in_scope
     return artifacts + collector.collect_at_commit(commit_sha, extra), in_scope | frozenset(extra)
+
+
+def _with_tsconfigs(collector: GitCollector, commit_sha: str,
+                    artifacts: list[Artifact]) -> list[Artifact]:
+    """TypeScript path aliases ("@/*" -> "./src/*") are read from tsconfig*.json
+    files, which a PR/commit slice rarely touches. Without them every aliased
+    import in a touched .ts/.tsx file would resolve as external, unlike a full
+    compile. So when the slice has TypeScript, add every tsconfig at this commit
+    as alias config input. They are not added to the scope: they produce no
+    entities, so they carry no removal evidence."""
+    if not any(posixpath.splitext(a.source_ref)[1] in (".ts", ".tsx") for a in artifacts):
+        return artifacts
+    have = {a.source_ref for a in artifacts}
+    extra = [p for p in collector.files_at_commit(commit_sha) if is_tsconfig(p) and p not in have]
+    return artifacts + collector.collect_at_commit(commit_sha, extra) if extra else artifacts
 _BUG_FIX_RE = re.compile(r"\b(fix(es|ed)?|bug(fix)?|hotfix|regression)\b", re.IGNORECASE)
 
 
