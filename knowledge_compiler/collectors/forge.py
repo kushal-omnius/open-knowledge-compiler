@@ -28,6 +28,9 @@ from datetime import datetime
 from typing import Protocol, runtime_checkable
 from urllib.parse import urlparse
 
+PR_FILES_PAGE_SIZE = 100  # GitHub's maximum per_page for the PR files list
+PR_FILES_CAP = 3000       # GitHub lists at most this many files for one PR
+
 
 @dataclass(frozen=True)
 class PRFile:
@@ -166,11 +169,26 @@ class GitHubGateway:
         return sorted(prs, key=lambda p: (p.merged_at, p.number))
 
     def _pr_files(self, number: int) -> tuple[PRFile, ...]:
-        data = self._get(f"/repos/{self.owner}/{self.repo}/pulls/{number}/files?per_page=100")
+        """Every file the PR changed. GitHub pages this list (100 per page) and
+        stops listing at PR_FILES_CAP, so a PR at the cap may be incomplete:
+        fail loudly rather than compile a partial scope that silently leaves the
+        unlisted files stale until the next full compile."""
         files = []
-        for f in data:
-            files.append(PRFile(path=f["filename"], change=f["status"],
-                                old_path=f.get("previous_filename")))
+        page = 1
+        while True:
+            data = self._get(f"/repos/{self.owner}/{self.repo}/pulls/{number}/files"
+                             f"?per_page={PR_FILES_PAGE_SIZE}&page={page}")
+            for f in data:
+                files.append(PRFile(path=f["filename"], change=f["status"],
+                                    old_path=f.get("previous_filename")))
+            if len(data) < PR_FILES_PAGE_SIZE or len(files) >= PR_FILES_CAP:
+                break
+            page += 1
+        if len(files) >= PR_FILES_CAP:
+            raise ForgeError(
+                f"PR #{number} changes at least {PR_FILES_CAP} files, the most GitHub "
+                f"lists for one PR, so an incremental compile could miss some — run "
+                f"`kc compile --full` at or after its merge commit instead")
         return tuple(files)
 
     def list_commits(self, base_branch: str, since: datetime | None) -> list[CommitInfo]:
