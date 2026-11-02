@@ -92,6 +92,26 @@ so it works even where a raw `git push` of a tag ref is restricted).
   **Upgrade note:** a knowledge base built by `--pr`/`reconcile` across a
   PR with more than 100 changed files may be missing entities; `kc verify`
   shows the drift, and one `kc compile --full` heals it.
+- Jira→feature matching (the per-issue LLM pass after file-level semantic
+  extraction) streams `[llm] i/n jira:<KEY> --changed|--failed` progress
+  lines, reports issues whose call failed (e.g. exhausted HTTP 429 retries)
+  as one compile warning instead of dropping their feature links silently,
+  and counts its calls toward `[llm] max_calls_per_run` and the `llm:`
+  call/token totals (previously uncounted). A run whose file pass leaves no
+  budget for these calls now fails resumably; raise `max_calls_per_run` by
+  the number of linked Jira issues if needed.
+- The per-repo compile advisory lock is held on a dedicated connection.
+  Locking and unlocking through the pooled Session could hit different
+  connections once the Jira pass opened a second one, leaking the lock so
+  the next compile of that repo in the same process waited forever.
+- Journey steps resolve against the post-compile state. A compile that
+  itself removed a `[[journeys]]` step's target (e.g. an API slug renamed
+  by 1.5.0 router-prefix composition) still counted the step as resolved
+  against the pre-compile snapshot, persisted the journey as `complete`
+  with no warning, and made the next `kc verify` report it `changed`. Such
+  a compile now drops the step with the usual "does not resolve" warning
+  and persists `partial`/`invalid`. Unobserved entities that Diff's
+  removal-evidence rule keeps (files a PR slice didn't touch) still count.
 
 ## [1.5.0] — 2026-11-01
 

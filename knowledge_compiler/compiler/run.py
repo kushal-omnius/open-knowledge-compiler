@@ -259,8 +259,8 @@ def verify(repo_dir: Path) -> VerifyReport:
         extracted_facts, _extract_stats = _extract(artifacts)
         facts = extracted_facts + _mutation_facts(ctx) + _journey_facts(ctx)
         current = load_current_state(session, repo.id, ctx["repo_slug"])
-        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
         scope = CompileScope(full=True, ran_families=frozenset({"deterministic"}))
+        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"], scope)
         delta, _ = compute_diff(candidate, current, scope)
 
         histogram: dict[str, int] = {}
@@ -315,8 +315,14 @@ def _locked_session(repo_dir: Path):
         check_connection(engine)
     except DatabaseUnavailableError as exc:
         raise CompileError(str(exc)) from exc
-    with Session(engine) as session:
-        session.execute(text("SELECT pg_advisory_lock(:k)"), {"k": repo_lock_key(repo_slug)})
+    # The lock lives on its own connection for the whole run: a Session hands its
+    # connection back to the pool at every commit, so lock and unlock issued
+    # through it can land on different pooled connections (e.g. once LLMCache has
+    # opened a second one) — the unlock then no-ops and the lock leaks to the
+    # next compile in the same process.
+    with engine.connect() as lock_conn, Session(engine) as session:
+        lock_conn.execute(text("SELECT pg_advisory_lock(:k)"), {"k": repo_lock_key(repo_slug)})
+        lock_conn.commit()  # session-level lock survives; don't sit idle in a transaction
         try:
             repo = session.execute(
                 select(Repository).where(Repository.slug == repo_slug)).scalar_one_or_none()
@@ -325,9 +331,9 @@ def _locked_session(repo_dir: Path):
             yield session, repo, ctx
         finally:
             session.rollback()
-            session.execute(text("SELECT pg_advisory_unlock(:k)"),
-                            {"k": repo_lock_key(repo_slug)})
-            session.commit()
+            lock_conn.execute(text("SELECT pg_advisory_unlock(:k)"),
+                              {"k": repo_lock_key(repo_slug)})
+            lock_conn.commit()
 
 
 def _full_compile_watermark(collector: GitCollector, default_branch: str,
@@ -444,17 +450,21 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         run.files_failed = extract_stats["files_failed"]
         run.failed_files = extract_stats["failed_files"]
         llm_ran, llm_warnings, llm_tokens = _extract_semantic(session, ctx, artifacts, facts)
-        run.llm_calls = llm_tokens["calls"]
-        run.llm_input_tokens = llm_tokens["input_tokens"]
-        run.llm_output_tokens = llm_tokens["output_tokens"]
 
         # Jira→Feature enrichment (LLM-derived motivates edges). Runs after
         # _extract_semantic so feature candidates are in `facts`. Load current
         # state here once; pass it to normalize below to avoid a second DB round-trip.
+        # Its calls share the per-run budget and the run's token totals (ADR-008).
         current = load_current_state(session, repo.id, ctx["repo_slug"])
-        enrichment_facts = _jira_feature_enrichment_facts(ctx, session, facts, current)
+        enrichment_facts, enrich_warnings, enrich_tokens = _jira_feature_enrichment_facts(
+            ctx, session, facts, current, calls_used=llm_tokens["calls"])
         facts.extend(enrichment_facts)
         llm_ran = llm_ran or bool(enrichment_facts)
+        llm_warnings += enrich_warnings
+        llm_tokens = {k: llm_tokens[k] + enrich_tokens[k] for k in llm_tokens}
+        run.llm_calls = llm_tokens["calls"]
+        run.llm_input_tokens = llm_tokens["input_tokens"]
+        run.llm_output_tokens = llm_tokens["output_tokens"]
 
         # degraded = the semantic layer is configured on but didn't run at all
         # (--no-llm or provider failure) — pipeline.md §6.1
@@ -471,7 +481,7 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
         families = frozenset({"deterministic"} | ({"llm"} if llm_ran else set()))
         scope = CompileScope(full=full, ran_families=families, in_scope_files=in_scope)
         # current already loaded above (before enrichment)
-        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"])
+        candidate = normalize(facts, current, Thresholds(), ctx["repo_slug"], scope)
         delta, dirty = compute_diff(candidate, current, scope)
         persist_compile(session, repo.id, run, candidate, delta)
         run.finished_at = func.now()
@@ -842,25 +852,31 @@ def _file_jira_all_keys(ctx: dict) -> list[str]:
         return []
 
 
-def _jira_feature_enrichment_facts(ctx: dict, session: Session,
-                                    facts: list[Fact], current) -> list[Fact]:
+def _jira_feature_enrichment_facts(ctx: dict, session: Session, facts: list[Fact], current,
+                                    calls_used: int = 0) -> tuple[list[Fact], list[str], dict]:
     """LLM-derived motivates edges: Jira Story → Feature (ir.md §3.3).
 
     Reads jira_observed and feature_candidate facts (+ current-state feature
     entities) and calls the LLM per-issue to match which compiled features a
-    Jira story motivated. Returns jira_feature_link_observed facts consumed by
-    Normalize._jira_stories() to populate payload["linked_feature_names"], which
-    _p5_relationships() resolves to motivates → Feature edges.
+    Jira story motivated. Returns (facts, warnings, token_summary): the
+    jira_feature_link_observed facts are consumed by Normalize._jira_stories()
+    to populate payload["linked_feature_names"], which _p5_relationships()
+    resolves to motivates → Feature edges; token_summary has the same shape as
+    _extract_semantic's (real spend, cache hits excluded).
 
     Skipped entirely when: LLM disabled, Jira disabled, no Jira facts, or no
     feature facts. Provider/validation errors skip the affected issue (never
-    fail the compile — Jira enrichment is best-effort additive, not core)."""
+    fail the compile — Jira enrichment is best-effort additive, not core) but
+    are reported as one compile warning. Calls count against
+    max_calls_per_run on top of calls_used (the file-level pass's spend);
+    exhausting it fails the run resumably, same as the file pass (pipeline.md §6.2)."""
+    tokens = dict(_ZERO_LLM_TOKENS)
     if not _llm_enabled(ctx) or not ctx["config"].get("jira", {}).get("enabled", False):
-        return []
+        return [], [], tokens
 
     jira_facts = [f for f in facts if f.fact_type == "jira_observed"]
     if not jira_facts:
-        return []
+        return [], [], tokens
 
     feature_candidates = {f.payload["name"]: f.payload.get("narrative", "")
                           for f in facts if f.fact_type == "feature_candidate"}
@@ -868,7 +884,7 @@ def _jira_feature_enrichment_facts(ctx: dict, session: Session,
                         for e in current.entities if e.entity_type == "feature"}
     all_features: dict[str, str] = {**current_features, **feature_candidates}
     if not all_features:
-        return []
+        return [], [], tokens
 
     from knowledge_compiler.llm.cache import LLMCache, cache_key
     from knowledge_compiler.llm.provider import LLMProviderError, build_provider
@@ -882,7 +898,9 @@ def _jira_feature_enrichment_facts(ctx: dict, session: Session,
         provider = ctx.get("llm_provider") or build_provider(llm_cfg)
         cache = LLMCache(session.get_bind())
     except LLMProviderError:
-        return []
+        return [], [], tokens
+    max_calls = llm_cfg.get("max_calls_per_run", 200)
+    progress = ctx.get("progress")
 
     feature_set_hash = content_hash({"names": sorted(all_features)})
     _ENRICH_EXTRACTION = Extraction(method="llm", extractor="jira-feature-match",
@@ -890,7 +908,10 @@ def _jira_feature_enrichment_facts(ctx: dict, session: Session,
                                     model_id=provider.model_id,
                                     template_version=JIRA_FEATURE_TEMPLATE_VERSION)
     results: list[Fact] = []
-    for jf in sorted(jira_facts, key=lambda f: f.payload["key"]):
+    failed: list[str] = []
+    first_error = ""
+    ordered = sorted(jira_facts, key=lambda f: f.payload["key"])
+    for i, jf in enumerate(ordered, start=1):
         key = jf.payload["key"]
         summary = jf.payload.get("summary", "")
         description = jf.payload.get("description", "")
@@ -902,17 +923,36 @@ def _jira_feature_enrichment_facts(ctx: dict, session: Session,
         if cached is not None:
             try:
                 out = JiraFeatureMatchOut.model_validate(cached)
-            except Exception:
+            except Exception as exc:  # noqa: BLE001 — skip the issue, reported below
+                failed.append(key)
+                first_error = first_error or str(exc)
                 continue
         else:
+            if calls_used + tokens["calls"] >= max_calls:
+                raise CompileError(
+                    f"LLM budget ({max_calls} calls) exhausted at jira:{key}; "
+                    "re-run to resume — completed work is cached")
             prompt = build_jira_feature_prompt(key, summary, description, all_features)
+            tokens["calls"] += 1
             try:
                 raw = provider.complete(prompt, JIRA_FEATURE_SCHEMA)
+                usage = getattr(provider, "last_usage", None) or {}
+                tokens["input_tokens"] += usage.get("input_tokens", 0)
+                tokens["output_tokens"] += usage.get("output_tokens", 0)
                 out = JiraFeatureMatchOut.model_validate(raw)
                 cache.put(ck, JIRA_FEATURE_TEMPLATE_ID, JIRA_FEATURE_TEMPLATE_VERSION,
                           provider.model_id, out.model_dump())
-            except Exception:
+            except Exception as exc:  # noqa: BLE001 — skip the issue, reported below
+                failed.append(key)
+                first_error = first_error or f"{type(exc).__name__}: {exc}"
+                if progress:
+                    progress("llm", i, len(ordered), f"jira:{key} --failed ({type(exc).__name__})")
                 continue
+            if progress:
+                progress("llm", i, len(ordered),
+                         f"jira:{key} --changed "
+                         f"(tokens in={usage.get('input_tokens', 0)} "
+                         f"out={usage.get('output_tokens', 0)})")
         matched = sorted({n for n in out.motivates if n in all_features})
         if matched:
             payload = {"jira_key": key, "feature_names": matched}
@@ -920,7 +960,13 @@ def _jira_feature_enrichment_facts(ctx: dict, session: Session,
                                 artifact_refs=(f"jira:{key}",),
                                 extraction=_ENRICH_EXTRACTION,
                                 content_hash=content_hash(payload)))
-    return results
+    warnings = []
+    if failed:
+        warnings.append(
+            f"Jira→feature matching failed for {len(failed)}/{len(ordered)} issue(s), "
+            f"their feature links are missing from this run: {', '.join(failed)} "
+            f"(first error: {first_error}); re-run to retry — successful matches are cached")
+    return results, warnings, tokens
 
 
 def _publisher_config(config: dict):
