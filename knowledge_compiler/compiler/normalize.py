@@ -404,18 +404,36 @@ class _Normalizer:
         # slice importing an out-of-scope module must not classify it as external
         internal = set(by_path) | {e.payload["path"] for e in self.current.entities
                                    if e.entity_type == "component"}
+        # language family per component and per source file, so import resolution
+        # never crosses languages (candidate wins over current state)
+        self._family_of: dict[str, str] = {}
+        self._family_of_file: dict[str, str] = {}
+        for e in self.current.entities:
+            if e.entity_type == "component" and e.payload.get("language"):
+                family = _language_family(e.payload["language"])
+                self._family_of[e.payload["path"]] = family
+                for file in e.payload.get("files", []):
+                    self._family_of_file[file] = family
+        for path, group in by_path.items():
+            family = _language_family(group[0].payload["language"])
+            self._family_of[path] = family
+            for f in group:
+                self._family_of_file[f.payload["file"]] = family
         for path in sorted(by_path):
             group = by_path[path]
             deps = sorted(set(deps_by_module.get(path, [])))
+            family = self._family_of[path]
             payload = {
                 "path": path,
                 "kind": group[0].payload["kind"],
                 "language": group[0].payload["language"],
                 "files": sorted({f.payload["file"] for f in group}),
                 "symbols": sorted(symbols_by_module.get(path, []), key=lambda s: s["symbol_path"]),
-                "internal_dependencies": [d for d in deps if self._resolve_internal(d, internal)],
+                "internal_dependencies": [d for d in deps
+                                          if self._resolve_internal(d, internal, family)],
                 # external dependency coordinates (ecosystem-agnostic; resolution is post-V1)
-                "external_dependencies": [d for d in deps if not self._resolve_internal(d, internal)],
+                "external_dependencies": [d for d in deps
+                                          if not self._resolve_internal(d, internal, family)],
             }
             if path in routing_by_module:
                 # only present when the module declares routers or mounts, so
@@ -562,9 +580,11 @@ class _Normalizer:
                                    anchors=component.anchors),
                       rule="natural_key", signals={}, facts=contributing)
 
-    @staticmethod
-    def _resolve_internal(dep: str, internal: set[str]) -> str | None:
-        """Longest internal component prefix of a dotted import path, else None."""
+    def _resolve_internal(self, dep: str, internal: set[str],
+                          family: str | None = None) -> str | None:
+        """Longest internal component prefix of a dotted import path, else None.
+        `family` is the importer's language family; when given, the suffix
+        fallback only considers components of that family."""
         parts = dep.split(".")
         for i in range(len(parts), 0, -1):
             prefix = ".".join(parts[:i])
@@ -577,7 +597,12 @@ class _Normalizer:
         # shares no prefix with its component `backend.db`. Resolve via dotted-suffix
         # match instead; only when exactly one internal component qualifies, so
         # ambiguous names stay unresolved (ADR-004's over-split-over-merge bias).
+        # Same language family only (dogfood finding on frida): Python's stdlib
+        # `import types` must not resolve to a lone TypeScript `widgets/types.ts`.
         candidates = [c for c in internal if c == dep or c.endswith("." + dep)]
+        if family is not None:
+            family_of = getattr(self, "_family_of", {})
+            candidates = [c for c in candidates if family_of.get(c) == family]
         if len(candidates) == 1:
             return candidates[0]
         return None
@@ -966,8 +991,9 @@ class _Normalizer:
             if slug not in best or conf > best[slug][0]:
                 best[slug] = (conf, mechanism)
 
+        family = getattr(self, "_family_of_file", {}).get(e.payload["file"])
         for target in e.payload["targets"]:
-            resolved = self._resolve_internal(target, set(components))
+            resolved = self._resolve_internal(target, set(components), family)
             if resolved:
                 offer(components[resolved], "import")
             # unresolved targets are external imports (pytest, stdlib, deps)
@@ -1016,7 +1042,8 @@ class _Normalizer:
         for path in sorted(observed):
             entity = self.entities[observed[path]]
             for dep in entity.payload["internal_dependencies"]:
-                resolved = self._resolve_internal(dep, set(components))
+                resolved = self._resolve_internal(dep, set(components),
+                                                  getattr(self, "_family_of", {}).get(path))
                 if resolved and resolved != path:
                     self.relationships.add((observed[path], "depends_on", components[resolved]))
 
@@ -1086,6 +1113,14 @@ class _Normalizer:
             self._put(self._entity("wiki_page", slug, owner.name, payload),
                       "natural_key", {}, [])
             self.relationships.add((slug, "documents", owner.slug))
+
+
+# languages whose modules can import each other; anything else is its own family
+_LANGUAGE_FAMILIES = {"typescript": "js", "javascript": "js"}
+
+
+def _language_family(language: str) -> str:
+    return _LANGUAGE_FAMILIES.get(language, language)
 
 
 def _file_to_module(file: str) -> str:
