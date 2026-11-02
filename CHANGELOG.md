@@ -31,6 +31,14 @@ so it works even where a raw `git push` of a tag ref is restricted).
   Locking and unlocking through the pooled Session could hit different
   connections once the Jira pass opened a second one, leaking the lock so
   the next compile of that repo in the same process waited forever.
+- Journey steps resolve against the post-compile state. A compile that
+  itself removed a `[[journeys]]` step's target (e.g. an API slug renamed
+  by 1.5.0 router-prefix composition) still counted the step as resolved
+  against the pre-compile snapshot, persisted the journey as `complete`
+  with no warning, and made the next `kc verify` report it `changed`. Such
+  a compile now drops the step with the usual "does not resolve" warning
+  and persists `partial`/`invalid`. Unobserved entities that Diff's
+  removal-evidence rule keeps (files a PR slice didn't touch) still count.
 
 ## [1.5.0] — 2026-11-01
 
