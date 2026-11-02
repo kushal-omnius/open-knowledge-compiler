@@ -17,6 +17,20 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- Calls through `from package import module` now cover the module. A test
+  doing `from storage import blob_utils` and `blob_utils.read_bytes(...)` under
+  a `backend/` import root produced `call` evidence for
+  `storage.blob_utils.read_bytes`, which the import-root fallback could not
+  match, so the test was linked only weakly (import) to the `storage` package.
+  The fallback now also tries the reference's dotted prefixes, longest first,
+  and stops at the first ambiguous one instead of falling back to a coarser
+  package. Call evidence also uses the test's language family now. On frida's
+  32 hand-labeled components, `covers` found 4 genuine tests instead of 2.
+  **Upgrade note:** one `kc compile --full` re-links existing tests (frida:
+  about 440 components and test coverages change once).
+
 ## [1.6.0] — 2026-11-02
 
 ### Added
