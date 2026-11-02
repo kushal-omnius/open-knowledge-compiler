@@ -32,6 +32,22 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ### Fixed
 
+- Import resolution no longer crosses languages. The import-root fallback
+  (a bare import matching the unique dotted suffix of a component path) also
+  matched components in other languages, so Python's stdlib `import types`
+  resolved to a lone TypeScript `widgets/types.ts`: a bogus `depends_on` edge
+  and an import-`covers` edge from every Python test importing `types`. On
+  frida this was the last incremental-vs-full divergence after #36/#37 (6
+  components, 28 test coverages, 36 relationship diffs in `kc verify`). The
+  fallback now only considers components of the importer's language family
+  (Python; TypeScript + JavaScript). This also resolves imports that a
+  same-named module in the other language used to make ambiguous: on frida,
+  `import utils` under the `backend/` import root now links to `backend.utils`
+  instead of staying unresolved next to `frontend/src/lib/utils.ts`, adding 20
+  `depends_on` and 24 `covers` edges to a full compile (none removed).
+  **Upgrade note:** one `kc compile --full` drops any wrong cross-language edges
+  already persisted and adds the newly resolved ones.
+
 - PR and commit compiles now resolve TypeScript path aliases (`@/*` ->
   `./src/*`) the way a full compile does. They used to read `tsconfig*.json`
   only when the change touched it, so every aliased import in a touched
