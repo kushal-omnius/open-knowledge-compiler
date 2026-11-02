@@ -8,6 +8,7 @@ invent an anchor (ADR-004 evidence discipline).
 
 from __future__ import annotations
 
+import hashlib
 from typing import Callable
 
 from pydantic import ValidationError
@@ -27,6 +28,15 @@ class LLMBudgetExceeded(Exception):
 _FACT_TYPE = {"business_rules": "business_rule_candidate",
               "features": "feature_candidate",
               "risks": "risk_candidate"}
+
+
+def _crlf_input_hash(content: str) -> str | None:
+    """The content_hash a full compile gave this file before the Git collector
+    normalized line endings, when it read a CRLF working tree
+    (core.autocrlf=true). None when the file has no line breaks."""
+    if "\n" not in content:
+        return None
+    return hashlib.sha256(content.encode("utf-8").replace(b"\n", b"\r\n")).hexdigest()
 
 
 class LLMSemanticExtractor:
@@ -88,6 +98,18 @@ class LLMSemanticExtractor:
         key = cache_key(TEMPLATE_ID, TEMPLATE_VERSION, self.provider.model_id,
                         artifact.content_hash)
         cached = self.cache.get(key)
+        if cached is None:
+            # Answers cached from a CRLF working tree are keyed on the CRLF
+            # bytes. Same file, same answer: reuse it under the LF key instead
+            # of re-asking the LLM, which costs tokens and returns different
+            # prose that churns the semantic entities.
+            legacy = _crlf_input_hash(artifact.content)
+            if legacy is not None:
+                cached = self.cache.get(cache_key(TEMPLATE_ID, TEMPLATE_VERSION,
+                                                  self.provider.model_id, legacy))
+                if cached is not None:
+                    self.cache.put(key, TEMPLATE_ID, TEMPLATE_VERSION,
+                                   self.provider.model_id, cached)
         if cached is not None:
             zero = {"input_tokens": 0, "output_tokens": 0}
             return ExtractionOut.model_validate(cached), "cached", zero  # cache holds validated output only
