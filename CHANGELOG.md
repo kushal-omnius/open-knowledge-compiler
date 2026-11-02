@@ -81,6 +81,18 @@ so it works even where a raw `git push` of a tag ref is restricted).
   authoritative, so every such PR deleted them and the next `kc verify`
   diverged (normalize.md §7).
 
+- PR compiles now see every file a large PR changed. The GitHub gateway read
+  only the first page (100 files) of a PR's file list, so `kc compile --pr`
+  and `kc reconcile` silently compiled a partial scope for bigger PRs: on
+  frida, PR #384 changed 240 files and only 77 source files were compiled,
+  leaving its new components missing until the next full compile. The list
+  is now paged in full. A PR at GitHub's 3000-file listing cap fails with a
+  `ForgeError` asking for `kc compile --full`, instead of compiling a scope
+  that may be incomplete.
+  **Upgrade note:** a knowledge base built by `--pr`/`reconcile` across a
+  PR with more than 100 changed files may be missing entities; `kc verify`
+  shows the drift, and one `kc compile --full` heals it.
+
 ## [1.5.0] — 2026-11-01
 
 ### Added
