@@ -599,12 +599,21 @@ class _Normalizer:
         # ambiguous names stay unresolved (ADR-004's over-split-over-merge bias).
         # Same language family only (dogfood finding on frida): Python's stdlib
         # `import types` must not resolve to a lone TypeScript `widgets/types.ts`.
-        candidates = [c for c in internal if c == dep or c.endswith("." + dep)]
-        if family is not None:
-            family_of = getattr(self, "_family_of", {})
-            candidates = [c for c in candidates if family_of.get(c) == family]
-        if len(candidates) == 1:
-            return candidates[0]
+        # Shorter dotted prefixes are tried too, longest first (dogfood finding on
+        # frida): a call through `from storage import blob_utils` reaches Normalize
+        # as `storage.blob_utils.read_bytes`, whose own suffix matches nothing but
+        # whose prefix `storage.blob_utils` is the module `backend.storage.blob_utils`.
+        # An ambiguous prefix stops the search rather than falling back to a coarser one.
+        family_of = getattr(self, "_family_of", {})
+        for i in range(len(parts), 0, -1):
+            prefix = ".".join(parts[:i])
+            candidates = [c for c in internal if c == prefix or c.endswith("." + prefix)]
+            if family is not None:
+                candidates = [c for c in candidates if family_of.get(c) == family]
+            if len(candidates) == 1:
+                return candidates[0]
+            if candidates:
+                return None
         return None
 
     # -- router prefix composition (FastAPI include_router, Express app.use) -------
@@ -999,7 +1008,7 @@ class _Normalizer:
             # unresolved targets are external imports (pytest, stdlib, deps)
         for ev in getattr(self, "_test_evidence", {}).get(e.payload["node_id"], []):
             if ev["mechanism"] == "call":
-                resolved = self._resolve_internal(ev["target_path"], set(components))
+                resolved = self._resolve_internal(ev["target_path"], set(components), family)
                 if resolved:
                     offer(components[resolved], "call")
             elif ev["mechanism"] == "http":
