@@ -17,6 +17,17 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- PR and commit compiles now resolve TypeScript path aliases (`@/*` ->
+  `./src/*`) the way a full compile does. They used to read `tsconfig*.json`
+  only when the change touched it, so every aliased import in a touched
+  `.ts`/`.tsx` file landed in `external_dependencies`, `depends_on` edges went
+  missing, and `kc verify` diverged after any incremental compile (frida
+  dogfood: 259 components). Incremental compiles with TypeScript now also
+  read every `tsconfig*.json` at the compile's commit as alias config, without
+  adding them to the compile scope.
+
 ## [1.5.0] — 2026-11-01
 
 ### Added

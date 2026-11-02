@@ -65,6 +65,11 @@ class GitCollector:
             capture_output=True)
         return result.returncode == 0
 
+    def files_at_commit(self, commit_sha: str) -> list[str]:
+        """Every tracked path in the commit's tree, sorted."""
+        listing = _git(self.repo_path, "ls-tree", "-r", "--name-only", "-z", commit_sha)
+        return sorted(p for p in listing.split("\0") if p)
+
     def collect_at_commit(self, commit_sha: str, paths: list[str]) -> list[Artifact]:
         """Stage specific files as they exist at a commit (PR-scoped collection).
         Paths absent at the commit (removed by the PR) are skipped — their absence
