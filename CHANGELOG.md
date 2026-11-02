@@ -31,6 +31,43 @@ so it works even where a raw `git push` of a tag ref is restricted).
   **Upgrade note:** one `kc compile --full` upgrades existing component
   tests from import to call coverage.
 
+- Test cases in pytest classes and in `describe()` blocks are detected.
+  The Python analyzer only took module-level `test*` functions, so
+  `class TestX:` / `def test_y(self):` tests (and their call evidence) were
+  invisible. The TypeScript analyzer only took top-level `test()`/`it()`
+  calls, so every `describe()`-wrapped test was invisible too (the JavaScript
+  analyzer already handled this). On frida these were 26 of the 27 genuine
+  covering tests `kc eval` missed. Python now follows pytest's default
+  collection (`test*` methods of module-level `Test*` classes, node id
+  `file::Class::test`); TypeScript finds `test`/`it` (with `.skip`/`.only`)
+  at any `describe()` depth, like JavaScript. Existing top-level node ids are
+  unchanged. **Upgrade note:** one `kc compile --full` adds the newly
+  detected tests as new `test_coverage` entities and their `covers` edges.
+
+- Calls through `from package import module` now cover the module. A test
+  doing `from storage import blob_utils` and `blob_utils.read_bytes(...)` under
+  a `backend/` import root produced `call` evidence for
+  `storage.blob_utils.read_bytes`, which the import-root fallback could not
+  match, so the test was linked only weakly (import) to the `storage` package.
+  The fallback now also tries the reference's dotted prefixes, longest first,
+  and stops at the first ambiguous one instead of falling back to a coarser
+  package. Call evidence also uses the test's language family now. On frida's
+  32 hand-labeled components, `covers` found 4 genuine tests instead of 2.
+  **Upgrade note:** one `kc compile --full` re-links existing tests (frida:
+  about 440 components and test coverages change once).
+
+- `kc eval` no longer counts test modules as changed or affected components.
+  kc compiles test files as components, but labels name the source modules
+  whose behavior changed, so every test file a PR edited was scored as a
+  false positive: on frida, 108 of 132 change-detection false positives.
+  A component is a test module when one of its files is a test file by its
+  own analyzer's convention (`test_*.py`, `*.test.ts`, …). Such components
+  are dropped from `change_detection` and `impact` predictions and listed
+  per item as `excluded_test_modules` in `--json`, except components the
+  label itself names: the convention can misfire (frida's production
+  workflow `cause_agent_test.py`), and the label is the ground truth.
+  Coverage scoring is unchanged.
+
 ## [1.6.0] — 2026-11-02
 
 ### Added
