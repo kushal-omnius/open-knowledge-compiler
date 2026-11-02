@@ -17,6 +17,27 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- Full and incremental compiles no longer disagree on Windows checkouts with
+  `core.autocrlf=true`. A full compile (and `kc verify`) read the CRLF working
+  tree; PR and commit compiles read LF git blobs. So an unchanged file got a
+  different artifact `content_hash` depending on the path. Any symbol with a
+  string token spanning lines (docstrings, multi-line strings, template
+  literals) got a different `body_hash`. Every incremental compile churned
+  those symbols, `kc verify` reported drift, and LLM extraction missed the
+  cache between the two paths. The Git collector now converts CRLF to LF on
+  both read paths before hashing (pipeline.md §3.1). Lone CRs are kept, as git
+  keeps them. Line numbers and anchors do not move.
+  **Upgrade note:** on an existing Windows knowledge base, run one
+  `kc compile --full` after upgrading. It reports symbols in CRLF files as
+  changed (`~N`), once; those deltas are line endings, not code. LLM answers
+  that earlier full compiles cached under the CRLF bytes are still used: on a
+  cache miss the extractor retries with the CRLF variant of the content and
+  copies a hit to the new key. So the upgrade compile makes no new LLM calls
+  for unchanged files. Linux/macOS checkouts and repos without autocrlf are
+  unaffected. No schema change.
+
 ## [1.5.0] — 2026-11-01
 
 ### Added
