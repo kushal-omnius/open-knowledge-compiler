@@ -68,12 +68,44 @@ def resolve_dependency(session: Session, coordinate: str,
             "entity_counts": counts}
 
 
+_MAX_RENAME_HOPS = 32
+
+
+def resolve_renamed_slug(session: Session, repo_id: int, slug: str) -> str | None:
+    """The live slug an entity removed by a git rename now goes by, following the
+    `renamed_to` lineage Diff records in the delta log (normalize.md §4.1).
+    None when `slug` is itself live, or its latest removal names no live successor."""
+    seen = {slug}
+    current = slug
+    for _ in range(_MAX_RENAME_HOPS):
+        if session.execute(select(EntityRow.id).where(
+                EntityRow.repo_id == repo_id, EntityRow.slug == current)).first():
+            return current if current != slug else None
+        evidence = session.execute(
+            select(DeltaChangeRow.evidence)
+            .where(DeltaChangeRow.repo_id == repo_id, DeltaChangeRow.slug == current,
+                   DeltaChangeRow.op == "removed")
+            .order_by(DeltaChangeRow.id.desc()).limit(1)).scalar_one_or_none()
+        nxt = (evidence or {}).get("renamed_to")
+        if not nxt or nxt in seen:
+            return None
+        seen.add(nxt)
+        current = nxt
+    return None
+
+
 def get_entity(session: Session, repo_id: int, slug: str,
                dep_map: dict[str, str] | None = None, max_neighbors: int = 50) -> dict | None:
+    """A slug retired by a git rename resolves to its successor, marked with
+    `renamed_from` so the caller can update its citation."""
     entity = session.execute(select(EntityRow).where(
         EntityRow.repo_id == repo_id, EntityRow.slug == slug)).scalar_one_or_none()
     if entity is None:
-        return None
+        live = resolve_renamed_slug(session, repo_id, slug)
+        if live is None:
+            return None
+        result = get_entity(session, repo_id, live, dep_map=dep_map, max_neighbors=max_neighbors)
+        return {**result, "renamed_from": slug} if result else None
 
     id_to = dict(session.execute(select(EntityRow.id, EntityRow.slug)
                                  .where(EntityRow.repo_id == repo_id)).all())
@@ -328,6 +360,7 @@ def impact_plan(session: Session, repo_id: int, slug: str,
     entity = get_entity(session, repo_id, slug, dep_map=dep_map)
     if entity is None:
         return None
+    slug = entity["slug"]  # a renamed slug resolves to its successor
 
     slug_to_id = dict(session.execute(select(EntityRow.slug, EntityRow.id)
                                       .where(EntityRow.repo_id == repo_id)).all())
@@ -483,6 +516,7 @@ def test_plan(session: Session, repo_id: int, slug: str,
     plan = impact_plan(session, repo_id, slug, dep_map=dep_map)
     if plan is None:
         return None
+    slug = plan["slug"]  # a renamed slug resolves to its successor
 
     slug_to_id = dict(session.execute(select(EntityRow.slug, EntityRow.id)
                                       .where(EntityRow.repo_id == repo_id)).all())

@@ -131,7 +131,10 @@ def build_server(repo_dir: Path):
         and owning component slug.
 
         For components with cross-repo dependencies, also resolves any
-        external_dependencies via kc.toml's [dependencies] map."""
+        external_dependencies via kc.toml's [dependencies] map.
+
+        A slug retired by a file rename returns its successor entity, with
+        renamed_from set to the slug you asked for — cite the new slug."""
         with repo_session() as (session, repo_id):
             return (queries.get_entity(session, repo_id, slug, dep_map=dep_map,
                                        max_neighbors=max_neighbors)
