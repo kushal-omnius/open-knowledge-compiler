@@ -381,6 +381,10 @@ def validate_test_cmd(ctx: click.Context, test_file: str, for_entity: str, repo_
     click.echo("existence:")
     for check in report.existence:
         click.echo(f"  {check.slug:<28} {'OK' if check.exists else 'MISSING'}")
+    if report.renamed_claims:
+        click.echo("renamed (scored as the new slug; update the header):")
+        for old, new in report.renamed_claims.items():
+            click.echo(f"  {old} -> {new}")
     click.echo()
     click.echo("--- targeting tier: did it cite the right things? ---")
     click.echo(f"precision/recall vs test_plan({report.for_entity}):")

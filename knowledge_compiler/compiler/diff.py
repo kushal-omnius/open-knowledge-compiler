@@ -119,10 +119,17 @@ def compute_diff(candidate: CandidateState, current: CurrentState,
             removed_slugs.add(slug)
         else:
             survivors.add(slug)
+    lineage = _rename_lineage(candidate, current, removed_slugs)
+    renamed_from = {new: old for old, new in lineage.items()}
+    entity_changes = [
+        c.model_copy(update={"evidence": {**c.evidence, "renamed_from": renamed_from[c.slug]}})
+        if c.op == "added" and c.slug in renamed_from else c
+        for c in entity_changes]
     for slug in sorted(removed_slugs):
         entity_changes.append(EntityChange(
             op="removed", slug=slug, entity_type=cur[slug].entity_type,
-            change_summary={}, evidence={}))
+            change_summary={},
+            evidence={"renamed_to": lineage[slug]} if slug in lineage else {}))
 
     # relationships: set diff. An edge is removable only when its FROM side was
     # observed this compile (its outgoing edges are then authoritative) or removed;
@@ -159,6 +166,26 @@ def compute_diff(candidate: CandidateState, current: CurrentState,
         dirty.update((rc.from_slug, rc.to_slug))
     dirty &= set(cand)  # dirty is about what exists now (emission input)
     return delta, dirty
+
+
+def _rename_lineage(candidate: CandidateState, current: CurrentState,
+                    removed_slugs: set[str]) -> dict[str, str]:
+    """old slug -> new slug for Normalize's rename pairs that really are a
+    removal plus an addition this compile (normalize.md §4.1). Wiki pages have
+    derived identity, so a page pairs when its owner does."""
+    cur = {e.slug: e for e in current.entities}
+    cand = {e.slug for e in candidate.entities}
+    lineage = {old: new for old, new in candidate.renames.items()
+               if old in removed_slugs and new in cand and new not in cur}
+    page_of = {e.payload.get("owner_slug"): e.slug for e in candidate.entities
+               if e.entity_type == "wiki_page"}
+    for slug in sorted(removed_slugs):
+        if cur[slug].entity_type != "wiki_page":
+            continue
+        new_page = page_of.get(lineage.get(cur[slug].payload.get("owner_slug", "")))
+        if new_page is not None and new_page not in cur:
+            lineage[slug] = new_page
+    return lineage
 
 
 def _evidence(candidate: CandidateState, slug: str) -> dict:

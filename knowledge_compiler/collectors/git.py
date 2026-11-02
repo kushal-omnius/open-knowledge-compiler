@@ -4,6 +4,13 @@ V1 scope: full compilation only — reads the working tree and records the HEAD
 commit (matches CI checkouts, where the tree IS the compiled commit). PR-scoped
 collection (forge diff + source_change_observed facts) lands with incremental
 compilation (phase 3).
+
+Both read paths (the working tree for full compiles, git blobs for PR/commit
+compiles) normalize CRLF to LF before hashing (pipeline.md §3.1). Under
+`core.autocrlf=true` the working tree is CRLF and the blob is LF. Without the
+normalization, an unchanged file got a different content_hash (and so a
+different LLM cache key) depending on which path read it, and so did the
+body_hash of any symbol whose string tokens span lines.
 """
 
 from __future__ import annotations
@@ -17,6 +24,12 @@ from knowledge_compiler.ir import Artifact
 
 # Binary sniff: NUL byte in the head of the file (git's own heuristic).
 _SNIFF_BYTES = 8192
+
+
+def _normalize_eol(raw: bytes) -> bytes:
+    """CRLF -> LF: the conversion git applies to text files on commit. Lone CRs
+    are kept, as git keeps them."""
+    return raw.replace(b"\r\n", b"\n")
 
 
 class GitCollectorError(Exception):
@@ -65,6 +78,11 @@ class GitCollector:
             capture_output=True)
         return result.returncode == 0
 
+    def files_at_commit(self, commit_sha: str) -> list[str]:
+        """Every tracked path in the commit's tree, sorted."""
+        listing = _git(self.repo_path, "ls-tree", "-r", "--name-only", "-z", commit_sha)
+        return sorted(p for p in listing.split("\0") if p)
+
     def collect_at_commit(self, commit_sha: str, paths: list[str]) -> list[Artifact]:
         """Stage specific files as they exist at a commit (PR-scoped collection).
         Paths absent at the commit (removed by the PR) are skipped — their absence
@@ -79,6 +97,7 @@ class GitCollector:
             raw = result.stdout
             if b"\0" in raw[:_SNIFF_BYTES]:
                 continue
+            raw = _normalize_eol(raw)
             artifacts.append(Artifact(
                 artifact_type="source_file", source_ref=rel_path.replace("\\", "/"),
                 content_hash=hashlib.sha256(raw).hexdigest(),
@@ -95,6 +114,7 @@ class GitCollector:
             raw = file_path.read_bytes()
             if b"\0" in raw[:_SNIFF_BYTES]:
                 continue  # binary: not an engineering-knowledge artifact
+            raw = _normalize_eol(raw)
             text = raw.decode("utf-8", errors="replace")
             artifacts.append(
                 Artifact(

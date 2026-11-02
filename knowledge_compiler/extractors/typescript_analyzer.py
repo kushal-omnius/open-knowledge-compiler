@@ -74,16 +74,19 @@ def _strip_jsonc(text: str) -> str:
 TsconfigAliases = tuple[str, str, dict[str, list[str]]]
 
 
+def is_tsconfig(path: str) -> bool:
+    """tsconfig.json or a variant like tsconfig.app.json."""
+    name = posixpath.basename(path)
+    return name == "tsconfig.json" or (name.startswith("tsconfig.") and name.endswith(".json"))
+
+
 def _find_tsconfig_aliases(artifacts: list) -> list[TsconfigAliases]:
     """Locate tsconfig*.json files and extract their path-alias config
     (compilerOptions.baseUrl + .paths). Sorted by config_dir depth descending so
     the nearest enclosing tsconfig wins in a monorepo layout."""
     configs: list[TsconfigAliases] = []
     for artifact in artifacts:
-        name = posixpath.basename(artifact.source_ref)
-        if artifact.content is None or not (
-            name == "tsconfig.json" or (name.startswith("tsconfig.") and name.endswith(".json"))
-        ):
+        if artifact.content is None or not is_tsconfig(artifact.source_ref):
             continue
         try:
             data = json.loads(_strip_jsonc(artifact.content))
