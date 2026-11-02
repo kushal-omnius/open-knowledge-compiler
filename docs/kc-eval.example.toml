@@ -19,7 +19,11 @@ tests = []      # genuinely untested — a correct coverage gap
 
 # A compiled change, named by PR number or commit prefix (not the bootstrap
 # compile). `changed`: components whose behavior changed. `affected`: everything
-# that needs re-testing, which always includes `changed`.
+# that needs re-testing, which always includes `changed`. Name source modules
+# only: test modules (test files by their analyzer's convention, e.g.
+# `test_*.py`, `*.test.ts`) are left out of the predictions you are scored
+# against. A real source module that merely matches that convention (say a
+# `*_test.py` workflow) can still be named here; it is then scored normally.
 [[change]]
 pr = 42
 changed = ["billing.rules"]
