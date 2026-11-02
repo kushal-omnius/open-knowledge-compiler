@@ -65,6 +65,39 @@ def _is_test_file(source_ref: str) -> bool:
     return name.startswith("test_") or name.endswith("_test.py")
 
 
+def _is_pytest_case(name: str, kind: str, scope: tuple[str, ...]) -> bool:
+    """pytest's default collection: module-level `test*` functions and `test*`
+    methods of a module-level `Test*` class (dogfood finding on frida, whose
+    backend groups most tests in classes)."""
+    if not name.startswith("test"):
+        return False
+    return kind == "function" or (kind == "method" and len(scope) == 1
+                                  and scope[0].startswith("Test"))
+
+
+def _pytest_functions(root: Node):
+    """(scope, function_definition) for each test `_is_pytest_case` collects."""
+    def definition(node: Node) -> Node | None:
+        return node.child_by_field_name("definition") if node.type == "decorated_definition" else node
+
+    def name_of(node: Node) -> str:
+        name = node.child_by_field_name("name")
+        return name.text.decode("utf-8") if name is not None else ""
+
+    for node in root.children:
+        d = definition(node)
+        if d is None:
+            continue
+        if d.type == "function_definition" and name_of(d).startswith("test"):
+            yield (), d
+        elif d.type == "class_definition" and name_of(d).startswith("Test"):
+            body = d.child_by_field_name("body")
+            for member in body.children if body is not None else ():
+                m = definition(member)
+                if m is not None and m.type == "function_definition" and name_of(m).startswith("test"):
+                    yield (name_of(d),), m
+
+
 class PythonAnalyzer:
     """LanguageAnalyzer plugin (built-in). Facts only — never entities (ADR-009)."""
 
@@ -160,9 +193,9 @@ class PythonAnalyzer:
         }
         fact("symbol_observed", payload, anchors=(anchor,))
 
-        if is_test and kind == "function" and name.startswith("test"):
+        if is_test and _is_pytest_case(name, kind, scope):
             fact("test_case_observed", {
-                "node_id": f"{artifact.source_ref}::{name}", "framework": "pytest",
+                "node_id": "::".join((artifact.source_ref, *scope, name)), "framework": "pytest",
                 "file": artifact.source_ref, "module": module,
             }, anchors=(anchor,))
 
@@ -272,14 +305,11 @@ class PythonAnalyzer:
         (`client.get("/items/1")`). Only test function bodies are scanned, so
         names a test file imports just for fixtures, types or setup never count
         as a call. conftest.py is not a test file, so its imports never count."""
-        for node in root.children:
-            fn = node.child_by_field_name("definition") if node.type == "decorated_definition" else node
-            if fn is None or fn.type != "function_definition":
-                continue
+        for scope, fn in _pytest_functions(root):
             name_node, body = fn.child_by_field_name("name"), fn.child_by_field_name("body")
-            if name_node is None or body is None or not name_node.text.decode("utf-8").startswith("test"):
+            if name_node is None or body is None:
                 continue
-            node_id = f"{ref}::{name_node.text.decode('utf-8')}"
+            node_id = "::".join((ref, *scope, name_node.text.decode("utf-8")))
             calls: set[str] = set()
             requests: set[tuple[str, str]] = set()
             stack = [body]
