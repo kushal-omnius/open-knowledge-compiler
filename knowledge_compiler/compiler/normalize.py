@@ -42,6 +42,8 @@ class CurrentState:
 
     entities: list[Entity] = field(default_factory=list)
     relationships: list[Relationship] = field(default_factory=list)
+    # rename lineage from the delta log, old slug -> new slug (normalize.md §4.1)
+    renames: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -59,6 +61,8 @@ class CandidateState:
     provenance: dict[str, list[dict]]      # slug -> contributing fact envelope snapshots
     conflicts: list[dict]
     warnings: list[str]
+    # this compile's rename pairs, old slug -> new slug (normalize.md §4.1)
+    renames: dict[str, str] = field(default_factory=dict)
 
 
 # --- Helpers ---------------------------------------------------------------------
@@ -160,6 +164,7 @@ class _Normalizer:
         self.provenance: dict[str, list[dict]] = {}
         self.conflicts: list[dict] = []
         self.warnings: list[str] = []
+        self.renames: dict[str, str] = {}
 
     def run(self) -> CandidateState:
         rename_map = self._p1_rename_map()
@@ -168,6 +173,7 @@ class _Normalizer:
         self._state_models()
         self._escaped_defects()
         self._p3_p4_candidates(rename_map)
+        self._rename_lineage(rename_map)
         self._user_journeys()
         self._p5_relationships()
         self._p6_wiki_pages()
@@ -184,6 +190,7 @@ class _Normalizer:
             provenance=self.provenance,
             conflicts=self.conflicts,
             warnings=sorted(self.warnings),
+            renames=dict(sorted(self.renames.items())),
         )
 
     # -- shared -------------------------------------------------------------------
@@ -272,7 +279,14 @@ class _Normalizer:
             declared_steps = f.payload.get("steps", [])
             resolved_steps = []
             unresolved_steps = []
-            for step_slug in declared_steps:
+            renamed_steps = {}
+            for declared in declared_steps:
+                step_slug = self._follow_renames(declared, current_slugs)
+                if step_slug != declared:
+                    renamed_steps[declared] = step_slug
+                    self.warnings.append(
+                        f"user_journey '{name}': step slug '{declared}' was renamed to "
+                        f"'{step_slug}' — update kc.toml")
                 if step_slug in self.entities or step_slug in current_slugs:
                     resolved_steps.append(step_slug)
                 else:
@@ -288,9 +302,32 @@ class _Normalizer:
                 status = "invalid"
             payload = {"name": name, "steps": resolved_steps, "status": status,
                       "unresolved_steps": unresolved_steps}
+            if renamed_steps:
+                # only when a step followed rename lineage, so other journeys keep their hash
+                payload["renamed_steps"] = dict(sorted(renamed_steps.items()))
             self._put(self._entity("user_journey", f"user-journey/{slugify(name)}",
                                    name, payload),
                       rule="natural_key", signals={}, facts=[f])
+
+    _MAX_RENAME_HOPS = 32
+
+    def _follow_renames(self, slug: str, current_slugs: set[str]) -> str:
+        """The slug a journey step goes by now. A pair from this compile always
+        applies (its old slug is still in current state, about to be removed);
+        persisted lineage applies only once the old slug resolves nowhere, so a
+        path re-created after a rename keeps its own slug."""
+        lineage = {**self.current.renames, **self.renames}
+        seen = {slug}
+        for _ in range(self._MAX_RENAME_HOPS):
+            live = slug in self.entities or slug in current_slugs
+            if slug not in self.renames and (live or slug not in lineage):
+                break
+            nxt = lineage[slug]
+            if nxt in seen:
+                break
+            seen.add(nxt)
+            slug = nxt
+        return slug
 
     def _pull_requests(self) -> None:
         for f in self._facts_of("pr_observed"):
@@ -694,6 +731,73 @@ class _Normalizer:
                                    node_id, payload, anchors=f.anchors),
                       "natural_key", {}, [f])
 
+    # -- rename lineage (normalize.md §4.1) -------------------------------------------
+
+    _LINEAGE_TYPES = ("component", "test_coverage", "state_model")  # path-keyed natural keys
+
+    def _rename_lineage(self, rename_map: dict[str, str]) -> None:
+        """Pair each path-keyed deterministic entity whose file git renamed with
+        the entity now observed at the renamed key. Its natural key (ADR-004)
+        changed, so it is still a different entity with a different slug; the
+        pair only records lineage, which Diff writes into the delta so stale
+        citations can be followed. Pairs only on a unique match in both
+        directions (DP 8: never guess). Components go first because a state
+        model's key is its owning component's path."""
+        if not rename_map:
+            return
+        current_slugs = {e.slug for e in self.current.entities}
+        gone = sorted((e for e in self.current.entities if e.slug not in self.entities),
+                      key=lambda e: e.slug)
+        fresh = [self.entities[s] for s in sorted(self.entities) if s not in current_slugs]
+        moved_paths: dict[str, str] = {}
+        for entity_type in self._LINEAGE_TYPES:
+            by_key: dict[object, list[Entity]] = {}
+            for e in fresh:
+                if e.entity_type == entity_type:
+                    by_key.setdefault(self._lineage_key(e), []).append(e)
+            pairs: dict[str, list[str]] = {}
+            for old in gone:
+                if old.entity_type != entity_type:
+                    continue
+                key = self._renamed_lineage_key(old, rename_map, moved_paths)
+                hits = by_key.get(key, []) if key is not None else []
+                if len(hits) == 1:
+                    pairs.setdefault(hits[0].slug, []).append(old.slug)
+            for new_slug, olds in sorted(pairs.items()):
+                if len(olds) != 1:
+                    continue
+                self.renames[olds[0]] = new_slug
+                if entity_type == "component":
+                    old = next(e for e in gone if e.slug == olds[0])
+                    moved_paths[old.payload["path"]] = self.entities[new_slug].payload["path"]
+
+    @staticmethod
+    def _lineage_key(e: Entity) -> object:
+        if e.entity_type == "component":
+            return tuple(sorted(e.payload.get("files", [])))
+        if e.entity_type == "test_coverage":
+            return e.payload.get("node_id")
+        return (e.payload.get("owner_component"), e.payload.get("field"))
+
+    @staticmethod
+    def _renamed_lineage_key(e: Entity, rename_map: dict[str, str],
+                             moved_paths: dict[str, str]) -> object | None:
+        """The key `e` would have after the renames, or None if none applies."""
+        if e.entity_type == "component":
+            files = e.payload.get("files", [])
+            if not any(f in rename_map for f in files):
+                return None
+            return tuple(sorted(rename_map.get(f, f) for f in files))
+        if e.entity_type == "test_coverage":
+            file, node_id = e.payload.get("file"), e.payload.get("node_id", "")
+            if file not in rename_map or not node_id.startswith(file):
+                return None
+            return rename_map[file] + node_id[len(file):]
+        owner = e.payload.get("owner_component")
+        if owner not in moved_paths:
+            return None
+        return (moved_paths[owner], e.payload.get("field"))
+
     # -- P3 + P4: the cascade (normalize.md §5–6) ------------------------------------
 
     _CANDIDATE_TYPE = {
@@ -946,10 +1050,14 @@ class _Normalizer:
                 # ADR-017: traverses edges are unordered (V1 relationships carry no
                 # payload, ir.md §3.3) — the journey's own payload["steps"] list is
                 # the source of truth for order; these edges only make the journey
-                # navigable from the wiki/relations side.
+                # navigable from the wiki/relations side. Every resolved step gets
+                # its edge, including one only in current state: a journey is
+                # re-observed on every compile, so its outgoing edges are
+                # authoritative, and an edge only to this compile's slice would
+                # drop the steps a PR didn't touch (normalize.md §7). Diff never
+                # adds an edge to an entity it removes.
                 for step_slug in e.payload["steps"]:
-                    if step_slug in self.entities:
-                        self.relationships.add((e.slug, "traverses", step_slug))
+                    self.relationships.add((e.slug, "traverses", step_slug))
             elif e.entity_type == "state_model":
                 owner_path = e.payload["owner_component"]
                 if owner_path in components:

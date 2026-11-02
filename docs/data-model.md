@@ -101,7 +101,7 @@ Normalized rows rather than one JSONB blob per compile — the headline query "w
 | `op` | `added` \| `changed` \| `removed` \| `moved` |
 | `entity_id`, `slug`, `entity_type` | slug + type denormalized so the log stays readable even if an entity is later removed |
 | `change_summary` JSONB | **granularity decision (ADR-003 left this open):** list of changed payload paths **with old→new values per path** + a one-line human-readable summary per change; for `moved`, old→new anchor file paths. Old values make the delta log *replayable backward*: point-in-time field values for version-skew queries (pinned-dependency test generation) reconstruct from the log instead of requiring recompile-at-tag |
-| `evidence` JSONB | supporting refs (facts' artifact refs) |
+| `evidence` JSONB | supporting refs (facts' artifact refs); for a path-keyed entity retired by a git rename, `renamed_to` on the `removed` row and `renamed_from` on the `added` row — the durable rename lineage (normalize.md §4.1, additive clarification) |
 
 `delta_relationship_changes`: `compile_run_id`, `op` (`added`\|`removed`), `relation_type`, `from_slug`, `to_slug`.
 

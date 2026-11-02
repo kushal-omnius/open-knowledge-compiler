@@ -36,7 +36,18 @@ def load_current_state(session: Session, repo_id: int, repo_slug: str) -> Curren
                      from_slug=id_to_slug[r.from_entity_id], to_slug=id_to_slug[r.to_entity_id])
         for r in rel_rows
     ]
-    return CurrentState(entities=entities, relationships=relationships)
+    # rename lineage (normalize.md §4.1): a slug's latest removal decides, so a
+    # slug re-added and later removed without a rename stops redirecting
+    renames: dict[str, str] = {}
+    for slug, evidence in session.execute(
+            select(DeltaChangeRow.slug, DeltaChangeRow.evidence)
+            .where(DeltaChangeRow.repo_id == repo_id, DeltaChangeRow.op == "removed")
+            .order_by(DeltaChangeRow.id)).all():
+        if (evidence or {}).get("renamed_to"):
+            renames[slug] = evidence["renamed_to"]
+        else:
+            renames.pop(slug, None)
+    return CurrentState(entities=entities, relationships=relationships, renames=renames)
 
 
 def persist_compile(session: Session, repo_id: int, run: CompileRun,

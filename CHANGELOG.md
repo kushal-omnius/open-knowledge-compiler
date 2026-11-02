@@ -17,8 +17,65 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Added
+
+- Rename lineage for path-keyed entities (normalize.md §4.1). A PR that
+  renames files still removes and re-adds the components, test coverage,
+  state models and wiki pages keyed by those paths, because their slugs are
+  derived from the path (ADR-004). The delta now pairs them: `renamed_to` on
+  the removed row, `renamed_from` on the added one. A stale slug resolves to
+  its successor: MCP `get_entity`/`impact_plan`/`test_plan` (the result is
+  marked `renamed_from`), `kc validate-test` (`renamed_claims` instead of a
+  nonexistent-slug failure) and `[[journeys]]` steps (warned, recorded in
+  `renamed_steps`). Found replaying frida PR #468, a 43-file pure rename.
+  PR compiles only: direct-commit and full compiles see no rename report.
+
 ### Fixed
 
+- PR and commit compiles now resolve TypeScript path aliases (`@/*` ->
+  `./src/*`) the way a full compile does. They used to read `tsconfig*.json`
+  only when the change touched it, so every aliased import in a touched
+  `.ts`/`.tsx` file landed in `external_dependencies`, `depends_on` edges went
+  missing, and `kc verify` diverged after any incremental compile (frida
+  dogfood: 259 components). Incremental compiles with TypeScript now also
+  read every `tsconfig*.json` at the compile's commit as alias config, without
+  adding them to the compile scope.
+- Full and incremental compiles no longer disagree on Windows checkouts with
+  `core.autocrlf=true`. A full compile (and `kc verify`) read the CRLF working
+  tree; PR and commit compiles read LF git blobs. So an unchanged file got a
+  different artifact `content_hash` depending on the path. Any symbol with a
+  string token spanning lines (docstrings, multi-line strings, template
+  literals) got a different `body_hash`. Every incremental compile churned
+  those symbols, `kc verify` reported drift, and LLM extraction missed the
+  cache between the two paths. The Git collector now converts CRLF to LF on
+  both read paths before hashing (pipeline.md §3.1). Lone CRs are kept, as git
+  keeps them. Line numbers and anchors do not move.
+  **Upgrade note:** on an existing Windows knowledge base, run one
+  `kc compile --full` after upgrading. It reports symbols in CRLF files as
+  changed (`~N`), once; those deltas are line endings, not code. LLM answers
+  that earlier full compiles cached under the CRLF bytes are still used: on a
+  cache miss the extractor retries with the CRLF variant of the content and
+  copies a hit to the new key. So the upgrade compile makes no new LLM calls
+  for unchanged files. Linux/macOS checkouts and repos without autocrlf are
+  unaffected. No schema change.
+
+- A PR compile no longer drops a journey's `traverses` edges to steps whose
+  files the PR didn't touch. P5 emitted the edges only to entities observed
+  in that compile, and a re-observed journey's outgoing edges are
+  authoritative, so every such PR deleted them and the next `kc verify`
+  diverged (normalize.md §7).
+
+- PR compiles now see every file a large PR changed. The GitHub gateway read
+  only the first page (100 files) of a PR's file list, so `kc compile --pr`
+  and `kc reconcile` silently compiled a partial scope for bigger PRs: on
+  frida, PR #384 changed 240 files and only 77 source files were compiled,
+  leaving its new components missing until the next full compile. The list
+  is now paged in full. A PR at GitHub's 3000-file listing cap fails with a
+  `ForgeError` asking for `kc compile --full`, instead of compiling a scope
+  that may be incomplete.
+  **Upgrade note:** a knowledge base built by `--pr`/`reconcile` across a
+  PR with more than 100 changed files may be missing entities; `kc verify`
+  shows the drift, and one `kc compile --full` heals it.
 - Jira→feature matching (the per-issue LLM pass after file-level semantic
   extraction) streams `[llm] i/n jira:<KEY> --changed|--failed` progress
   lines, reports issues whose call failed (e.g. exhausted HTTP 429 retries)
