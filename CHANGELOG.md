@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.6.1] — 2026-11-02
+
 ### Fixed
 
 - Rendering an imported component in a JS/TS test now counts as `call`
