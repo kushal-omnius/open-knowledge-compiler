@@ -83,17 +83,31 @@ class GitCollector:
         listing = _git(self.repo_path, "ls-tree", "-r", "--name-only", "-z", commit_sha)
         return sorted(p for p in listing.split("\0") if p)
 
+    def has_commit(self, commit_sha: str) -> bool:
+        """True when the commit object exists in the local clone. A forge can list a
+        commit (PR merge, direct push) that was never fetched here."""
+        result = subprocess.run(
+            ["git", "-C", str(self.repo_path), "cat-file", "-e", f"{commit_sha}^{{commit}}"],
+            capture_output=True)
+        return result.returncode == 0
+
     def collect_at_commit(self, commit_sha: str, paths: list[str]) -> list[Artifact]:
         """Stage specific files as they exist at a commit (PR-scoped collection).
         Paths absent at the commit (removed by the PR) are skipped — their absence
-        is scope evidence, not an artifact."""
+        is scope evidence, not an artifact. Any other read failure (notably a commit
+        missing from the local clone) raises GitCollectorError: treating it as
+        "absent" would make Diff remove every entity anchored to the in-scope files."""
+        if paths and not self.has_commit(commit_sha):
+            raise GitCollectorError(
+                f"commit {commit_sha} is not in the local clone at {self.repo_path}")
         artifacts: list[Artifact] = []
         for rel_path in sorted(set(paths)):
             result = subprocess.run(
                 ["git", "-C", str(self.repo_path), "cat-file", "-p", f"{commit_sha}:{rel_path}"],
                 capture_output=True)
             if result.returncode != 0:
-                continue  # absent at this commit
+                if self._absent_or_gitlink(commit_sha, rel_path, result.stderr):
+                    continue  # absent at this commit, or a submodule (not a blob)
             raw = result.stdout
             if b"\0" in raw[:_SNIFF_BYTES]:
                 continue
@@ -103,6 +117,23 @@ class GitCollector:
                 content_hash=hashlib.sha256(raw).hexdigest(),
                 content=raw.decode("utf-8", errors="replace")))
         return artifacts
+
+    def _absent_or_gitlink(self, commit_sha: str, rel_path: str, cat_file_stderr: bytes) -> bool:
+        """After a failed `cat-file`, confirm via `ls-tree` (not localized stderr) that
+        the path is genuinely absent at the commit, or a gitlink (mode 160000, type
+        `commit`). Anything else is a real read failure."""
+        listing = subprocess.run(
+            ["git", "-C", str(self.repo_path), "ls-tree", "-z", commit_sha, "--", rel_path],
+            capture_output=True)
+        if listing.returncode == 0:
+            if not listing.stdout:
+                return True
+            meta = listing.stdout.split(b"	", 1)[0].split()
+            if len(meta) >= 2 and meta[1] == b"commit":
+                return True
+        raise GitCollectorError(
+            f"cannot read {rel_path} at commit {commit_sha} in {self.repo_path}: "
+            f"{(listing.stderr or cat_file_stderr).decode('utf-8', errors='replace').strip()}")
 
     def collect_full(self) -> list[Artifact]:
         tracked = _git(self.repo_path, "ls-files", "-z").split("\0")
