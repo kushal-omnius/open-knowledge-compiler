@@ -17,6 +17,8 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+## [1.6.2] — 2026-11-17
+
 ### Fixed
 
 - `kc reconcile` no longer mass-removes entities when the forge lists a PR or
