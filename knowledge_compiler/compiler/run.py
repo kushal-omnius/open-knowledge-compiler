@@ -400,6 +400,15 @@ def _compile_one(session: Session, repo: Repository, ctx: dict,
     session.commit()  # staging commit 1
 
     try:
+        # A forge-listed commit that was never fetched makes every path look
+        # "absent" and mass-removes the in-scope entities; fail the run instead
+        # (status failed, so the watermark does not advance).
+        if not full and not collector.has_commit(commit_sha):
+            what = f"PR #{pr.number} merge" if pr is not None else "commit"
+            raise CompileError(
+                f"{what} commit {commit_sha[:12]} is not in the local clone at "
+                f"{ctx['repo_dir']} — the forge lists it but it hasn't been fetched. "
+                f"Run `git fetch` (or `git pull`) in the analyzed repository, then re-run.")
         # Collect -> staging commit 2
         if pr is None and commit is None:
             artifacts = collector.collect_full()

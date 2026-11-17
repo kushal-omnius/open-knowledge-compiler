@@ -17,6 +17,27 @@ so it works even where a raw `git push` of a tag ref is restricted).
 
 ## [Unreleased]
 
+### Fixed
+
+- `kc reconcile` no longer mass-removes entities when the forge lists a PR or
+  commit that is not in the local clone. Reconcile takes the change list from
+  the forge API but reads file contents with `git cat-file` locally. With the
+  commit object unfetched, every read failed and was treated as "path absent
+  at this commit", so every in-scope file stayed in scope with no content, Diff
+  read that as removal evidence for every entity anchored to those files, the
+  run was recorded as succeeded, and the watermark advanced past it (one real
+  incident removed 511 entities, including all APIs). Now `_compile_one` checks
+  `GitCollector.has_commit` first and, if the commit is missing, fails the run
+  with a `CompileError` telling you to `git fetch` and re-run: the run is
+  marked `failed`, the watermark does not advance, and reconcile stops there
+  rather than skipping past the item. `GitCollector.collect_at_commit` also
+  now distinguishes a path that is genuinely absent at the commit (or a
+  submodule gitlink), which is still skipped, from any other read failure,
+  which raises `GitCollectorError`. There is deliberately no "in-scope files
+  but zero artifacts" guard: a change that only deletes files, or only touches
+  binary files, legitimately collects nothing, and the strict collector already
+  catches the real failure.
+
 ## [1.6.1] — 2026-11-02
 
 ### Fixed
